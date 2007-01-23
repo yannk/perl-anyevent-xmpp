@@ -1,0 +1,58 @@
+#!/opt/perl/bin/perl
+use strict;
+use utf8;
+use AnyEvent;
+use Net::XMPP2::IM::Connection;
+use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::LibIDN qw/idn_prep_resource/;
+use Encode;
+
+binmode STDOUT, ":utf8";
+
+my $j = AnyEvent->condvar;
+
+my $res = "Net::XどなPP2";
+
+my $con = Net::XMPP2::IM::Connection->new (
+            username => 'ELmex',
+            domain => 'localhost',
+            resource => $res,
+            password => 'xxxxxx',
+          );
+if ($con->connect) {
+   print "CONNECT!\n";
+} else {
+   print "UNABLETO CONNECT: $!\n";
+}
+$con->init;
+$con->reg_cb (
+   session_ready => sub {
+      my ($con) = @_;
+      print "stream ready!\n" ;
+      $con->send_iq (
+         get => sub {
+            my ($w) = @_;
+            $w->addPrefix (xmpp_ns ('version'), '');
+            $w->emptyTag ([xmpp_ns ('version'), 'query']);
+         }, sub {
+            my ($node, $errnode, $err) = @_;
+            unless (defined $node) {
+               print "ERROR: $err->[0]/$err->[3]:" .($err->[1]->name)."\n";
+               return;
+            }
+            my (@name) = $node->find_all ([qw/version query/], [qw/version name/]);
+            my (@ver)  = $node->find_all ([qw/version query/], [qw/version version/]);
+            print "REPL: ".($name[0]->text). " " .($ver[0]->text)."!\n" if @name and @ver;
+            print "NO VERSION FOUND!\n" unless @name and @ver;
+         },
+         to => 'localhost',
+         from => $con->jid
+      );
+   },
+   debug_recv   => sub { print "recv: $_[1]\n" },
+   debug_send   => sub { print "send: $_[1]\n" },
+   stream_error => sub { die "ERROR[$_[1]]{$_[2]}\n" },
+);
+
+
+$j->wait;

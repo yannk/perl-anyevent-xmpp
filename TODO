@@ -1,0 +1,7 @@
+- TLS
+- XEP-0086: Error Condition Mappings
+- SRV record lookup: weight handling!
+- testing of stanza errors
+- message and presence sending
+- *prep etc.
+- cleanup the internal-namepsace mess...

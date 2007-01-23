@@ -1,0 +1,48 @@
+NAME
+    Net::XMPP2 - An implementation of the XMPP Protocol
+
+VERSION
+    Version 0.01
+
+SYNOPSIS
+       use Net::XMPP2;
+       ...
+
+FUNCTIONS
+  init
+AUTHOR
+    Robin Redeker, "<elmex at ta-sa.org>"
+
+BUGS
+    Please report any bugs or feature requests to "bug-net-xmpp2 at
+    rt.cpan.org", or through the web interface at
+    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-XMPP2>. I will be
+    notified, and then you'll automatically be notified of progress on your
+    bug as I make changes.
+
+SUPPORT
+    You can find documentation for this module with the perldoc command.
+
+        perldoc Net::XMPP2
+
+    You can also look for information at:
+
+    * AnnoCPAN: Annotated CPAN documentation
+        <http://annocpan.org/dist/Net-XMPP2>
+
+    * CPAN Ratings
+        <http://cpanratings.perl.org/d/Net-XMPP2>
+
+    * RT: CPAN's request tracker
+        <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-XMPP2>
+
+    * Search CPAN
+        <http://search.cpan.org/dist/Net-XMPP2>
+
+ACKNOWLEDGEMENTS
+COPYRIGHT & LICENSE
+    Copyright 2007 Robin Redeker, all rights reserved.
+
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
