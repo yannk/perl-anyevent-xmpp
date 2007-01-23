@@ -14,16 +14,12 @@ my $j = AnyEvent->condvar;
 my $res = "Net::XどなPP2";
 
 my $con = Net::XMPP2::IM::Connection->new (
-            username => 'ELmex',
-            domain => 'localhost',
+            username => 'elmex', #'elmor',
+            domain => 'amessage.eu',#'jabber.org',
             resource => $res,
             password => 'xxxxxx',
           );
-if ($con->connect) {
-   print "CONNECT!\n";
-} else {
-   print "UNABLETO CONNECT: $!\n";
-}
+$con->connect or die "Couldn't connect: $!";
 $con->init;
 $con->reg_cb (
    session_ready => sub {
@@ -45,7 +41,7 @@ $con->reg_cb (
             print "REPL: ".($name[0]->text). " " .($ver[0]->text)."!\n" if @name and @ver;
             print "NO VERSION FOUND!\n" unless @name and @ver;
          },
-         to => 'localhost',
+         to => $con->{domain},#'localhost',
          from => $con->jid
       );
    },

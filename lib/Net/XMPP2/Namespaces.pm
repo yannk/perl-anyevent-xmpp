@@ -12,6 +12,7 @@ our %NAMESPACES = (
    stanzas => 'urn:ietf:params:xml:ns:xmpp-stanzas',
    sasl    => 'urn:ietf:params:xml:ns:xmpp-sasl',
    bind    => 'urn:ietf:params:xml:ns:xmpp-bind',
+   tls     => 'urn:ietf:params:xml:ns:xmpp-tls',
    roster  => 'jabber:iq:roster',
    version => 'jabber:iq:version',
    session => 'urn:ietf:params:xml:ns:xmpp-session',
@@ -48,6 +49,7 @@ which make handling of namepsaces a bit easier:
    stanzas => urn:ietf:params:xml:ns:xmpp-stanzas
    sasl    => urn:ietf:params:xml:ns:xmpp-sasl
    bind    => urn:ietf:params:xml:ns:xmpp-bind
+   tls     => urn:ietf:params:xml:ns:xmpp-tls
 
    client  => jabber:client
    roster  => jabber:iq:roster

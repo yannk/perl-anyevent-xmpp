@@ -160,6 +160,20 @@ sub send_sasl_response {
    $self->flush;
 }
 
+=head2 send_starttls
+
+Sends the starttls command to the server.
+
+=cut
+
+sub send_starttls {
+   my ($self) = @_;
+   my $w = $self->{writer};
+   $w->addPrefix (xmpp_ns ('tls'),   '');
+   $w->emptyTag ([xmpp_ns ('tls'), 'starttls']);
+   $self->flush;
+}
+
 =head2 send_iq ($id, $type, $create_cb, %attrs)
 
 This method sends an IQ stanza of type C<$type>. C<$create_cb>

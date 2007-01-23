@@ -1,7 +1,9 @@
-- TLS
-- XEP-0086: Error Condition Mappings
-- SRV record lookup: weight handling!
-- testing of stanza errors
-- message and presence sending
-- *prep etc.
-- cleanup the internal-namepsace mess...
+Net::XMPP2 missing functionality to be RFC 3920 conform:
+   - TLS: implemented, just do some extensive testing WRT blocking,
+          i don't trust the current way the watchers are handled,
+          i'm in fear of deadlocks...
+   - SRV record lookup: weight handling!
+   [not mandatory but nice: - XEP-0086: Error Condition Mappings]
+
+Net::XMPP2::IM missing functionality to be RFC 3921 conform:
+   - message and presence sending
