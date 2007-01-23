@@ -669,7 +669,7 @@ sub connect {
          my $l = sysread $sock, my $data, 1024;
 
          unless ($l) {
-            return if $! == Errno::EGAIN();
+            return if $! == Errno::EAGAIN;
             if (defined $l) {
                $self->{disconnect_cb}->($self->{host}, $self->{port}, "EOF from server '$self->{host}:$self->{port}'");
                $self->end_sockets;
@@ -751,7 +751,7 @@ sub try_ssl_write {
             return;
          }
 
-         if ($! != Errno::EGAIN()
+         if ($! != Errno::EAGAIN
              or my $err = Net::SSLeay::ERR_get_error) {
 
             $self->{disconnect_cb}->($self->{host}, $self->{port},
@@ -794,7 +794,7 @@ sub try_ssl_read {
             return;
          }
 
-         if ($! != Errno::EGAIN()
+         if ($! != Errno::EAGAIN
              or my $err = Net::SSLeay::ERR_get_error) {
 
             $self->{disconnect_cb}->($self->{host}, $self->{port},
@@ -820,12 +820,10 @@ sub make_ssl_read_watcher {
 
    $poll ||= 'r';
    $self->{r} =
-      AnyEvent->io (
-         poll => $poll, fh => $self->{socket}, cb => sub {
-            warn "read cb [$poll]\n";
-            $self->try_ssl_read;
-         }
-      );
+      AnyEvent->io (poll => $poll, fh => $self->{socket}, cb => sub {
+         #d# warn "read cb [$poll]\n";
+         $self->try_ssl_read;
+      });
 }
 
 sub make_ssl_write_watcher {
@@ -835,7 +833,7 @@ sub make_ssl_write_watcher {
    $poll ||= 'w';
    $self->{w} =
       AnyEvent->io (poll => $poll, fh => $self->{socket}, cb => sub {
-         warn "write cb [$poll]\n";
+         #d# warn "write cb [$poll]\n";
          $self->try_ssl_write;
       });
 }
@@ -854,7 +852,7 @@ sub write_data {
                if (my $data = $self->{write_buffer}) {
                   my $len = syswrite $cl, $data;
                   unless ($len) {
-                     return if $! == Errno::EGAIN();
+                     return if $! == Errno::EAGAIN;
                      if (not defined $len) {
                         warn "error when writing data on $self->{host}:$self->{port}: $!";
                         return;

@@ -15,7 +15,7 @@ my $res = "Net::XどなPP2";
 
 my $con = Net::XMPP2::IM::Connection->new (
             username => 'elmex', #'elmor',
-            domain => 'amessage.eu',#'jabber.org',
+            domain => 'localhost',#amessage.eu',#'jabber.org',
             resource => $res,
             password => 'xxxxxx',
           );
@@ -45,8 +45,8 @@ $con->reg_cb (
          from => $con->jid
       );
    },
-   debug_recv   => sub { print "recv: $_[1]\n" },
-   debug_send   => sub { print "send: $_[1]\n" },
+   debug_recv   => sub { print "recv: $_[1]\n"; 1 },
+   debug_send   => sub { print "send: $_[1]\n"; 1 },
    stream_error => sub { die "ERROR[$_[1]]{$_[2]}\n" },
 );
 
