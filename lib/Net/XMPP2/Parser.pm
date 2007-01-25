@@ -14,6 +14,12 @@ Net::XMPP2::Parser - A parser for XML streams (helper for Net::XMPP2)
    use Net::XMPP2::Parser;
    ...
 
+=head1 DESCRIPTION
+
+This is a XMPP XML parser helper class, which helps me to cope with the XMPP XML.
+
+See also L<Net::XMPP2::Writer> for a discussion of the issues with XML in XMPP.
+
 =head1 METHODS
 
 =head2 new
