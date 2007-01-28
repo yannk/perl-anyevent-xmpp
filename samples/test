@@ -2,6 +2,7 @@
 use strict;
 use utf8;
 use AnyEvent;
+use Net::XMPP2 qw/xep-86/;
 use Net::XMPP2::IM::Connection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::LibIDN qw/idn_prep_resource/;
@@ -15,7 +16,7 @@ my $res = "Net::XどなPP2";
 
 my $con = Net::XMPP2::IM::Connection->new (
             username => 'elmex', #'elmor',
-            domain => 'localhost',#amessage.eu',#'jabber.org',
+            domain => 'amessage.eu',#'jabber.org',
             resource => $res,
             password => 'xxxxxx',
           );

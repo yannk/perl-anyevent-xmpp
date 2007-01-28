@@ -1,7 +1,8 @@
 package Net::XMPP2;
-
 use warnings;
 use strict;
+
+our %EXTENSION_ENABLED;
 
 =head1 NAME
 
@@ -86,6 +87,40 @@ connection.
 I mainly expect problems where aviable data isn't properly read from the socket
 or written to it. You might want to take a look at the C<debug_send> and C<debug_recv>
 events in L<Net::XMPP2::Connection>.
+
+=head Supportet extensions
+
+You can extend the functionality of this modules either by giving C<use Net::XMPP2>
+an argument like this:
+
+   use Net::XMPP2 qw/xep-0086/;
+
+(Unfortunately this is not really reentrant, but when someone needs this in a
+reentrant way i might be able to implement something)
+
+This is the list of supported XMPP extensions:
+
+=over 4
+
+=item XEP-0086 - Error Condition Mappings
+
+   "A mapping to enable legacy entities to correctly handle errors from XMPP-aware entities."
+
+This extension will enable sending of the old error codes when generating a stanza
+error with for example: L<Net::XMPP2::Writer::write_error_tag>
+
+=back
+
+=cut
+
+sub import {
+   my ($mod, @exts) = @_;
+   for (@exts) {
+      if (/^xep-(\d+)$/i) {
+         $EXTENSION_ENABLED{''. (1*$1)} = 1;
+      }
+   }
+}
 
 =head1 AUTHOR
 

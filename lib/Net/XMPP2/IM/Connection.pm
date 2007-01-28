@@ -33,17 +33,52 @@ sub new {
    my $this = shift;
    my $class = ref($this) || $this;
    my $self = $class->SUPER::new (@_);
+
+   $self->{ext} = {}; # reserved for extensions
+
+   $self->reg_cb (message  => sub { $self->handle_message (@_); 1 });
+   $self->reg_cb (presence => sub { $self->handle_presence (@_); 1 });
+
    $self->reg_cb (stream_ready => sub {
       my ($jid) = @_;
-      $self->send_iq (set => sub {
-         my ($w) = @_;
-         $w->addPrefix (xmpp_ns ('session'), '');
-         $w->emptyTag ([xmpp_ns ('session'), 'session']);
-      }, sub {
+      if ($self->features ()->find_all ([qw/session session/])) {
+         $self->send_session_iq;
+      } else {
+         $self->{session_active} = 1;
+         $self->send_presence ();
          $self->event ('session_ready');
-      });
+      }
    });
    $self
+}
+
+sub send_session_iq {
+   my ($self) = @_;
+
+   $self->send_iq (set => sub {
+      my ($w) = @_;
+      $w->addPrefix (xmpp_ns ('session'), '');
+      $w->emptyTag ([xmpp_ns ('session'), 'session']);
+
+   }, sub {
+      my ($node, $errnode, $errar) = @_;
+      if ($node) {
+         $self->{session_active} = 1;
+         $self->send_presence;
+         $self->event ('session_ready');
+      } else {
+         $self->event (session_error => $errnode, $errar);
+      }
+   });
+}
+
+sub handle_presence {
+   my ($self) = @_;
+
+}
+
+sub handle_message {
+   my ($self) = @_;
 }
 
 =head1 EVENTS
@@ -54,8 +89,15 @@ These additional events can be registered on with C<reg_cb>:
 
 =item session_ready
 
-This event is sent if the session has been completly established and you can
-send messages and such over the stream.
+This event is generated when the session has been fully established and
+can be used to send around messages and other stuff.
+
+=item session_error => $erriq, $errarr
+
+If an error happened during establishment of the session this
+event will be generated. C<$erriq> is the L<Net::XMPP2::Node> object
+of the error iq tag and C<$errar> is an error array as described in
+L<Net::XMPP2::Connection::send_iq> for error responses for iq requests.
 
 =back
 

@@ -248,6 +248,7 @@ sub event {
 
    my $nxt = [];
 
+   my $handled;
    for (@{$self->{events}->{lc $ev}}) {
       $_->($self, @arg) and push @$nxt, $_;
    }
@@ -261,6 +262,7 @@ sub handle_stanza {
    if ($node->eq (stream => 'features')) {
       $self->event (stream_features => $node);
       $self->handle_stream_features ($node);
+      $self->{features} = $node;
    } elsif ($node->eq (tls => 'proceed')) {
       $self->enable_ssl;
       $self->{parser}->init;
@@ -273,6 +275,10 @@ sub handle_stanza {
       $self->handle_sasl_success ($node);
    } elsif ($node->eq (client => 'iq')) {
       $self->handle_iq ($node);
+   } elsif ($node->eq (client => 'message')) {
+      $self->event (message => $node);
+   } elsif ($node->eq (client => 'presence')) {
+      $self->event (presence => $node);
    } elsif ($node->eq (stream => 'error')) {
       $self->handle_error ($node);
    } else {
@@ -298,14 +304,16 @@ This method sends an IQ XMPP request.
 Please take a look at the documentation for C<send_iq> in Net::XMPP2::Writer
 about the meaning of C<$type>, C<$create_cb> and C<%attrs>.
 
-C<$result_cb> will be called when a result was received. The first argument
-to C<$result_cb> will be a Net::XMPP2::Parser instance and the second
-will be a Net::XMPP2::Node instance containing the IQ result stanza contents.
+C<$result_cb> will be called when a result was received. The first argument to
+C<$result_cb> will be a Net::XMPP2::Node instance containing the IQ result
+stanza contents.
 
 If the IQ resulted in a stanza error the second argument to C<$result_cb> will
 be C<undef> (if the error type was not 'continue') and the third argument will
 be a Net::XMPP2::Node containg the IQ error stanza. And the fourth argument
 will be a array reference with following contents:
+
+This method returns the newly generated id for this iq request.
 
 =over 4
 
@@ -336,20 +344,77 @@ sub send_iq {
    my $id = $self->{iq_id}++;
    $self->{iqs}->{$id} = $result_cb;
    $self->{writer}->send_iq ($id, $type, $create_cb, %attrs);
+   $id
+}
+
+=head2 reply_iq_result ($req_iq_node, $create_cb, %attrs)
+
+This method will generate a result reply to the iq request C<Net::XMPP2::Node>
+in C<$req_iq_node>.
+
+Please take a look at the documentation for C<send_iq> in Net::XMPP2::Writer
+about the meaning C<$create_cb> and C<%attrs>.
+
+The type for this iq reply is 'result'.
+
+=cut
+
+sub reply_iq_result {
+   my ($self, $iqnode, $create_cb, %attrs) = @_;
+   $self->{writer}->send_iq ($iqnode->attr ('id'), 'result', $create_cb, %attrs);
+}
+
+=head2 reply_iq_error ($req_iq_node, $error_type, $error, %attrs)
+
+This method will generate an error reply to the iq request C<Net::XMPP2::Node>
+in C<$req_iq_node>.
+
+C<$error_type> is one of 'cancel', 'continue', 'modify', 'auth' and 'wait'.
+C<$error> is one of the defined error conditions described in
+L<Net::XMPP2::Writer::write_error_tag>.
+
+Please take a look at the documentation for C<send_iq> in Net::XMPP2::Writer
+about the meaning C<$create_cb> and C<%attrs>.
+
+The type for this iq reply is 'error'.
+
+=cut
+
+sub reply_iq_error {
+   my ($self, $iqnode, $errtype, $error, %attrs) = @_;
+
+   $self->{writer}->send_iq (
+      $iqnode->attr ('id'), 'error',
+      sub { $self->{writer}->write_error_tag ($iqnode, $errtype, $error) },
+      %attrs
+   );
 }
 
 sub handle_iq {
    my ($self, $node) = @_;
 
-   if ($node->attr ('type') eq 'result') {
-      if (my $cb = $self->{iqs}->{$node->attr ('id')}) {
+   my $type = $node->attr ('type');
+
+   if ($type eq 'result') {
+      if (my $cb = delete $self->{iqs}->{$node->attr ('id')}) {
          $cb->($node);
       }
-   } elsif ($node->attr ('type') eq 'error') {
-      if (my $cb = $self->{iqs}->{$node->attr ('id')}) {
+   } elsif ($type eq 'error') {
+      if (my $cb = delete $self->{iqs}->{$node->attr ('id')}) {
 
          my $error = $self->filter_error_stanza ($node);
          $cb->(($error->[0] eq 'continue' ? $node : undef), $node, $error);
+      }
+
+   } else {
+      my $handled = 0;
+      $self->event ("iq_${type}_request" => $node, \$handled);
+
+      my @from;
+      push @from, (to => $node->attr ('from')) if $node->attr ('from');
+
+      unless ($handled) {
+         $self->reply_iq_error ($node, undef, 'service-unavailable', @from);
       }
    }
 }
@@ -449,6 +514,42 @@ sub handle_error {
    $self->{writer}->send_end_of_stream;
 }
 
+=head2 send_presence ($type, $create_cb, %attrs)
+
+This method sends a presence stanza, for the meanings
+of C<$type>, C<$create_cb> and C<%attrs> please take a look
+at the documentation for L<Net::XMPP2::Writer::send_presence>.
+
+This methods does attach an id attribute to the message stanza and
+will return the id that was used (so you can react on possible replies).
+
+=cut
+
+sub send_presence {
+   my ($self, $type, $create_cb, %attrs) = @_;
+   my $id = $self->{iq_id}++;
+   $self->{writer}->send_presence ($id, $type, $create_cb, %attrs);
+   $id
+}
+
+=head2 send_message ($to, $type, $create_cb, %attrs)
+
+This method sends a presence stanza, for the meanings
+of C<$to>, C<$type>, C<$create_cb> and C<%attrs> please take a look
+at the documentation for L<Net::XMPP2::Writer::send_message>.
+
+This methods does attach an id attribute to the message stanza and
+will return the id that was used (so you can react on possible replies).
+
+=cut
+
+sub send_message {
+   my ($self, $to, $type, $create_cb, %attrs) = @_;
+   my $id = $self->{iq_id}++;
+   $self->{writer}->send_message ($id, $to, $type, $create_cb, %attrs);
+   $id
+}
+
 =head2 do_rebind ($resource)
 
 In case you got a C<bind_error> event and want to retry
@@ -507,6 +608,28 @@ method.
 
 sub jid { $_[0]->{jid} }
 
+=head2 features
+
+Returns the last received <features> tag in form of an L<Net::XMPP2::Node> object.
+
+=cut
+
+sub features { $_[0]->{features} }
+
+#sub enable_extension {
+#   my ($self, @exts) = @_;
+#   for (@exts) {
+#      if (/^xep-(\d+)$/i) {
+#         $self->{ext}->{''.(1*$1)} = 1;
+#      }
+#   }
+#}
+#
+#sub check_extension {
+#   my ($self, $extnum) = @_;
+#   return $self->{ext}->{"$extnum"} || $Net::XMPP2::EXTENSION_ENABLED{"$extnum"};
+#}
+
 =head1 EVENTS
 
 These events can be registered on with C<reg_cb>:
@@ -515,7 +638,8 @@ These events can be registered on with C<reg_cb>:
 
 =item stream_features => $node
 
-This 
+This event is sent when a stream feature (<features>) tag is received. C<$node> is the
+L<Net::XMPP2::Node> object that represents the <features> tag.
 
 =item stream_ready => $jid
 
@@ -554,6 +678,30 @@ C<$host> and C<$port> were the host and port we were connected to.
 
 Note: C<$host> and C<$port> might be different from the domain you passed to
 C<new> if C<connect> performed a SRV RR lookup.
+
+=item presence => $node
+
+This event is sent when a presence stanza is received. C<$node> is the
+L<Net::XMPP2::Node> object that represents the <presence> tag.
+
+=item message => $node
+
+This event is sent when a message stanza is received. C<$node> is the
+L<Net::XMPP2::Node> object that represents the <message> tag.
+
+=item iq_set_request => $node, $handled_ref
+
+=item iq_get_request => $node, $handled_ref
+
+These events are sent when an iq request stanza of type 'get' or 'set' is received.
+C<$type> will either be 'get' or 'set' and C<$node> will be the L<Net::XMPP2::Node>
+object of the iq tag.
+
+If C<$$handled_ref> is true an event handler should not handle this message anymore.
+
+If one of the event handlers handled this message the scalar pointed at by
+the reference in C<$handled_ref> should be set to 1 true value. If C<$$handled_ref>
+is still false after all event handlers were executed an error iq will be generated.
 
 =back
 
@@ -668,7 +816,11 @@ sub connect {
       AnyEvent->io (poll => 'r', fh => $sock, cb => sub {
          my $l = sysread $sock, my $data, 1024;
 
-         unless ($l) {
+         if ($l) {
+            $self->{read_buffer} .= $data;
+            $self->handle_data (\$self->{read_buffer});
+
+         } else {
             return if $! == Errno::EAGAIN;
             if (defined $l) {
                $self->{disconnect_cb}->($self->{host}, $self->{port}, "EOF from server '$self->{host}:$self->{port}'");
@@ -681,9 +833,6 @@ sub connect {
                return;
             }
          }
-
-         $self->{read_buffer} .= $data;
-         $self->handle_data (\$self->{read_buffer});
       });
    return 1;
 }
@@ -692,9 +841,13 @@ sub end_sockets {
    my ($self) = @_;
    delete $self->{r};
    delete $self->{w};
-   delete $self->{ssl};
    delete $self->{socket};
-   delete $self->{ssl_enabled};
+   if (delete $self->{ssl_enabled}) {
+      Net::SSLeay::free ($self->{ssl});
+      delete $self->{ssl};
+      Net::SSLeay::CTX_free ($self->{ctx});
+      delete $self->{ctx};
+   }
 }
 
 sub dumpbio {
@@ -765,7 +918,7 @@ sub try_ssl_write {
       }
       $self->make_ssl_read_watcher;
       return;
-   } else { warn "wrote: $l\n" }
+   } #d# else { warn "wrote: $l\n" }
 
    if ($l == length $self->{ssl_out_buffer}) {
       delete $self->{w};
@@ -807,10 +960,11 @@ sub try_ssl_read {
             return;
          }
       }
+   } else {
+      $self->{read_buffer} .= decode_utf8 ($self->{ssl_read_data});
+      $self->handle_data (\$self->{read_buffer});
+      $self->{ssl_read_data} = "";
    }
-
-   $self->{read_buffer} .= decode_utf8 ($self->{ssl_read_data});
-   $self->handle_data (\$self->{read_buffer});
 
 }
 

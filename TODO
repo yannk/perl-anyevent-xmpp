@@ -6,7 +6,5 @@ Net::XMPP2 missing functionality to be RFC 3920 conform:
    - errorhandling for TLS and SASL!
    - testing of send_message and send_presence!
 
-   [not mandatory but nice: - XEP-0086: Error Condition Mappings]
-
 Net::XMPP2::IM missing functionality to be RFC 3921 conform:
    - message and presence sending

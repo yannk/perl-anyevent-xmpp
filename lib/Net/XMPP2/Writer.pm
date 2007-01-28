@@ -304,13 +304,14 @@ sub _generate_key_xmls {
 }
 
 sub send_presence {
-   my ($self, $type, $create_cb, %attrs) = @_;
+   my ($self, $id, $type, $create_cb, %attrs) = @_;
 
    my $w = $self->{writer};
    $w->addPrefix (xmpp_ns ('client'), '');
 
    my @add;
-   push @add, (type => $type) if defined $typ;
+   push @add, (type => $type) if defined $type;
+   push @add, (id => $id) if defined $id;
 
    if (defined $create_cb) {
       $w->startTag ('presence', @add, %attrs);
@@ -366,15 +367,18 @@ and the value will be the character content.
 =cut
 
 sub send_message {
-   my ($self, $to, $type, $create_cb, %attrs) = @_;
+   my ($self, $id, $to, $type, $create_cb, %attrs) = @_;
 
    my $w = $self->{writer};
    $w->addPrefix (xmpp_ns ('client'), '');
 
+   my @add;
+   push @add, (id => $id) if defined $id;
+
    $type ||= 'chat';
 
    if (defined $create_cb) {
-      $w->startTag ('message', to => $to, type => $type, %attrs);
+      $w->startTag ('message', @add, to => $to, type => $type, %attrs);
       _generate_key_xmls (subject => $attrs{subject})    if defined $attrs{subject};
       _generate_key_xmls (body => $attrs{body})          if defined $attrs{body};
       _generate_key_xml (thread => $attrs{thread})       if defined $attrs{thread};
@@ -382,17 +386,87 @@ sub send_message {
       $w->endTag;
    } else {
       if (exists $attrs{subject} or $attrs{body} or $attrs{thread}) {
-         $w->startTag ('message', to => $to, type => $type, %attrs);
+         $w->startTag ('message', @add, to => $to, type => $type, %attrs);
          _generate_key_xmls (subject => $attrs{subject})    if defined $attrs{subject};
          _generate_key_xmls (body => $attrs{body})          if defined $attrs{body};
          _generate_key_xml (thread => $attrs{thread})       if defined $attrs{thread};
          $w->endTag;
       } else {
-         $w->emptyTag ('message', to => $to, type => $type, %attrs);
+         $w->emptyTag ('message', @add, to => $to, type => $type, %attrs);
       }
    }
 
    $self->flush;
+}
+
+
+=head2 write_error_tag ($error_stanza_node, $error_type, $error)
+
+C<$error_type> is one of 'cancel', 'continue', 'modify', 'auth' and 'wait'.
+C<$error> is the name of the error tag child element. If C<$error> is one of
+the following:
+
+   'bad-request', 'conflict', 'feature-not-implemented', 'forbidden', 'gone',
+   'internal-server-error', 'item-not-found', 'jid-malformed', 'not-acceptable',
+   'not-allowed', 'not-authorized', 'payment-required', 'recipient-unavailable',
+   'redirect', 'registration-required', 'remote-server-not-found',
+   'remote-server-timeout', 'resource-constraint', 'service-unavailable',
+   'subscription-required', 'undefined-condition', 'unexpected-request'
+
+then a default can be select for C<$error_type>, and the argument can be undefined.
+
+Note: This method is currently a bit limited in the generation of the xml
+for the errors, if you need more please contact me.
+
+=cut
+
+our %STANZA_ERRORS = (
+   'bad-request'             => ['modify', 400],
+   'conflict'                => ['cancel', 409],
+   'feature-not-implemented' => ['cancel', 501],
+   'forbidden'               => ['auth',   403],
+   'gone'                    => ['modify', 302],
+   'internal-server-error'   => ['wait',   500],
+   'item-not-found'          => ['cancel', 404],
+   'jid-malformed'           => ['modify', 400],
+   'not-acceptable'          => ['modify', 406],
+   'not-allowed'             => ['cancel', 405],
+   'not-authorized'          => ['auth',   401],
+   'payment-required'        => ['auth',   402],
+   'recipient-unavailable'   => ['wait',   404],
+   'redirect'                => ['modify', 302],
+   'registration-required'   => ['auth',   407],
+   'remote-server-not-found' => ['cancel', 404],
+   'remote-server-timeout'   => ['wait',   504],
+   'resource-constraint'     => ['wait',   500],
+   'service-unavailable'     => ['cancel', 503],
+   'subscription-required'   => ['auth',   407],
+   'undefined-condition'     => ['cancel', 500],
+   'unexpected-request'      => ['wait',   400],
+);
+
+sub write_error_tag {
+   my ($self, $errstanza, $type, $error) = @_;
+
+   my $w = $self->{writer};
+
+   $_->write_on ($w) for $errstanza->nodes;
+
+   my @add;
+
+   unless (defined $type and defined $STANZA_ERRORS{$error}) {
+      $type = $STANZA_ERRORS{$error}->[0];
+   }
+
+   if ($Net::XMPP2::EXTENSION_ENABLED{'86'} and defined $STANZA_ERRORS{$error}) {
+      push @add, (code => $STANZA_ERRORS{$error}->[1]);
+   }
+
+   $w->addPrefix (xmpp_ns ('client'), '');
+   $w->startTag ([xmpp_ns ('client') => 'error'], type => $type, @add);
+      $w->addPrefix (xmpp_ns ('stanzas'), '');
+      $w->emptyTag ([xmpp_ns ('stanzas') => $error]);
+   $w->endTag;
 }
 
 =head1 AUTHOR
