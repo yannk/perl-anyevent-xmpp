@@ -8,7 +8,7 @@ use Net::XMPP2::Namespaces qw/xmpp_ns/;
 
 =head1 NAME
 
-Net::XMPP2::Writer - A XML writer for XMPP
+Net::XMPP2::Writer - A "XML" writer for XMPP
 
 =head1 SYNOPSIS
 
@@ -17,43 +17,58 @@ Net::XMPP2::Writer - A XML writer for XMPP
 
 =head1 DESCRIPTION
 
-This module contains some helper functions for writing XMPP XML,
+This module contains some helper functions for writing XMPP "XML",
 which is not real XML at all ;-( I use L<XML::Writer> and tune it
-until it creates XML that is accepted by most servers propably
+until it creates "XML" that is accepted by most servers propably
 (all of the XMPP servers i tested yet work (jabberd14, jabberd2, ejabberd).
 
 I hope the semantics of L<XML::Writer> don't change much over the future,
 but if they do and you run into problems, please report them!
 
-The whole XML concept of XMPP is fundamentally broken anyway. It's supposed
+The whole "XML" concept of XMPP is fundamentally broken anyway. It's supposed
 to be an subset of XML. But a subset of XML productions is not XML. Strictly
-speaking you need a special XMPP XML parser and writer to be 100% conformant.
+speaking you need a special XMPP "XML" parser and writer to be 100% conformant.
 
-But i try to be as XML XMPP conformant as possible (it should be around 99-100%).
-But it's hard to say what XML is conformant, as the specifications of XMPP XML and XML
+But i try to be as "XML" XMPP conformant as possible (it should be around 99-100%).
+But it's hard to say what XML is conformant, as the specifications of XMPP "XML" and XML
 are contradicting. For example XMPP also says you only have to generated and accept
 utf-8 encodings of XML, but the XML recommendation says that each parser has
 to accept utf-8 E<and> utf-16. So, what do you do? Do you use a XML conformant parser
 or do you write your own?
 
-I'm using XML::Parser::Expat as expat does support parsing of broken (aka 'partial')
-XML documents, as XMPP requires. Another argument is that if you capture a XMPP
+I'm using XML::Parser::Expat because expat knows how to parse broken (aka 'partial')
+"XML" documents, as XMPP requires. Another argument is that if you capture a XMPP
 conversation to the end, and even if a '</stream:stream>' tag was captured, you
 wont have a valid XML document. The problem is that you have to resent a <stream> tag
 after TLS and SASL authentication each!
 
 But well... Net::XMPP2 does it's best with expat to cope with the fundamental brokeness
-of XML in XMPP.
+of "XML" in XMPP.
 
-Back to the issue with XML generation: I've discoverd that many XMPP servers (eg.
+Back to the issue with "XML" generation: I've discoverd that many XMPP servers (eg.
 jabberd14 and ejabberd) have problems with XML namespaces. Thats the reason why
 i'm assigning the namespace prefixes manually: The servers just don't accept validly
 namespaced XML. The draft 3921bis does even state that a client SHOULD generate a 'stream'
 prefix for the <stream> tag.
 
-I advice you to explictly set the namespaces too if you generate XML for XMPP yourself,
+I advice you to explictly set the namespaces too if you generate "XML" for XMPP yourself,
 at least until all or most of the XMPP servers have been fixed. Which might take some
 years :-) And maybe will happen never.
+
+And another note: As XMPP requires all predefined entity characters to be escaped
+in character data you need a "XML" writer that will escape everything:
+
+   RFC 3920 - 11.1.  Restrictions:
+
+     character data or attribute values containing unescaped characters
+     that map to the predefined entities (Section 4.6 therein);
+     such characters MUST be escaped
+
+This means:
+You have to escape '>' in the character data. I don't know whether XML::Writer
+does that. And i honestly don't care much about this. XMPP is broken by design and
+i have barely time to writer my own XML parsers and writers to suit their sick taste
+of "XML". (Do i repeat myself?)
 
 =head1 METHODS
 

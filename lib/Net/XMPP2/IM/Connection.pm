@@ -65,11 +65,51 @@ sub send_session_iq {
       if ($node) {
          $self->{session_active} = 1;
          $self->send_presence;
+         $self->retrieve_roster;
          $self->event ('session_ready');
       } else {
          $self->event (session_error => $errnode, $errar);
       }
    });
+}
+
+sub retrieve_roster {
+   my ($self) = @_;
+   $self->send_iq (get => sub {
+      my ($w) = @_;
+      $w->addPrefix (xmpp_ns ('roster'), '');
+      $w->emptyTag ([xmpp_ns ('roster'), 'query']);
+   }, sub {
+      my ($node, $errnode, $errar) = @_;
+      if ($node) {
+         $self->store_roster ($node);
+      } else {
+         $self->event (roster_error => $errnode, $errar);
+      }
+   });
+}
+
+sub store_roster {
+   my ($self, $node) = @_;
+
+   my ($query) = $node->find_all ([qw/roster query/]);
+   return unless $query;
+
+   for my $item ($query->find_all ([qw/roster item/])) {
+      my ($jid, $name, $subscription) =
+         ($item->attr ('jid'), $item->attr ('name'), $item->attr ('subscription'));
+      my @groups;
+      push @groups, $_->text for $item->find_all ([qw/roster group/]);
+
+      my $ro = $self->{roster}->{$jid} = {
+         jid          => $jid,
+         name         => $name,
+         subscription => $subscription,
+         groups       => [ @groups ]
+      };
+   }
+
+   $self->event ('roster_update');
 }
 
 sub handle_presence {

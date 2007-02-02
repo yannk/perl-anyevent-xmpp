@@ -27,17 +27,15 @@ or:
 =head1 DESCRIPTION
 
 This is the head module of the L<Net::XMPP2> XMPP client protocol (as described in
-RFC3920 and RFC3921) framework.
+RFC 3920 and RFC 3921) framework.
 
-L<Net::XMPP2::Connection> is a RFC3920 conformant "XML" stream implementation
+L<Net::XMPP2::Connection> is a RFC 3920 conformant "XML" stream implementation
 for clients, which handles tcp connect up to the resource binding.
 
-L<Net::XMPP2::IM::Connection> is a more highlevel module, which is inherited
-from L<Net::XMPP2::Connection>, which handles all the instant messaging client
-functionality described in RFC3921 (and some of the extensions).  For a
-complete listing of supported extensions see also the documentation of
-L<Net::XMPP2::IM::Connection>. I will try to make the extensions as optional as
-possible to be also able to provide a pure RFC3921 implementation.
+L<Net::XMPP2::IM::Connection> is a more highlevel module, which is derived
+from L<Net::XMPP2::Connection>. It handles all the instant messaging client
+functionality described in RFC 3921. Some extensions for XMPP are
+also implemented and can be activated as described below in L<Supportet extensions>.
 
 There are also other modules in this distribution, for example:
 L<Net::XMPP2::Util>, L<Net::XMPP2::Writer>, L<Net::XMPP2::Parser> and those i
@@ -55,15 +53,19 @@ permits you to use this module together with other I/O event based programs and
 libraries (ie. L<Gtk2> or L<Event>).
 
 The other modules could often only be integrated in those applications or librarys
-by using threads. But as threads are not as easy to handle as a simple I/O based
-event framework i decided to write this module.
+by using threads. I decided to write this module because i think CPAN lacks
+an event based XMPP module. Threads are unfortunately not an alternative in Perl
+at the moment due the limited threading functionality they provide and the global
+speed hit. I also think that a simple event based I/O framework might be a bit easier
+to handle than threads.
 
 Another thing was that I didn't like the APIs of the other modules. In L<Net::XMPP2>
-i try to provide low level modules for speaking XMPP as defined in RFC3920 and RFC3921
-(see also L<Net::XMPP2::Connection> and L<Net::XMPP2::IM::Connection>).
+i try to provide low level modules for speaking XMPP as defined in RFC 3920 and RFC 3921
+(see also L<Net::XMPP2::Connection> and L<Net::XMPP2::IM::Connection>). But i also
+try to provide a high level API. (Even thought that the Highlevel API is still TODO)
 
-I also try to have all additional features and functionality as optional as possible,
-to not impose too much structure on the client writers.
+I also try to have all additional features and functionality as optional as possible
+to give the client writers enough freedom.
 
 =head1 A note about TLS
 
@@ -88,15 +90,12 @@ I mainly expect problems where aviable data isn't properly read from the socket
 or written to it. You might want to take a look at the C<debug_send> and C<debug_recv>
 events in L<Net::XMPP2::Connection>.
 
-=head Supportet extensions
+=head1 Supportet extensions
 
 You can extend the functionality of this modules either by giving C<use Net::XMPP2>
 an argument like this:
 
    use Net::XMPP2 qw/xep-0086/;
-
-(Unfortunately this is not really reentrant, but when someone needs this in a
-reentrant way i might be able to implement something)
 
 This is the list of supported XMPP extensions:
 

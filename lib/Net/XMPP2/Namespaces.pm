@@ -17,6 +17,7 @@ our %NAMESPACES = (
    version => 'jabber:iq:version',
    session => 'urn:ietf:params:xml:ns:xmpp-session',
    xml     => 'http://www.w3.org/XML/1998/namespace',
+   disco_info => 'http://jabber.org/protocol/disco#info',
 );
 
 =head1 NAME

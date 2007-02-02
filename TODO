@@ -3,8 +3,11 @@ Net::XMPP2 missing functionality to be RFC 3920 conform:
           i don't trust the current way the watchers are handled,
           i'm in fear of deadlocks...
    - SRV record lookup: weight handling!
+   - make dns resolution async!
    - errorhandling for TLS and SASL!
    - testing of send_message and send_presence!
+   - make extensions more optional and reentrant
+   - add stanza-error objects instead error-xml nodes
 
 Net::XMPP2::IM missing functionality to be RFC 3921 conform:
    - message and presence sending

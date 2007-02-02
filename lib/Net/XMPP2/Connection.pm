@@ -100,6 +100,10 @@ to check this.
 
 This is the password for the C<username> above.
 
+=item disable_ssl => $bool
+
+If C<$bool> is true no SSL will be used.
+
 =back
 
 =cut
@@ -215,9 +219,13 @@ sub handle_data {
    $self->{parser}->feed (substr $$buf, 0, (length $$buf), '');
 }
 
-sub write_data {
+sub debug_wrote_data {
    my ($self, $data) = @_;
    $self->event (debug_send => $data);
+}
+
+sub write_data {
+   my ($self, $data) = @_;
    $self->SUPER::write_data ($data);
 }
 
@@ -263,6 +271,7 @@ sub handle_stanza {
       $self->event (stream_features => $node);
       $self->handle_stream_features ($node);
       $self->{features} = $node;
+
    } elsif ($node->eq (tls => 'proceed')) {
       $self->enable_ssl;
       $self->{parser}->init;
@@ -414,7 +423,7 @@ sub handle_iq {
       push @from, (to => $node->attr ('from')) if $node->attr ('from');
 
       unless ($handled) {
-         $self->reply_iq_error ($node, undef, 'service-unavailable', @from);
+         $self->reply_iq_error ($node, undef, 'feature-not-implemented', @from);
       }
    }
 }
@@ -456,7 +465,7 @@ sub handle_stream_features {
    my @bind  = $node->find_all ([qw/bind bind/]);
    my @tls   = $node->find_all ([qw/tls starttls/]);
 
-   if (not ($self->{ssl_enabled}) and @tls) {
+   if (not ($self->{disable_ssl}) && not ($self->{ssl_enabled}) && @tls) {
       $self->{writer}->send_starttls;
 
    } elsif (not ($self->{authenticated}) and @mechs) {
@@ -880,6 +889,12 @@ sub dumpbio {
 
 sub try_ssl_write {
    my ($self) = @_;
+
+   unless ($self->{ssl_out_buffer}) { # refill buffer
+      $self->{ssl_out_buffer} = $self->{write_buffer};
+      $self->{write_buffer} = "";
+   }
+
    unless ($self->{ssl_out_buffer}) {
       delete $self->{w};
       return;
@@ -918,13 +933,10 @@ sub try_ssl_write {
       }
       $self->make_ssl_read_watcher;
       return;
-   } #d# else { warn "wrote: $l\n" }
-
-   if ($l == length $self->{ssl_out_buffer}) {
-      delete $self->{w};
+   } else {
+      $self->debug_wrote_data (substr $self->{ssl_out_buffer}, 0, $l);
+      $self->{ssl_out_buffer} = substr $self->{ssl_out_buffer}, $l;
    }
-
-   $self->{ssl_out_buffer} = substr $self->{ssl_out_buffer}, $l;
 }
 
 sub try_ssl_read {
@@ -987,14 +999,15 @@ sub make_ssl_write_watcher {
    $poll ||= 'w';
    $self->{w} =
       AnyEvent->io (poll => $poll, fh => $self->{socket}, cb => sub {
-         #d# warn "write cb [$poll]\n";
+         #warn "write cb [$poll]\n";
          $self->try_ssl_write;
+         1;
       });
 }
 
 sub write_data {
    my ($self, $data) = @_;
-   return unless $self->{r};
+   #return unless $self->{r};
 
    my $cl = $self->{socket};
    $self->{write_buffer} .= $data;
@@ -1019,6 +1032,7 @@ sub write_data {
                      delete $self->{w};
                   }
 
+                  $self->debug_wrote_data (substr $self->{write_buffer}, 0, $len);
                   $self->{write_buffer} = substr $self->{write_buffer}, $len;
                }
             });
