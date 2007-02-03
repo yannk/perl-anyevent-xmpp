@@ -30,12 +30,16 @@ This is the head module of the L<Net::XMPP2> XMPP client protocol (as described 
 RFC 3920 and RFC 3921) framework.
 
 L<Net::XMPP2::Connection> is a RFC 3920 conformant "XML" stream implementation
-for clients, which handles tcp connect up to the resource binding.
+for clients, which handles tcp connect up to the resource binding. And provides
+low-level access to the XML nodes on the XML stream along with some high
+level methods to send the predefined XML stanzas.
 
 L<Net::XMPP2::IM::Connection> is a more highlevel module, which is derived
 from L<Net::XMPP2::Connection>. It handles all the instant messaging client
-functionality described in RFC 3921. Some extensions for XMPP are
-also implemented and can be activated as described below in L<Supportet extensions>.
+functionality described in RFC 3921.
+
+Some extensions for XMPP are also implemented and can be activated as described
+below in L<Supportet extensions>.
 
 There are also other modules in this distribution, for example:
 L<Net::XMPP2::Util>, L<Net::XMPP2::Writer>, L<Net::XMPP2::Parser> and those i
@@ -62,7 +66,7 @@ to handle than threads.
 Another thing was that I didn't like the APIs of the other modules. In L<Net::XMPP2>
 i try to provide low level modules for speaking XMPP as defined in RFC 3920 and RFC 3921
 (see also L<Net::XMPP2::Connection> and L<Net::XMPP2::IM::Connection>). But i also
-try to provide a high level API. (Even thought that the Highlevel API is still TODO)
+try to provide a high level API.
 
 I also try to have all additional features and functionality as optional as possible
 to give the client writers enough freedom.

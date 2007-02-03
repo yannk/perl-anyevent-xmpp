@@ -36,8 +36,8 @@ sub new {
 
    $self->{ext} = {}; # reserved for extensions
 
-   $self->reg_cb (message  => sub { $self->handle_message (@_); 1 });
-   $self->reg_cb (presence => sub { $self->handle_presence (@_); 1 });
+   $self->reg_cb (message_xml  => sub { $self->handle_message (@_); 1 });
+   $self->reg_cb (presence_xml => sub { $self->handle_presence (@_); 1 });
 
    $self->reg_cb (stream_ready => sub {
       my ($jid) = @_;
@@ -68,23 +68,25 @@ sub send_session_iq {
          $self->retrieve_roster;
          $self->event ('session_ready');
       } else {
-         $self->event (session_error => $errnode, $errar);
+         $self->event (session_error => $errnode, $errar); # TODO: make error obj
       }
    });
 }
 
 sub retrieve_roster {
    my ($self) = @_;
+
    $self->send_iq (get => sub {
       my ($w) = @_;
       $w->addPrefix (xmpp_ns ('roster'), '');
       $w->emptyTag ([xmpp_ns ('roster'), 'query']);
+
    }, sub {
       my ($node, $errnode, $errar) = @_;
       if ($node) {
          $self->store_roster ($node);
       } else {
-         $self->event (roster_error => $errnode, $errar);
+         $self->event (roster_error => $errnode, $errar); # TODO: make error obj
       }
    });
 }
@@ -109,7 +111,7 @@ sub store_roster {
       };
    }
 
-   $self->event ('roster_update');
+   $self->event ('roster_update'); # TODO, pass object!
 }
 
 sub handle_presence {

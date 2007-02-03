@@ -229,7 +229,7 @@ sub write_data {
    $self->SUPER::write_data ($data);
 }
 
-=item reg_cb ($eventname1, $cb1, [$eventname2, $cb2, ...])
+=head2 reg_cb ($eventname1, $cb1, [$eventname2, $cb2, ...])
 
 This method registers a callback C<$cb1> for the event with the
 name C<$eventname1>. You can also pass multiple of these eventname => callback
@@ -285,9 +285,9 @@ sub handle_stanza {
    } elsif ($node->eq (client => 'iq')) {
       $self->handle_iq ($node);
    } elsif ($node->eq (client => 'message')) {
-      $self->event (message => $node);
+      $self->event (message_xml => $node);
    } elsif ($node->eq (client => 'presence')) {
-      $self->event (presence => $node);
+      $self->event (presence_xml => $node);
    } elsif ($node->eq (stream => 'error')) {
       $self->handle_error ($node);
    } else {
@@ -364,6 +364,8 @@ in C<$req_iq_node>.
 Please take a look at the documentation for C<send_iq> in Net::XMPP2::Writer
 about the meaning C<$create_cb> and C<%attrs>.
 
+Use C<$create_cb> to create the XML for the result.
+
 The type for this iq reply is 'result'.
 
 =cut
@@ -383,7 +385,7 @@ C<$error> is one of the defined error conditions described in
 L<Net::XMPP2::Writer::write_error_tag>.
 
 Please take a look at the documentation for C<send_iq> in Net::XMPP2::Writer
-about the meaning C<$create_cb> and C<%attrs>.
+about the meaning of C<%attrs>.
 
 The type for this iq reply is 'error'.
 
@@ -417,7 +419,7 @@ sub handle_iq {
 
    } else {
       my $handled = 0;
-      $self->event ("iq_${type}_request" => $node, \$handled);
+      $self->event ("iq_${type}_request_xml" => $node, \$handled);
 
       my @from;
       push @from, (to => $node->attr ('from')) if $node->attr ('from');
@@ -519,7 +521,8 @@ sub handle_error {
          }
       }
    }
-   $self->event (stream_error => $error, (@txt ? $txt[0]->text : ''));
+   $self->event (stream_error     => $error, (@txt ? $txt[0]->text : ''));
+   $self->event (stream_error_xml => $node);
    $self->{writer}->send_end_of_stream;
 }
 
@@ -595,6 +598,7 @@ sub do_rebind {
             if ($err) {
                my ($res) = $err_iq->find_all ([qw/bind bind/], [qw/bind resource/]);
                $self->event (bind_error => $err->[0], ($res ? $res : $self->{resource}));
+               $self->event (bind_error_xml => $err_iq);
 
             } else {
                my @jid = $ret_iq->find_all ([qw/bind bind/], [qw/bind jid/]);
@@ -645,7 +649,7 @@ These events can be registered on with C<reg_cb>:
 
 =over 4
 
-=item stream_features => $node
+=item stream_features_xml => $node
 
 This event is sent when a stream feature (<features>) tag is received. C<$node> is the
 L<Net::XMPP2::Node> object that represents the <features> tag.
@@ -657,6 +661,26 @@ resources have been bound) and is ready for transmitting regular stanzas.
 
 C<$jid> is the bound jabber id.
 
+=item stream_error => $error, $text
+
+This event is sent if a XML stream error occured. C<$error>
+will be the machine readable error string, which is one of:
+
+   bad-format bad-namespace-prefix conflict connection-timeout host-gone
+   host-unknown improper-addressing internal-server-error invalid-from
+   invalid-id invalid-namespace invalid-xml not-authorized policy-violation
+   remote-connection-failed resource-constraint restricted-xml
+   see-other-host system-shutdown undefined-condition unsupported-stanza-type
+   unsupported-version xml-not-well-formed
+
+And C<$text> is an optional human readable text.
+
+=item stream_error_xml => $node
+
+This is sent when a XML stream error occurs. C<$node>
+is the XML node of the 'error' stanza and will be a L<Net::XMPP2::Node>
+object.
+
 =item bind_error => $error_name, $resource
 
 This event is generated when the stream was unable to bind to
@@ -665,6 +689,12 @@ may be 'bad-request', 'not-allowed' or 'conflict'.
 
 Node: this is untested, i couldn't get the server to send a bind error
 to test this.
+
+=item bind_error_xml => $iq_error_node
+
+This event is generated when the stream was unable to bind to
+any or the in C<new> specified resource. C<$iq_error_node> contains
+the IQ error L<Net::XMPP2::Node>.
 
 =item connect => $host, $port
 
@@ -688,19 +718,19 @@ C<$host> and C<$port> were the host and port we were connected to.
 Note: C<$host> and C<$port> might be different from the domain you passed to
 C<new> if C<connect> performed a SRV RR lookup.
 
-=item presence => $node
+=item presence_xml => $node
 
 This event is sent when a presence stanza is received. C<$node> is the
 L<Net::XMPP2::Node> object that represents the <presence> tag.
 
-=item message => $node
+=item message_xml => $node
 
 This event is sent when a message stanza is received. C<$node> is the
 L<Net::XMPP2::Node> object that represents the <message> tag.
 
-=item iq_set_request => $node, $handled_ref
+=item iq_set_request_xml => $node, $handled_ref
 
-=item iq_get_request => $node, $handled_ref
+=item iq_get_request_xml => $node, $handled_ref
 
 These events are sent when an iq request stanza of type 'get' or 'set' is received.
 C<$type> will either be 'get' or 'set' and C<$node> will be the L<Net::XMPP2::Node>

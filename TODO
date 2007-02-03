@@ -7,7 +7,10 @@ Net::XMPP2 missing functionality to be RFC 3920 conform:
    - errorhandling for TLS and SASL!
    - testing of send_message and send_presence!
    - make extensions more optional and reentrant
+
    - add stanza-error objects instead error-xml nodes
+   - add high-level events together with low-level events which just
+     pass on the XML nodes.
 
 Net::XMPP2::IM missing functionality to be RFC 3921 conform:
    - message and presence sending
