@@ -1,5 +1,4 @@
 package Net::XMPP2::Util;
-use warnings;
 use strict;
 use Encode;
 use Net::LibIDN qw/idn_prep_name idn_prep_resource idn_prep_node/;
@@ -39,7 +38,7 @@ sub nodeprep {
    decode_utf8 (idn_prep_node (encode_utf8 ($str), 'UTF-8'))
 }
 
-=head2 join_jid ($node, $domain, $resource)
+=head2 prep_join_jid ($node, $domain, $resource)
 
 This function joins the parts C<$node>, C<$domain> and C<$resource>
 to a full jid and applies stringprep profiles. If the profiles couldn't
@@ -47,7 +46,7 @@ be applied undef will be returned.
 
 =cut
 
-sub join_jid {
+sub prep_join_jid {
    my ($node, $domain, $resource) = @_;
    my $jid = "";
 
@@ -69,6 +68,42 @@ sub join_jid {
    $jid
 }
 
+=head2 join_jid ($user, $domain, $resource)
+
+This is a plain concatenation of C<$user>, C<$domain> and C<$resource>
+without stringprep.
+
+See also L<prep_join_jid>
+
+=cut
+
+sub join_jid {
+   my ($node, $domain, $resource) = @_;
+   my $jid = "";
+   $jid .= "$node\@" if defined $node;
+   $jid .= $domain;
+   $jid .= "/$resource" if defined $resource;
+   $jid
+}
+
+=head2 split_jid ($jid)
+
+This function splits up the C<$jid> into user/node, domain and resource
+part and will return them as list.
+
+   my ($user, $host, $res) = split_jid ($jid);
+
+=cut
+
+sub split_jid {
+   my ($jid) = @_;
+   if ($jid =~ /^([^@]*)@?([^\/]+)\/?(.*)$/) {
+      return ($1, $2, $3);
+   } else {
+      return (undef, undef, undef);
+   }
+}
+
 =head2 stringprep_jid ($jid)
 
 This applies stringprep to all parts of the jid according to the RFC 3920.
@@ -83,11 +118,35 @@ and the preparations done.
 
 sub stringprep_jid {
    my ($jid) = @_;
-   if ($jid =~ /^([^@]*)@?([^\/]+)\/(.*)$/) {
-      return join_jid ($1, $2, $3);
-   } else {
-      return undef;
-   }
+   my ($user, $host, $res) = split_jid ($jid);
+   return undef unless defined ($user) || defined ($host) || defined ($res);
+   return prep_join_jid ($user, $host, $res);
+}
+
+=head2 prep_bare_jid ($jid)
+
+This function makes the jid C<$jid> a bare jid, meaning:
+it will strip off the resource part. With stringprep.
+
+=cut
+
+sub prep_bare_jid {
+   my ($jid) = @_;
+   my ($user, $host, $res) = split_jid ($jid);
+   prep_join_jid ($user, $host)
+}
+
+=head2 bare_jid ($jid)
+
+This function makes the jid C<$jid> a bare jid, meaning:
+it will strip off the resource part. But without stringprep.
+
+=cut
+
+sub bare_jid {
+   my ($jid) = @_;
+   my ($user, $host, $res) = split_jid ($jid);
+   join_jid ($user, $host)
 }
 
 =head1 AUTHOR

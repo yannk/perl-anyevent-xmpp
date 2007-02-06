@@ -6,6 +6,7 @@ use XML::Twig;
 use Net::XMPP2 qw/xep-86/;
 use Net::XMPP2::IM::Connection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Util;
 use Net::LibIDN qw/idn_prep_resource/;
 use Encode;
 
@@ -26,15 +27,14 @@ binmode STDOUT, ":utf8";
 my $j = AnyEvent->condvar;
 
 my $res = "Net::XどなPP2";
+
 #my $res = "Net::XMPP2";
 
 my $con = Net::XMPP2::IM::Connection->new (
-            username => 'elmex', #'elmor',
-            domain => 'amessage.eu',#'jabber.org',
-   #         username => 'elmor', #'elmor',
-    #        domain => 'jabber.org',#'jabber.org',
+    username => 'elmex', password => 'xxxxxx', domain => 'jabber.org',
+ #   username => 'elmex', password => 'xxxxxx', domain => 'jabber.org',
+ #   username => 'elmor', password => 'xxxxxx', domain => 'amessage.eu',
             resource => $res,
-            password => 'xxxxxx',
             disable_ssl => 1,
           );
 $con->connect or die "Couldn't connect: $!";
@@ -74,11 +74,15 @@ $con->reg_cb (
             );
          }
    },
+   presence_update => sub {
+      my ($con, $roster) = @_;
+      $roster->debug_dump;
+      1;
+   },
    roster_update => sub {
-      my ($con) = @_;
-      for (keys %{$con->{roster}}) {
-         print "\tROSTER[$_]\n";
-      }
+      my ($con, $roster) = @_;
+      $roster->debug_dump;
+      1;
    },
    debug_recv   => sub { print "RRRRRRRRECVVVVVV:\n"; dumpxml ($_[1]); 1},
    debug_send   => sub { print "SSSSSSSSENDDDDDD:\n"; dumpxml ($_[1]); 1 },

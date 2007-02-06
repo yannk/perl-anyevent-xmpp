@@ -1,13 +1,13 @@
 package Net::XMPP2::IM::Connection;
-use warnings;
 use strict;
 use Net::XMPP2::Connection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::IM::Roster;
 our @ISA = qw/Net::XMPP2::Connection/;
 
 =head1 NAME
 
-Net::XMPP2::Connection - A XML stream that implements the XMPP RFC 3920.
+Net::XMPP2::IM::Connection - A XML stream that implements the XMPP RFC 3921.
 
 =head1 SYNOPSIS
 
@@ -35,9 +35,16 @@ sub new {
    my $self = $class->SUPER::new (@_);
 
    $self->{ext} = {}; # reserved for extensions
+   $self->{roster} = Net::XMPP2::IM::Roster->new (connection => $self);
 
-   $self->reg_cb (message_xml  => sub { $self->handle_message (@_); 1 });
-   $self->reg_cb (presence_xml => sub { $self->handle_presence (@_); 1 });
+   $self->reg_cb (message_xml =>
+      sub { shift @_; $self->handle_message (@_);    1 });
+   $self->reg_cb (presence_xml =>
+      sub { shift @_; $self->handle_presence (@_);   1 });
+   $self->reg_cb (iq_set_request_xml =>
+      sub { shift @_; $self->handle_iq_set (@_);     1 });
+   $self->reg_cb (disconnect =>
+      sub { shift @_; $self->handle_disconnect (@_); 1 });
 
    $self->reg_cb (stream_ready => sub {
       my ($jid) = @_;
@@ -103,24 +110,60 @@ sub store_roster {
       my @groups;
       push @groups, $_->text for $item->find_all ([qw/roster group/]);
 
-      my $ro = $self->{roster}->{$jid} = {
-         jid          => $jid,
+      $self->{roster}->set_contact ($jid,
          name         => $name,
          subscription => $subscription,
          groups       => [ @groups ]
-      };
+      );
    }
 
-   $self->event ('roster_update'); # TODO, pass object!
+   $self->event (roster_update => $self->{roster});
+}
+
+sub get_roster {
+   my ($self) = @_;
+   $self->{roster}
+}
+
+sub handle_iq_set {
+   my ($self, $node, $rhandled) = @_;
+
+   if ($node->find_all ([qw/roster query/])) {
+      $self->store_roster ($node);
+      $self->reply_iq_result ($node, sub {});
+   }
 }
 
 sub handle_presence {
-   my ($self) = @_;
+   my ($self, $node) = @_;
 
+   my $type       = $node->attr ('type');
+   my ($show)     = $node->find_all ([qw/client show/]);
+   my ($priority) = $node->find_all ([qw/client priority/]);
+
+   my $jid = $node->attr ('from');
+
+   my @stati;
+   push @stati, [$_->attr ('lang'), $_->text]
+      for $node->find_all ([qw/client status/]);
+
+   $self->{roster}->set_presence ($jid,
+      show     => $show     ? $show->text     : undef,
+      priority => $priority ? $priority->text : undef,
+      type     => $type,
+      status   => \@stati,
+   );
+
+   $self->event (presence_update => $self->{roster}, $self->{roster}->get_contact ($jid))
 }
 
 sub handle_message {
    my ($self) = @_;
+}
+
+sub handle_disconnect {
+   my ($self) = @_;
+   delete $self->{roster};
 }
 
 =head1 EVENTS

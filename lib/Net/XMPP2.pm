@@ -101,6 +101,12 @@ an argument like this:
 
    use Net::XMPP2 qw/xep-0086/;
 
+There are other extensions that don't change the behaviour of the client
+to the outside, those are implemented silently. They are listed below the
+list of supported XMPP extensions.
+
+=head2 List of supported extensions
+
 This is the list of supported XMPP extensions:
 
 =over 4
@@ -111,6 +117,15 @@ This is the list of supported XMPP extensions:
 
 This extension will enable sending of the old error codes when generating a stanza
 error with for example: L<Net::XMPP2::Writer::write_error_tag>
+
+=back
+
+=head2 List of silently supported extensions
+
+This is the list of silently supported extensions which don'tt
+change the behaviour of the modules.
+
+=over 4
 
 =back
 

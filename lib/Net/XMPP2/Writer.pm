@@ -1,5 +1,4 @@
 package Net::XMPP2::Writer;
-use warnings;
 use strict;
 use XML::Writer;
 use Authen::SASL;
@@ -253,12 +252,13 @@ sub send_iq {
    if ($attrs{lang}) {
       push @from, ([ xmpp_ns ('xml'), 'lang' ] => delete $attrs{leng})
    }
+   push @from, (id => $id) if defined $id;
    if (defined $create_cb) {
-      $w->startTag ('iq', id => $id, type => $type, @from, %attrs);
+      $w->startTag ('iq', type => $type, @from, %attrs);
       $create_cb->($w);
       $w->endTag;
    } else {
-      $w->emptyTag ('iq', id => $id, type => $type, @from, %attrs);
+      $w->emptyTag ('iq', type => $type, @from, %attrs);
    }
    $self->flush;
 }
@@ -355,7 +355,7 @@ sub send_presence {
 Sends a message stanza.
 
 C<$to> is the destination JID of the message. C<$type> is
-the type of the message, and if it is undefined it will default to 'chat'.
+the type of the message, and if C<$type> is undefined it will default to 'chat'.
 C<$type> must be one of the following: 'chat', 'error', 'groupchat', 'headline'
 or 'normal'.
 

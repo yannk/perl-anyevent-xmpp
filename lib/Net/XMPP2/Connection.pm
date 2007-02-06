@@ -1,5 +1,4 @@
 package Net::XMPP2::Connection;
-use warnings;
 use strict;
 use AnyEvent;
 use IO::Socket::INET;
@@ -127,8 +126,15 @@ sub new {
 
    $self->{disconnect_cb} = sub {
       my ($host, $port, $message) = @_;
+      delete $self->{authenticated};
+      delete $self->{ssl_enabled};
       $self->event (disconnect => $host, $port, $message);
    };
+
+   for (qw/username password domain/) {
+      die "No '$_' argument given to new, but '$_' is required\n"
+         unless $self->{$_};
+   }
 
    return $self;
 }
