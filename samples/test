@@ -31,11 +31,9 @@ my $res = "Net::XどなPP2";
 #my $res = "Net::XMPP2";
 
 my $con = Net::XMPP2::IM::Connection->new (
-    username => 'elmex', password => 'xxxxxx', domain => 'jabber.org',
- #   username => 'elmex', password => 'xxxxxx', domain => 'jabber.org',
- #   username => 'elmor', password => 'xxxxxx', domain => 'amessage.eu',
+            username => 'elmex', password => 'xxxxxxxx', domain => 'jabber.org',
             resource => $res,
-            disable_ssl => 1,
+            disable_ssl => 0,
           );
 $con->connect or die "Couldn't connect: $!";
 $con->init;
@@ -77,12 +75,20 @@ $con->reg_cb (
    presence_update => sub {
       my ($con, $roster) = @_;
       $roster->debug_dump;
-      1;
+      1
    },
    roster_update => sub {
       my ($con, $roster) = @_;
       $roster->debug_dump;
-      1;
+      1
+   },
+   message => sub {
+      my ($con, $msg) = @_;
+      print "Message from: ".$msg->from." to: ".$msg->to.":\n$msg\n";
+      if ($msg =~ /arsch/si) {
+         $msg->reply ("FOTZE!");
+      }
+      1
    },
    debug_recv   => sub { print "RRRRRRRRECVVVVVV:\n"; dumpxml ($_[1]); 1},
    debug_send   => sub { print "SSSSSSSSENDDDDDD:\n"; dumpxml ($_[1]); 1 },

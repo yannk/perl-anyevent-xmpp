@@ -149,6 +149,19 @@ sub bare_jid {
    join_jid ($user, $host)
 }
 
+=head2 is_bare_jid ($jid)
+
+This method returns a boolean which indicates whether C<$jid> is a 
+bare JID.
+
+=cut
+
+sub is_bare_jid {
+   my ($jid) = @_;
+   my ($user, $host, $res) = split_jid ($jid);
+   defined $res
+}
+
 =head1 AUTHOR
 
 Robin Redeker, C<< <elmex at ta-sa.org> >>

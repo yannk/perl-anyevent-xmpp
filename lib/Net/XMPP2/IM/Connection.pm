@@ -3,6 +3,7 @@ use strict;
 use Net::XMPP2::Connection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::IM::Roster;
+use Net::XMPP2::IM::Message;
 our @ISA = qw/Net::XMPP2::Connection/;
 
 =head1 NAME
@@ -143,22 +144,48 @@ sub handle_presence {
 
    my $jid = $node->attr ('from');
 
-   my @stati;
-   push @stati, [$_->attr ('lang'), $_->text]
+   my %stati;
+   $stati{$_->attr ('lang') || ''} = $_->text
       for $node->find_all ([qw/client status/]);
 
    $self->{roster}->set_presence ($jid,
       show     => $show     ? $show->text     : undef,
       priority => $priority ? $priority->text : undef,
       type     => $type,
-      status   => \@stati,
+      status   => \%stati,
    );
 
    $self->event (presence_update => $self->{roster}, $self->{roster}->get_contact ($jid))
 }
 
 sub handle_message {
-   my ($self) = @_;
+   my ($self, $node) = @_;
+
+   my $from     = $node->attr ('from');
+   my $to       = $node->attr ('to');
+   my $type     = $node->attr ('type');
+   my ($thread) = $node->find_all ([qw/client thread/]);
+
+   my %bodies;
+   my %subjects;
+
+   $bodies{$_->attr ('lang') || ''} = $_->text
+      for $node->find_all ([qw/client body/]);
+   $subjects{$_->attr ('lang') || ''} = $_->text
+      for $node->find_all ([qw/client subject/]);
+
+   my $msg =
+      Net::XMPP2::IM::Message->new (
+         connection => $self,
+         from       => $from,
+         to         => $to,
+         type       => $type,
+         bodies     => \%bodies,
+         subjects   => \%subjects,
+         thread     => $thread
+      );
+
+   $self->event (message => $msg);
 }
 
 sub handle_disconnect {

@@ -19,28 +19,24 @@ sub jid { $_[0]->{jid} }
 
 sub priority { $_[0]->{priority} }
 
-sub status_all {
+sub status_all_lang {
    my ($self, $jid) = @_;
-   @{$self->{status} || []}
+   keys %{$self->{status} || []}
 }
 
 sub show { $_[0]->{show} }
 
 sub status {
-   my ($self) = @_;
+   my ($self, $lang) = @_;
 
-   my @stati = $self->status_all;
-   for (@stati) {
-      if ((not defined $_->[0]) || $_->[0] eq '') {
-         return $_->[1];
-      }
+   if (defined $lang) {
+      return $self->{status}->{$lang}
+   } else {
+      return $self->{status}->{''}
+         if defined $self->{status}->{''};
+      return $self->{status}->{en}
+         if defined $self->{status}->{en};
    }
-
-   my @en = grep { $_->[0] eq 'en' } @stati;
-
-   return $en[1]->[1] if @en;
-
-   return $stati[1]->[1] if @stati;
 
    undef
 }
@@ -84,6 +80,10 @@ sub touch_presence {
          Net::XMPP2::IM::Presence->new (connection => $self->{connection}, jid => $jid);
    }
    $self->{presences}->{$sjid}
+}
+
+sub get_presence {
+   my ($self, $jid) = @_;
 }
 
 sub get_presences { values %{$_[0]->{presences}} }

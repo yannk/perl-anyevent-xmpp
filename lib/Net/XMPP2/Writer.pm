@@ -328,22 +328,27 @@ sub send_presence {
    push @add, (type => $type) if defined $type;
    push @add, (id => $id) if defined $id;
 
+   my %fattrs =
+      map { $_ => $attrs{$_} }
+         grep { my $k = $_; not grep { $k ne $_ } qw/show priority status/ }
+            keys %attrs;
+
    if (defined $create_cb) {
-      $w->startTag ('presence', @add, %attrs);
-      _generate_key_xml (show => $attrs{show})         if defined $attrs{show};
-      _generate_key_xml (priority => $attrs{priority}) if defined $attrs{priority};
-      _generate_key_xmls (status => $attrs{status})    if defined $attrs{status};
+      $w->startTag ('presence', @add, %fattrs);
+      _generate_key_xml ($w, show => $attrs{show})         if defined $attrs{show};
+      _generate_key_xml ($w, priority => $attrs{priority}) if defined $attrs{priority};
+      _generate_key_xmls ($w, status => $attrs{status})    if defined $attrs{status};
       $create_cb->($w);
       $w->endTag;
    } else {
       if (exists $attrs{show} or $attrs{priority} or $attrs{status}) {
-         $w->startTag ('presence', @add, %attrs);
-         _generate_key_xml (show => $attrs{show})         if defined $attrs{show};
-         _generate_key_xml (priority => $attrs{priority}) if defined $attrs{priority};
-         _generate_key_xmls (status => $attrs{status})    if defined $attrs{status};
+         $w->startTag ('presence', @add, %fattrs);
+         _generate_key_xml ($w, show => $attrs{show})         if defined $attrs{show};
+         _generate_key_xml ($w, priority => $attrs{priority}) if defined $attrs{priority};
+         _generate_key_xmls ($w, status => $attrs{status})    if defined $attrs{status};
          $w->endTag;
       } else {
-         $w->emptyTag ('presence', @add, %attrs);
+         $w->emptyTag ('presence', @add, %fattrs);
       }
    }
 
@@ -392,22 +397,27 @@ sub send_message {
 
    $type ||= 'chat';
 
+   my %fattrs =
+      map { $_ => $attrs{$_} }
+         grep { my $k = $_; not grep { $k ne $_ } qw/subject body thread/ }
+            keys %attrs;
+
    if (defined $create_cb) {
-      $w->startTag ('message', @add, to => $to, type => $type, %attrs);
-      _generate_key_xmls (subject => $attrs{subject})    if defined $attrs{subject};
-      _generate_key_xmls (body => $attrs{body})          if defined $attrs{body};
-      _generate_key_xml (thread => $attrs{thread})       if defined $attrs{thread};
+      $w->startTag ('message', @add, to => $to, type => $type, %fattrs);
+      _generate_key_xmls ($w, subject => $attrs{subject})    if defined $attrs{subject};
+      _generate_key_xmls ($w, body => $attrs{body})          if defined $attrs{body};
+      _generate_key_xml ($w, thread => $attrs{thread})       if defined $attrs{thread};
       $create_cb->($w);
       $w->endTag;
    } else {
       if (exists $attrs{subject} or $attrs{body} or $attrs{thread}) {
-         $w->startTag ('message', @add, to => $to, type => $type, %attrs);
-         _generate_key_xmls (subject => $attrs{subject})    if defined $attrs{subject};
-         _generate_key_xmls (body => $attrs{body})          if defined $attrs{body};
-         _generate_key_xml (thread => $attrs{thread})       if defined $attrs{thread};
+         $w->startTag ('message', @add, to => $to, type => $type, %fattrs);
+         _generate_key_xmls ($w, subject => $attrs{subject})    if defined $attrs{subject};
+         _generate_key_xmls ($w, body => $attrs{body})          if defined $attrs{body};
+         _generate_key_xml ($w, thread => $attrs{thread})       if defined $attrs{thread};
          $w->endTag;
       } else {
-         $w->emptyTag ('message', @add, to => $to, type => $type, %attrs);
+         $w->emptyTag ('message', @add, to => $to, type => $type, %fattrs);
       }
    }
 
