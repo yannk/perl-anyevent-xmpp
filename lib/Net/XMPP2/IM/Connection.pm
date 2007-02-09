@@ -30,6 +30,29 @@ For additional events that can be registered to look below in the EVENTS section
 
 =cut
 
+=head2 new (%args)
+
+This is the constructor. It takes the same arguments as
+the constructor of L<Net::XMPP2::Connection> along with a
+few others:
+
+=over 4
+
+=item dont_retrieve_roster => $bool
+
+Set this to a true value if no roster should be requested on connection
+establishment. You can retrieve the roster later if you want to
+with the C<retrieve_roster> method.
+
+The internal roster will be set even if this option is active, and
+even presences will be stored in there, except that the C<get_contacts>
+method on the roster object won't return anything as there are
+no roster items.
+
+=back
+
+=cut
+
 sub new {
    my $this = shift;
    my $class = ref($this) || $this;
@@ -52,9 +75,7 @@ sub new {
       if ($self->features ()->find_all ([qw/session session/])) {
          $self->send_session_iq;
       } else {
-         $self->{session_active} = 1;
-         $self->send_presence ();
-         $self->event ('session_ready');
+         $self->init_connection;
       }
    });
    $self
@@ -71,18 +92,26 @@ sub send_session_iq {
    }, sub {
       my ($node, $errnode, $errar) = @_;
       if ($node) {
-         $self->{session_active} = 1;
-         $self->send_presence;
-         $self->retrieve_roster;
-         $self->event ('session_ready');
+         $self->init_connection;
       } else {
          $self->event (session_error => $errnode, $errar); # TODO: make error obj
       }
    });
 }
 
-sub retrieve_roster {
+sub init_connection {
    my ($self) = @_;
+   $self->{session_active} = 1;
+   if ($self->{dont_retrieve_roster}) {
+      $self->send_presence;
+   } else {
+      $self->retrieve_roster (1);
+   }
+   $self->event ('session_ready');
+}
+
+sub retrieve_roster {
+   my ($self, $init) = @_;
 
    $self->send_iq (get => sub {
       my ($w) = @_;
@@ -96,6 +125,8 @@ sub retrieve_roster {
       } else {
          $self->event (roster_error => $errnode, $errar); # TODO: make error obj
       }
+
+      $self->send_presence if $init;
    });
 }
 
@@ -217,44 +248,6 @@ L<Net::XMPP2::Connection::send_iq> for error responses for iq requests.
 
 Robin Redeker, C<< <elmex at ta-sa.org> >>
 
-=head1 BUGS
-
-Please report any bugs or feature requests to
-C<bug-net-xmpp2 at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-XMPP2>.
-I will be notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Net::XMPP2
-
-You can also look for information at:
-
-=over 4
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Net-XMPP2>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Net-XMPP2>
-
-=item * RT: CPAN's request tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-XMPP2>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Net-XMPP2>
-
-=back
-
-=head1 ACKNOWLEDGEMENTS
-
 =head1 COPYRIGHT & LICENSE
 
 Copyright 2007 Robin Redeker, all rights reserved.
@@ -263,7 +256,5 @@ This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =cut
-
-
 
 1; # End of Net::XMPP2

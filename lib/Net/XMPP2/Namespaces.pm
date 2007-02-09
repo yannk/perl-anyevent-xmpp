@@ -6,17 +6,17 @@ our @EXPORT_OK = qw/xmpp_ns set_xmpp_ns_alias/;
 our @ISA = qw/Exporter/;
 
 our %NAMESPACES = (
-   client  => 'jabber:client',
-   stream  => 'http://etherx.jabber.org/streams',
-   streams => 'urn:ietf:params:xml:ns:xmpp-streams',
-   stanzas => 'urn:ietf:params:xml:ns:xmpp-stanzas',
-   sasl    => 'urn:ietf:params:xml:ns:xmpp-sasl',
-   bind    => 'urn:ietf:params:xml:ns:xmpp-bind',
-   tls     => 'urn:ietf:params:xml:ns:xmpp-tls',
-   roster  => 'jabber:iq:roster',
-   version => 'jabber:iq:version',
-   session => 'urn:ietf:params:xml:ns:xmpp-session',
-   xml     => 'http://www.w3.org/XML/1998/namespace',
+   client     => 'jabber:client',
+   stream     => 'http://etherx.jabber.org/streams',
+   streams    => 'urn:ietf:params:xml:ns:xmpp-streams',
+   stanzas    => 'urn:ietf:params:xml:ns:xmpp-stanzas',
+   sasl       => 'urn:ietf:params:xml:ns:xmpp-sasl',
+   bind       => 'urn:ietf:params:xml:ns:xmpp-bind',
+   tls        => 'urn:ietf:params:xml:ns:xmpp-tls',
+   roster     => 'jabber:iq:roster',
+   version    => 'jabber:iq:version',
+   session    => 'urn:ietf:params:xml:ns:xmpp-session',
+   xml        => 'http://www.w3.org/XML/1998/namespace',
    disco_info => 'http://jabber.org/protocol/disco#info',
 );
 
@@ -77,44 +77,6 @@ sub set_xmpp_ns_alias { return $NAMESPACES{$_[0]} }
 =head1 AUTHOR
 
 Robin Redeker, C<< <elmex at ta-sa.org> >>
-
-=head1 BUGS
-
-Please report any bugs or feature requests to
-C<bug-net-xmpp2 at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-XMPP2>.
-I will be notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Net::XMPP2
-
-You can also look for information at:
-
-=over 4
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Net-XMPP2>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Net-XMPP2>
-
-=item * RT: CPAN's request tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-XMPP2>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Net-XMPP2>
-
-=back
-
-=head1 ACKNOWLEDGEMENTS
 
 =head1 COPYRIGHT & LICENSE
 
