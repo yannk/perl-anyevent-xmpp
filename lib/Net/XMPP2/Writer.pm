@@ -28,7 +28,7 @@ The whole "XML" concept of XMPP is fundamentally broken anyway. It's supposed
 to be an subset of XML. But a subset of XML productions is not XML. Strictly
 speaking you need a special XMPP "XML" parser and writer to be 100% conformant.
 
-But i try to be as "XML" XMPP conformant as possible (it should be around 99-100%).
+But I try to be as "XML" XMPP conformant as possible (it should be around 99-100%).
 But it's hard to say what XML is conformant, as the specifications of XMPP "XML" and XML
 are contradicting. For example XMPP also says you only have to generated and accept
 utf-8 encodings of XML, but the XML recommendation says that each parser has
@@ -46,7 +46,7 @@ of "XML" in XMPP.
 
 Back to the issue with "XML" generation: I've discoverd that many XMPP servers (eg.
 jabberd14 and ejabberd) have problems with XML namespaces. Thats the reason why
-i'm assigning the namespace prefixes manually: The servers just don't accept validly
+I'm assigning the namespace prefixes manually: The servers just don't accept validly
 namespaced XML. The draft 3921bis does even state that a client SHOULD generate a 'stream'
 prefix for the <stream> tag.
 
@@ -65,9 +65,9 @@ in character data you need a "XML" writer that will escape everything:
 
 This means:
 You have to escape '>' in the character data. I don't know whether XML::Writer
-does that. And i honestly don't care much about this. XMPP is broken by design and
-i have barely time to writer my own XML parsers and writers to suit their sick taste
-of "XML". (Do i repeat myself?)
+does that. And I honestly don't care much about this. XMPP is broken by design and
+I have barely time to writer my own XML parsers and writers to suit their sick taste
+of "XML". (Do I repeat myself?)
 
 =head1 METHODS
 
@@ -83,9 +83,9 @@ The callback that is called when a XML stanza was completly written
 and is ready for transfer. The first argument of the callback
 will be the character data to send to the socket.
 
-And calls C<init>.
-
 =back
+
+And calls C<init>.
 
 =cut
 
@@ -136,7 +136,7 @@ sub send_init_stream {
    $w->xmlDecl ('UTF-8');
    $w->addPrefix (xmpp_ns ('stream'), 'stream');
    $w->addPrefix (xmpp_ns ('client'), '');
-   $w->forceNSDecl ('jabber:client');
+   $w->forceNSDecl (xmpp_ns ('client'));
    $w->startTag (
       [xmpp_ns ('stream'), 'stream'],
       to => $domain,
@@ -173,7 +173,7 @@ sub send_sasl_auth {
    my $sasl = Authen::SASL->new (
       mechanism => $mechanisms,
       callback => {
-         authname => $user,
+         authname => $user,# . '@' . $domain,
          user => $user,
          pass => $pass,
       }
