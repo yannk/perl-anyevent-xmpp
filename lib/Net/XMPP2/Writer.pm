@@ -28,6 +28,14 @@ The whole "XML" concept of XMPP is fundamentally broken anyway. It's supposed
 to be an subset of XML. But a subset of XML productions is not XML. Strictly
 speaking you need a special XMPP "XML" parser and writer to be 100% conformant.
 
+On top of that XMPP E<requires> you to parse these partial "XML" documents.
+But a partial XML document is not well-formed, heck, it's not even a XML document!.
+And a parser should bail out with an error. But XMPP doesn't care, it just relies on
+implementation dependend behaviour of chunked parsing modes for SAX parsing.
+This functionality isn't even specified by the XML recommendation in any way.
+The recommendation even says that it's undefined what happens if you process
+not-well-formed XML documents.
+
 But I try to be as "XML" XMPP conformant as possible (it should be around 99-100%).
 But it's hard to say what XML is conformant, as the specifications of XMPP "XML" and XML
 are contradicting. For example XMPP also says you only have to generated and accept
@@ -39,7 +47,7 @@ I'm using XML::Parser::Expat because expat knows how to parse broken (aka 'parti
 "XML" documents, as XMPP requires. Another argument is that if you capture a XMPP
 conversation to the end, and even if a '</stream:stream>' tag was captured, you
 wont have a valid XML document. The problem is that you have to resent a <stream> tag
-after TLS and SASL authentication each!
+after TLS and SASL authentication each! Awww... I'm repeating myself.
 
 But well... Net::XMPP2 does it's best with expat to cope with the fundamental brokeness
 of "XML" in XMPP.
@@ -68,6 +76,9 @@ You have to escape '>' in the character data. I don't know whether XML::Writer
 does that. And I honestly don't care much about this. XMPP is broken by design and
 I have barely time to writer my own XML parsers and writers to suit their sick taste
 of "XML". (Do I repeat myself?)
+
+I would be happy if they finally say (in RFC3920): "XMPP is NOT XML. It's just
+XML-like, and some XML utilities allow you to process this kind of XML.".
 
 =head1 METHODS
 

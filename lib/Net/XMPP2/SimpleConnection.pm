@@ -117,49 +117,10 @@ sub end_sockets {
    }
 }
 
-sub dumpbio {
-   my ($self) = @_;
-
-   print "er: ".Net::SSLeay::BIO_should_retry (Net::SSLeay::get_rbio ($self->{ssl}));
-   print " ew: ".Net::SSLeay::BIO_should_retry (Net::SSLeay::get_wbio ($self->{ssl}));
-   print " rr: ".Net::SSLeay::BIO_should_read (Net::SSLeay::get_rbio ($self->{ssl}));
-   print " rw: ".Net::SSLeay::BIO_should_read (Net::SSLeay::get_wbio ($self->{ssl}));
-   print " wr: ".Net::SSLeay::BIO_should_write (Net::SSLeay::get_rbio ($self->{ssl}));
-   print " ww: ".Net::SSLeay::BIO_should_write (Net::SSLeay::get_wbio ($self->{ssl}))."\n";
-
-   my $e = Net::SSLeay::BIO_should_retry (Net::SSLeay::get_wbio ($self->{ssl}))
-           | Net::SSLeay::BIO_should_retry (Net::SSLeay::get_wbio ($self->{ssl}));
-   my $w = Net::SSLeay::BIO_should_read (Net::SSLeay::get_wbio ($self->{ssl}))
-           | Net::SSLeay::BIO_should_write (Net::SSLeay::get_wbio ($self->{ssl}));
-   my $r = Net::SSLeay::BIO_should_read (Net::SSLeay::get_rbio ($self->{ssl}))
-           | Net::SSLeay::BIO_should_write (Net::SSLeay::get_rbio ($self->{ssl}));
-
-   print "TEST:$e $w $r\n";
- #  delete $self->{r};
- #  delete $self->{w};
- #  if ($w) { $self->make_ssl_write_watcher }
- #  if ($r) { $self->make_ssl_read_watcher }
- #  unless ($e) {
- #     $self->make_ssl_read_watcher;
- #     $self->make_ssl_write_watcher;
- #  }
-}
-
 sub try_ssl_write {
    my ($self) = @_;
 
-   unless ($self->{ssl_out_buffer}) { # refill buffer
-      $self->{ssl_out_buffer} = $self->{write_buffer};
-      $self->{write_buffer} = "";
-   }
-
-   unless ($self->{ssl_out_buffer}) {
-      delete $self->{w};
-      return;
-   }
-
-   my $l = Net::SSLeay::write_nb ($self->{ssl},
-              $self->{ssl_out_buffer}, length ($self->{ssl_out_buffer}));
+   my $l = Net::SSLeay::write ($self->{ssl}, $self->{write_buffer});
 
    if ($l <= 0) {
       if ($l == 0) {
@@ -170,8 +131,8 @@ sub try_ssl_write {
 
       } else {
          my $err2 = Net::SSLeay::get_error $self->{ssl}, $l;
-         #d# warn "write err[$err2]\n"; $self->dumpbio;
          if ($err2 == 2 || $err2 == 3) {
+            warn "WRITE RETRY $err2\n";
             delete $self->{w};
             $self->make_ssl_write_watcher ($err2 == 2 ? 'r' : 'w');
             return;
@@ -189,78 +150,46 @@ sub try_ssl_write {
             return;
          }
       }
-      $self->make_ssl_read_watcher;
-      return;
    } else {
-      $self->debug_wrote_data (substr $self->{ssl_out_buffer}, 0, $l);
-      $self->{ssl_out_buffer} = substr $self->{ssl_out_buffer}, $l;
+      $self->debug_wrote_data (substr $self->{write_buffer}, 0, $l);
+      $self->{write_buffer} = substr $self->{write_buffer}, $l;
+      warn "WROTE[$l][$self->{write_buffer}]\n";
+      if (length ($self->{write_buffer}) <= 0) {
+         warn "DONE WRITING\n";
+         delete $self->{w};
+      }
    }
 }
 
 sub try_ssl_read {
    my ($self) = @_;
-   my $l = Net::SSLeay::read_nb ($self->{ssl}, $self->{ssl_read_data});
+   my $r = Net::SSLeay::read ($self->{ssl});
 
-   if ($l <= 0) {
-      if ($l == 0) {
+   if (defined $r) {
+      $self->{read_buffer} .= decode_utf8 ($r);
+      $self->handle_data (\$self->{read_buffer});
+   } else {
+      my $err2 = Net::SSLeay::get_error $self->{ssl}, $l;
+      if ($err2 == 2 || $err2 == 3) {
+         warn "READ RETRY $err2\n";
+         delete $self->{r};
+         $self->make_ssl_read_watcher ($err2 == 2 ? 'r' : 'w');
+         return;
+      }
+
+      if ($! != Errno::EAGAIN
+          or my $err = Net::SSLeay::ERR_get_error) {
+
          $self->{disconnect_cb}->($self->{host}, $self->{port},
-            "unexpected EOF from server (ssl) '$self->{host}:$self->{port}'");
+            sprintf (
+               "Error while reading from server '$self->{host}:$self->{port}':"
+               ."(%d|%s|%s)",
+               $err2, (Net::SSLeay::ERR_error_string $err), "$!")
+         );
          $self->end_sockets;
          return;
-
-      } else {
-         my $err2 = Net::SSLeay::get_error $self->{ssl}, $l;
-         #d# warn "read err[$err2]\n"; $self->dumpbio;
-         if ($err2 == 2 || $err2 == 3) {
-            delete $self->{r};
-            $self->make_ssl_read_watcher ($err2 == 2 ? 'r' : 'w');
-            return;
-         }
-
-         if ($! != Errno::EAGAIN
-             or my $err = Net::SSLeay::ERR_get_error) {
-
-            $self->{disconnect_cb}->($self->{host}, $self->{port},
-               sprintf (
-                  "Error while reading from server '$self->{host}:$self->{port}':"
-                  ."(%d|%s|%s)",
-                  $err2, (Net::SSLeay::ERR_error_string $err), "$!")
-            );
-            $self->end_sockets;
-            return;
-         }
       }
-   } else {
-      $self->{read_buffer} .= decode_utf8 ($self->{ssl_read_data});
-      $self->handle_data (\$self->{read_buffer});
-      $self->{ssl_read_data} = "";
    }
-
-}
-
-sub make_ssl_read_watcher {
-   my ($self, $poll) = @_;
-   return if $self->{r};
-
-   $poll ||= 'r';
-   $self->{r} =
-      AnyEvent->io (poll => $poll, fh => $self->{socket}, cb => sub {
-         #d# warn "read cb [$poll]\n";
-         $self->try_ssl_read;
-      });
-}
-
-sub make_ssl_write_watcher {
-   my ($self, $poll) = @_;
-   return if $self->{w};
-
-   $poll ||= 'w';
-   $self->{w} =
-      AnyEvent->io (poll => $poll, fh => $self->{socket}, cb => sub {
-         #warn "write cb [$poll]\n";
-         $self->try_ssl_write;
-         1;
-      });
 }
 
 sub write_data {
@@ -268,12 +197,12 @@ sub write_data {
    #return unless $self->{r};
 
    my $cl = $self->{socket};
-   $self->{write_buffer} .= $data;
+   $self->{write_buffer} .= $self->{ssl_enabled} ? encode_utf8 ($data) : $data;
 
    unless ($self->{w}) {
-      if (not $self->{ssl_enabled}) {
-         $self->{w} =
-            AnyEvent->io (poll => 'w', fh => $cl, cb => sub {
+      $self->{w} =
+         AnyEvent->io (poll => 'w', fh => $cl, cb => sub {
+            if (not $self->{ssl_enabled}) {
                if (my $data = $self->{write_buffer}) {
                   my $len = syswrite $cl, $data;
                   unless ($len) {
@@ -293,16 +222,33 @@ sub write_data {
                   $self->debug_wrote_data (substr $self->{write_buffer}, 0, $len);
                   $self->{write_buffer} = substr $self->{write_buffer}, $len;
                }
-            });
-
-      } else {
-         unless ($self->{ssl_out_buffer}) {
-            $self->{ssl_out_buffer} = encode_utf8 ($self->{write_buffer});
-            $self->{write_buffer} = "";
-            $self->make_ssl_write_watcher;
-         }
-      }
+            } else {
+               $self->try_ssl_write;
+            }
+         });
    }
+}
+
+sub make_ssl_read_watcher {
+   my ($self, $poll) = @_;
+   return if $self->{r};
+
+   $poll ||= 'r';
+   $self->{r} =
+      AnyEvent->io (poll => $poll, fh => $self->{socket}, cb => sub {
+         $self->try_ssl_read;
+      });
+}
+
+sub make_ssl_write_watcher {
+   my ($self, $poll) = @_;
+   return if $self->{w};
+
+   $poll ||= 'w';
+   $self->{w} =
+      AnyEvent->io (poll => $poll, fh => $self->{socket}, cb => sub {
+         $self->try_ssl_write;
+      });
 }
 
 sub enable_ssl {
@@ -318,7 +264,8 @@ sub enable_ssl {
    $self->{w} = undef;
 
    $self->{ctx} = Net::SSLeay::CTX_new ();
-   Net::SSLeay::CTX_set_mode($self->{ctx}, 1);
+   # enable SSL_MODE_ENABLE_PARTIAL_WRITE and SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER
+   Net::SSLeay::CTX_set_mode($self->{ctx}, 1 | 2);
    $self->{ssl} = Net::SSLeay::new ($self->{ctx});
 
    Net::SSLeay::set_fd ($self->{ssl}, fileno $self->{socket});
@@ -328,7 +275,6 @@ sub enable_ssl {
    binmode $self->{socket}, ":bytes";
 
    $self->{ssl_read_data} = "";
-
    $self->make_ssl_read_watcher;
 }
 

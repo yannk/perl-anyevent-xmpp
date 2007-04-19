@@ -74,21 +74,17 @@ to give the client writers enough freedom.
 =head1 A note about TLS
 
 This module also supports TLS, as the specification of XMPP requires an
-implementation to support TLS. This module also needs a very recent version of
-L<Net::SSLeay> which has the functions L<Net::SSLeay::write_nb> and
-L<Net::SSLeay::read_nb>. Those functions are required for non-blocking I/O with TLS.
-
-Unfortunately the implementation of TLS with non-blocking sockets was not as easy as i
-expected. I needed to extend L<Net::SSLeay> to provide read and write functions
-which supported retries and i also needed some more complicated approach in handling
-ready states of the sockets.
+implementation to support TLS.
 
 There are maybe still some bugs in the handling of TLS in L<Net::XMPP2::Connection>.
-So keep an eye on TLS with this module and please inform with a detailed bug report
-if you run into any problems. As i use this module myself i don't expect TLS to be
-completly broken, but it might break under different circumstances than i have here.
-Those circumstances might be a different load of data pumped through the TLS
-connection.
+So keep an eye on TLS with this module. If you encounter any problems it would be
+very helpful if you could debug them or at least send me a detailed report on how
+to reproduce the problem.
+
+(As I use this module myself I don't expect TLS to be completly broken, but it
+might break under different circumstances than I have here.  Those
+circumstances might be a different load of data pumped through the TLS
+connection.)
 
 I mainly expect problems where aviable data isn't properly read from the socket
 or written to it. You might want to take a look at the C<debug_send> and C<debug_recv>
