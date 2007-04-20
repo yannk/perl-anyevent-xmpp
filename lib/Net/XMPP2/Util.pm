@@ -2,6 +2,9 @@ package Net::XMPP2::Util;
 use strict;
 use Encode;
 use Net::LibIDN qw/idn_prep_name idn_prep_resource idn_prep_node/;
+require Exporter;
+our @EXPORT_OK = qw/stringprep_jid split_jid prep_bare_jid/;
+our @ISA = qw/Exporter/;
 
 =head1 NAME
 

@@ -53,13 +53,13 @@ sub touch_jid {
 sub set_presence {
    my ($self, $jid, %data) = @_;
    $self->touch_jid ($jid);
-   $self->get_contact ($jid)->set_presence ($jid, %data);
+   $self->get_contact ($jid)->set_presence ($jid, %data)
 }
 
 sub set_contact {
    my ($self, $jid, %data) = @_;
    $self->touch_jid ($jid);
-   $self->get_contact ($jid)->_set (%data);
+   $self->get_contact ($jid)->_set (%data)
 }
 
 =head2 get_contact ($jid)
@@ -93,9 +93,7 @@ C<get_contacts_off_roster> method. See below.
 
 sub get_contacts {
    my ($self) = @_;
-   grep {
-      $_->subscription && $_->subscription ne ''
-   } values %{$self->{contacts}}
+   grep { $_->is_on_roster } values %{$self->{contacts}}
 }
 
 =head2 get_contacts_off_roster
@@ -111,9 +109,7 @@ above.
 
 sub get_contacts_off_roster {
    my ($self) = @_;
-   grep {
-      not ($_->subscription) || $_->subscription eq ''
-   } values %{$self->{contacts}}
+   grep { not $_->is_on_roster } values %{$self->{contacts}}
 }
 
 =head2 debug_dump

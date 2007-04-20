@@ -37,6 +37,7 @@ sub new {
 sub _set {
    my ($self, %data) = @_;
    $self->{$_} = $data{$_} for keys %data;
+   $self
 }
 
 sub remove_presence {
@@ -81,12 +82,15 @@ sub get_presences { values %{$_[0]->{presences}} }
 
 sub set_presence {
    my ($self, $jid, %data) = @_;
+   my $old;
    if ($data{type} eq 'unavailable') {
-      $self->remove_presence ($jid);
+      $old = $self->remove_presence ($jid);
    } else {
       my $p = $self->touch_presence ($jid);
+      $old = $p->clone;
       $p->_set (%data);
    }
+   $old
 }
 
 =head2 groups
@@ -117,6 +121,19 @@ Returns the (nick)name of this contact.
 
 sub name {
    $_[0]->{name}
+}
+
+=head2 is_on_roster ()
+
+Returns 1 if this is a contact that is officially on the
+roster and not just a contact we've received presence information
+for.
+
+=cut
+
+sub is_on_roster {
+   my ($self) = @_;
+   $self->{subscription} && $self->{subscription} ne ''
 }
 
 =head2 subscription

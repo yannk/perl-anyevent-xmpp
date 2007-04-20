@@ -132,7 +132,6 @@ sub try_ssl_write {
       } else {
          my $err2 = Net::SSLeay::get_error $self->{ssl}, $l;
          if ($err2 == 2 || $err2 == 3) {
-            warn "WRITE RETRY $err2\n";
             delete $self->{w};
             $self->make_ssl_write_watcher ($err2 == 2 ? 'r' : 'w');
             return;
@@ -153,9 +152,7 @@ sub try_ssl_write {
    } else {
       $self->debug_wrote_data (substr $self->{write_buffer}, 0, $l);
       $self->{write_buffer} = substr $self->{write_buffer}, $l;
-      warn "WROTE[$l][$self->{write_buffer}]\n";
       if (length ($self->{write_buffer}) <= 0) {
-         warn "DONE WRITING\n";
          delete $self->{w};
       }
    }
@@ -258,14 +255,16 @@ sub enable_ssl {
 
    $self->{ssl_enabled} = 1;
 
-   warn "START TLS!\n";
+   #d# warn "START TLS!\n";
 
    $self->{r} = undef;
    $self->{w} = undef;
 
    $self->{ctx} = Net::SSLeay::CTX_new ();
+
    # enable SSL_MODE_ENABLE_PARTIAL_WRITE and SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER
    Net::SSLeay::CTX_set_mode($self->{ctx}, 1 | 2);
+
    $self->{ssl} = Net::SSLeay::new ($self->{ctx});
 
    Net::SSLeay::set_fd ($self->{ssl}, fileno $self->{socket});

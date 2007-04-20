@@ -4,10 +4,11 @@ use AnyEvent;
 use IO::Socket::INET;
 use Net::XMPP2::Parser;
 use Net::XMPP2::Writer;
-use Net::XMPP2::Util;
+use Net::XMPP2::Util qw/split_jid/;
 use Net::XMPP2::Event;
 use Net::XMPP2::SimpleConnection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Error;
 use Net::DNS;
 
 our @ISA = qw/Net::XMPP2::SimpleConnection Net::XMPP2::Event/;
@@ -54,6 +55,11 @@ This should be the language of the human readable contents that
 will be transmitted over the stream. The default will be 'en'.
 
 Please look in RFC 3066 how C<$tag> should look like.
+
+=item jid => $jid
+
+This can be used to set the settings C<username>, C<domain>
+(and optionally C<resource>) from a C<$jid>.
 
 =item resource => $resource
 
@@ -130,6 +136,13 @@ sub new {
       delete $self->{ssl_enabled};
       $self->event (disconnect => $host, $port, $message);
    };
+
+   if ($self->{jid}) {
+      my ($user, $host, $res) = split_jid ($self->{jid});
+      $self->{username} = $user;
+      $self->{domain}   = $host;
+      $self->{resource} = $res if defined $res;
+   }
 
    for (qw/username password domain/) {
       die "No '$_' argument given to new, but '$_' is required\n"
@@ -270,7 +283,7 @@ sub handle_stanza {
    }
 }
 
-=head2 init ($domain)
+=head2 init ()
 
 Initiate the XML stream.
 
@@ -279,6 +292,18 @@ Initiate the XML stream.
 sub init {
    my ($self) = @_;
    $self->{writer}->send_init_stream ($self->{language}, $self->{domain});
+}
+
+=head2 is_connected ()
+
+Returns true if the connection is still connected and stanzas can be
+sent.
+
+=cut
+
+sub is_connected {
+   my ($self) = @_;
+   $self->{authenticated}
 }
 
 =head2 send_iq ($type, $create_cb, $result_cb, %attrs)
@@ -294,32 +319,9 @@ stanza contents.
 
 If the IQ resulted in a stanza error the second argument to C<$result_cb> will
 be C<undef> (if the error type was not 'continue') and the third argument will
-be a Net::XMPP2::Node containg the IQ error stanza. And the fourth argument
-will be a array reference with following contents:
+be a L<Net::XMPP2::Error::IQ> object.
 
 This method returns the newly generated id for this iq request.
-
-=over 4
-
-=item index 0: error type
-
-This will be one of: 'cancel', 'continue', 'modify', 'auth' and 'wait'.
-
-=item index 1: error condition element
-
-This might be undefined if other XMPP speakers don't play nice i guess.
-
-=item index 2: error text
-
-This will be the human readable form of the error which is maybe undef if
-not supplied.
-
-=item index 3: error code
-
-If the error element had an 'code' attribute it will be put here,
-the RFC says that this is for backward compatibility :)
-
-=back
 
 =cut
 
@@ -389,8 +391,8 @@ sub handle_iq {
    } elsif ($type eq 'error') {
       if (my $cb = delete $self->{iqs}->{$node->attr ('id')}) {
 
-         my $error = $self->filter_error_stanza ($node);
-         $cb->(($error->[0] eq 'continue' ? $node : undef), $node, $error);
+         my $error = Net::XMPP2::Error::IQ->new (node => $node);
+         $cb->(($error->type eq 'continue' ? $node : undef), $error);
       }
 
    } else {
@@ -404,39 +406,6 @@ sub handle_iq {
          $self->reply_iq_error ($node, undef, 'feature-not-implemented', @from);
       }
    }
-}
-
-sub filter_error_stanza {
-   my ($self, $node) = @_;
-
-   my @error;
-   my ($err) = $node->find_all ([qw/client error/]);
-   $error[0] = $err->attr ('type');
-   $error[3] = $err->attr ('code');
-
-   if ($err) {
-      if (my ($txt) = $err->find_all ([qw/stanzas text/])) {
-         $error[2] = $txt->text;
-      }
-      for my $er (
-        qw/bad-request conflict feature-not-implemented forbidden
-           gone internal-server-error item-not-found jid-malformed
-           not-acceptable not-allowed not-authorized payment-required
-           recipient-unavailable redirect registration-required
-           remote-server-not-found remote-server-timeout resource-constraint
-           service-unavailable subscription-required undefined-condition
-           unexpected-request/)
-      {
-         if (my ($el) = $err->find_all ([stanzas => $er])) {
-            $error[1] = $el;
-            last;
-         }
-      }
-   } else {
-      warn "no error element found in error stanza!";
-   }
-
-   return \@error
 }
 
 sub handle_stream_features {
@@ -474,33 +443,9 @@ sub handle_sasl_success {
 
 sub handle_error {
    my ($self, $node) = @_;
-   my @txt = $node->find_all ([qw/stream text/]);
-   my $error;
-   for my $er (
-      qw/bad-format bad-namespace-prefix conflict connection-timeout host-gone
-         host-unknown improper-addressing internal-server-error invalid-from
-         invalid-id invalid-namespace invalid-xml not-authorized policy-violation
-         remote-connection-failed resource-constraint restricted-xml
-         see-other-host system-shutdown undefined-condition unsupported-stanza-type
-         unsupported-version xml-not-well-formed/)
-   {
-      for ($node->nodes) {
-         if ($node->eq (streams => $er)) {
-            $error = $_->name;
-            last
-         }
-      }
-   }
-   unless ($error) {
-      warn "got undefined error stanza, trying to find any undefined error...";
-      for ($node->nodes) {
-         if ($node->eq_ns ('streams')) {
-            $error = $node->name;
-         }
-      }
-   }
-   $self->event (stream_error     => $error, (@txt ? $txt[0]->text : ''));
-   $self->event (stream_error_xml => $node);
+   my $error = Net::XMPP2::Error::Stream->new (node => $node);
+
+   $self->event (stream_error     => $error);
    $self->{writer}->send_end_of_stream;
 }
 
@@ -571,12 +516,11 @@ sub do_rebind {
             }
          },
          sub {
-            my ($ret_iq, $err_iq, $err) = @_;
+            my ($ret_iq, $error, $err) = @_;
 
             if ($err) {
-               my ($res) = $err_iq->find_all ([qw/bind bind/], [qw/bind resource/]);
-               $self->event (bind_error => $err->[0], ($res ? $res : $self->{resource}));
-               $self->event (bind_error_xml => $err_iq);
+               my ($res) = $error->xml_node ()->find_all ([qw/bind bind/], [qw/bind resource/]);
+               $self->event (bind_error => $error, ($res ? $res : $self->{resource}));
 
             } else {
                my @jid = $ret_iq->find_all ([qw/bind bind/], [qw/bind jid/]);
@@ -639,40 +583,23 @@ resources have been bound) and is ready for transmitting regular stanzas.
 
 C<$jid> is the bound jabber id.
 
-=item stream_error => $error, $text
+=item stream_error => $error
 
 This event is sent if a XML stream error occured. C<$error>
-will be the machine readable error string, which is one of:
+is a L<Net::XMPP2::Error::Stream> object.
 
-   bad-format bad-namespace-prefix conflict connection-timeout host-gone
-   host-unknown improper-addressing internal-server-error invalid-from
-   invalid-id invalid-namespace invalid-xml not-authorized policy-violation
-   remote-connection-failed resource-constraint restricted-xml
-   see-other-host system-shutdown undefined-condition unsupported-stanza-type
-   unsupported-version xml-not-well-formed
-
-And C<$text> is an optional human readable text.
-
-=item stream_error_xml => $node
-
-This is sent when a XML stream error occurs. C<$node>
-is the XML node of the 'error' stanza and will be a L<Net::XMPP2::Node>
-object.
-
-=item bind_error => $error_name, $resource
+=item bind_error => $error, $resource
 
 This event is generated when the stream was unable to bind to
-any or the in C<new> specified resource. C<$error_name>
-may be 'bad-request', 'not-allowed' or 'conflict'.
+any or the in C<new> specified resource. C<$error> is a L<Net::XMPP2::Error::IQ>
+object. C<$resource> is the errornous resource string or undef if none
+was received.
+
+The C<condition> of the C<$error> might be one of: 'bad-request',
+'not-allowed' or 'conflict'.
 
 Node: this is untested, i couldn't get the server to send a bind error
 to test this.
-
-=item bind_error_xml => $iq_error_node
-
-This event is generated when the stream was unable to bind to
-any or the in C<new> specified resource. C<$iq_error_node> contains
-the IQ error L<Net::XMPP2::Node>.
 
 =item connect => $host, $port
 

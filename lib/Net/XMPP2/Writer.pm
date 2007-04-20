@@ -318,7 +318,7 @@ sub _generate_key_xmls {
    my ($w, $key, $value) = @_;
    if (ref ($value) eq 'HASH') {
       for (keys %$value) {
-         $w->startTag ($key, [xmpp_ns ('xml'), 'lang'] => $_);
+         $w->startTag ($key, ($_ ne '' ? ([xmpp_ns ('xml'), 'lang'] => $_) : ()));
          $w->characters ($value->{$_});
          $w->endTag;
       }

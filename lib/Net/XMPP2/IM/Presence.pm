@@ -9,6 +9,18 @@ sub new {
    bless { @_ }, $class;
 }
 
+sub clone {
+   my ($self) = @_;
+   my $p = $self->new (connection => $self->{connection});
+   $p->_set (
+      show     => $self->{show},
+      jid      => $self->{jid},
+      priority => $self->{priority},
+      status   => $self->{status},
+   );
+   $p
+}
+
 sub _set {
    my ($self, %data) = @_;
    $self->{show}     = $data{show} || '';

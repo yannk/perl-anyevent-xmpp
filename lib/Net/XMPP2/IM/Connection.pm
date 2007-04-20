@@ -136,20 +136,23 @@ sub store_roster {
    my ($query) = $node->find_all ([qw/roster query/]);
    return unless $query;
 
+   my @upd;
+
    for my $item ($query->find_all ([qw/roster item/])) {
       my ($jid, $name, $subscription) =
          ($item->attr ('jid'), $item->attr ('name'), $item->attr ('subscription'));
       my @groups;
       push @groups, $_->text for $item->find_all ([qw/roster group/]);
 
-      $self->{roster}->set_contact ($jid,
-         name         => $name,
-         subscription => $subscription,
-         groups       => [ @groups ]
-      );
+      push @upd,
+         $self->{roster}->set_contact ($jid,
+            name         => $name,
+            subscription => $subscription,
+            groups       => [ @groups ]
+         );
    }
 
-   $self->event (roster_update => $self->{roster});
+   $self->event (roster_update => $self->{roster}, \@upd);
 }
 
 sub get_roster {
@@ -179,14 +182,17 @@ sub handle_presence {
    $stati{$_->attr ('lang') || ''} = $_->text
       for $node->find_all ([qw/client status/]);
 
-   $self->{roster}->set_presence ($jid,
-      show     => $show     ? $show->text     : undef,
-      priority => $priority ? $priority->text : undef,
-      type     => $type,
-      status   => \%stati,
-   );
+   my $old =
+      $self->{roster}->set_presence ($jid,
+         show     => $show     ? $show->text     : undef,
+         priority => $priority ? $priority->text : undef,
+         type     => $type,
+         status   => \%stati,
+      );
 
-   $self->event (presence_update => $self->{roster}, $self->{roster}->get_contact ($jid))
+   my $new = $self->{roster}->get_contact ($jid)->get_presence ($jid);
+
+   $self->event (presence_update => $self->{roster}, $self->{roster}->get_contact ($jid), $old, $new)
 }
 
 sub handle_message {
@@ -241,6 +247,31 @@ If an error happened during establishment of the session this
 event will be generated. C<$erriq> is the L<Net::XMPP2::Node> object
 of the error iq tag and C<$errar> is an error array as described in
 L<Net::XMPP2::Connection::send_iq> for error responses for iq requests.
+
+=item roster_update => $roster, $contacts
+
+This event is emitted when a roster update has been received.
+C<$roster> is the L<Net::XMPP2::IM::Roster> object you get by
+calling C<get_roster>.
+C<$contacts> is an array reference of L<Net::XMPP2::IM::Contact> objects
+which have changed.
+
+=item presence_update => $roster, $contact, $old_presence, $new_presence
+
+This event is emitted when the presence of a contact has changed.
+C<$roster> is the L<Net::XMPP2::IM::Roster> object you get by
+calling C<get_roster>.
+C<$contact> is the L<Net::XMPP2::IM::Contact> object which presence status
+has changed.
+C<$old_presence> is a L<Net::XMPP2::IM::Presence> object which represents the
+presence prior to the change.
+C<$new_presence> is a L<Net::XMPP2::IM::Presence> object which represents the
+presence after to the change.
+
+=item message => $msg
+
+This event is emitted when a message was received.
+C<$msg> is a L<Net::XMPP2::IM::Message> object.
 
 =back
 

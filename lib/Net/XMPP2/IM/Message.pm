@@ -163,6 +163,21 @@ sub make_reply {
    $msg
 }
 
+=head2 is_connected ()
+
+This method returns 1 when the message is "connected".
+That means: It returns 1 when you can call the C<send> method
+without a connection argument. (It will also return only 1 when
+the connection that is referenced by this message is still
+connected).
+
+=cut
+
+sub is_connected {
+   my ($self) = @_;
+   $self->{connection}->is_connected
+}
+
 =head2 send ([$connection])
 
 This method send this message. If C<$connection>
