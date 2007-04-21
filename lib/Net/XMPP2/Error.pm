@@ -184,7 +184,7 @@ sub string {
       $self->text
 }
 
-package Net::XMPP2::Error::IQ;
+package Net::XMPP2::Error::Stream;
 our @ISA = qw/Net::XMPP2::Error/;
 
 =head1 SUBCLASS
@@ -270,8 +270,7 @@ strings or some other string that has been discovered by a heuristic
 
 =cut
 
-sub text { $_[0]->{error_text} }
-
+sub name { $_[0]->{error_name} }
 
 =head3 text ()
 
@@ -287,6 +286,63 @@ sub string {
    sprintf "stream error: %s: %s",
       $self->name,
       $self->text
+}
+
+package Net::XMPP2::Error::SASL;
+our @ISA = qw/Net::XMPP2::Error/;
+
+=head1 SUBCLASS
+
+Net::XMPP2::Error::SASL - SASL authentication error
+
+=cut
+
+sub init {
+   my ($self) = @_;
+   my $node = $self->xml_node;
+
+   my $error;
+   for ($node->nodes) {
+      $error = $_->name;
+      last
+   }
+
+   $self->{error_cond} = $error;
+}
+
+=head3 xml_node ()
+
+Returns the L<Net::XMPP2::Node> object for this stream error.
+
+=cut
+
+sub xml_node {
+   $_[0]->{node}
+}
+
+=head3 condition ()
+
+Returns the error condition, which might be one of:
+
+   aborted
+   incorrect-encoding
+   invalid-authzid
+   invalid-mechanism
+   mechanism-too-weak
+   not-authorized
+   temporary-auth-failure
+
+=cut
+
+sub condition {
+   $_[0]->{error_cond}
+}
+
+sub string {
+   my ($self) = @_;
+
+   sprintf "sasl error: %s",
+      $self->condition
 }
 
 =head1 AUTHOR

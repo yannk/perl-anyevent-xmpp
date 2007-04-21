@@ -137,6 +137,11 @@ sub update_connections {
                $self->event (message => $acc, $msg);
                1
             },
+            sasl_error => sub {
+               my ($con, $error) = @_;
+               $self->event (sasl_error => $acc, $error);
+               1
+            },
             presence_update => sub {
                my ($con, $roster, $contact, $old, $new) = @_;
                $self->event (presence_update => $acc, $roster, $contact, $old, $new);

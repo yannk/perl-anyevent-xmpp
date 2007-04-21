@@ -1,6 +1,9 @@
 Net::XMPP2 missing functionality to be RFC 3920 conform:
+   - improve error handling for SASL to 
+     support retries as specified in RFC 3920.
+     (eg. by supporting a method sasl_retry() which takes
+      the changed credentials)
    - SRV record lookup: weight handling!
-   - errorhandling for TLS and SASL!
    - test Net::XMPP2::Error for bind_error and stream_error.
    later:
       - make dns resolution async!

@@ -77,14 +77,14 @@ sub connect {
 
    $self->set_noblock;
 
-   binmode $sock, ":utf8";
+   binmode $sock, ":raw";
 
    $self->{r} =
       AnyEvent->io (poll => 'r', fh => $sock, cb => sub {
          my $l = sysread $sock, my $data, 1024;
 
          if ($l) {
-            $self->{read_buffer} .= $data;
+            $self->{read_buffer} .= decode_utf8 $data;
             $self->handle_data (\$self->{read_buffer});
 
          } else {
@@ -194,7 +194,7 @@ sub write_data {
    #return unless $self->{r};
 
    my $cl = $self->{socket};
-   $self->{write_buffer} .= $self->{ssl_enabled} ? encode_utf8 ($data) : $data;
+   $self->{write_buffer} .= encode_utf8 ($data);
 
    unless ($self->{w}) {
       $self->{w} =

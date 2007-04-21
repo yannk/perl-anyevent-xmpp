@@ -112,6 +112,19 @@ sub get_contacts_off_roster {
    grep { not $_->is_on_roster } values %{$self->{contacts}}
 }
 
+=head2 subscribe ($jid)
+
+This method sends a subscription request to C<$jid>.
+If the optional C<$not_mutual> paramenter is true
+the subscription will not be mutual.
+
+=cut
+
+sub subscribe {
+   my ($self) = @_;
+   # FIXME / TODO
+}
+
 =head2 debug_dump
 
 This prints the roster and all it's contacts

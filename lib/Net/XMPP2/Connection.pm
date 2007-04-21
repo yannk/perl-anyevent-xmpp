@@ -266,18 +266,32 @@ sub handle_stanza {
       $self->{writer}->init;
       $self->{writer}->send_init_stream ($self->{language}, $self->{domain});
 
+   } elsif ($node->eq (tls => 'failure')) {
+      $self->event ('tls_error');
+      $self->disconnect ('TLS failure on TLS negotiation.');
+
    } elsif ($node->eq (sasl => 'challenge')) {
       $self->handle_sasl_challenge ($node);
+
    } elsif ($node->eq (sasl => 'success')) {
       $self->handle_sasl_success ($node);
+
+   } elsif ($node->eq (sasl => 'failure')) {
+      my $error = Net::XMPP2::Error::SASL->new (node => $node);
+      $self->event (sasl_error => $error);
+
    } elsif ($node->eq (client => 'iq')) {
       $self->handle_iq ($node);
+
    } elsif ($node->eq (client => 'message')) {
       $self->event (message_xml => $node);
+
    } elsif ($node->eq (client => 'presence')) {
       $self->event (presence_xml => $node);
+
    } elsif ($node->eq (stream => 'error')) {
       $self->handle_error ($node);
+
    } else {
       warn "Didn't understood stanza: '" . $node->name . "'";
    }
@@ -571,7 +585,7 @@ These events can be registered on with C<reg_cb>:
 
 =over 4
 
-=item stream_features_xml => $node
+=item stream_features => $node
 
 This event is sent when a stream feature (<features>) tag is received. C<$node> is the
 L<Net::XMPP2::Node> object that represents the <features> tag.
@@ -587,6 +601,15 @@ C<$jid> is the bound jabber id.
 
 This event is sent if a XML stream error occured. C<$error>
 is a L<Net::XMPP2::Error::Stream> object.
+
+=item tls_error
+
+This event is emitted when a TLS error occured on TLS negotiation.
+After this the connection will be disconnected.
+
+=item sasl_error => $error
+
+This event is emitted on SASL authentication error.
 
 =item bind_error => $error, $resource
 
