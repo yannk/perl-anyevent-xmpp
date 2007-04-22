@@ -90,11 +90,11 @@ sub send_session_iq {
       $w->emptyTag ([xmpp_ns ('session'), 'session']);
 
    }, sub {
-      my ($node, $errnode, $errar) = @_;
+      my ($node, $error) = @_;
       if ($node) {
          $self->init_connection;
       } else {
-         $self->event (session_error => $errnode, $errar); # TODO: make error obj
+         $self->event (session_error => $error); # TODO: make error obj
       }
    });
 }
@@ -105,13 +105,26 @@ sub init_connection {
    if ($self->{dont_retrieve_roster}) {
       $self->send_presence;
    } else {
-      $self->retrieve_roster (1);
+      $self->retrieve_roster (sub { $self->send_presence });
    }
    $self->event ('session_ready');
 }
 
+=head2 retrieve_roster ($cb)
+
+This method initiates a roster request. If you set C<dont_retrieve_roster>
+when creating this connection no roster was retrieved.
+You can do that with this method. The coderef in C<$cb> will be
+called after the roster was retrieved.
+
+The first argument of the callback in C<$cb> will be the roster
+and the second will be a L<Net::XMPP2::Error::IQ> object when
+an error occured while retrieving the roster.
+
+=cut
+
 sub retrieve_roster {
-   my ($self, $init) = @_;
+   my ($self, $cb) = @_;
 
    $self->send_iq (get => sub {
       my ($w) = @_;
@@ -119,39 +132,20 @@ sub retrieve_roster {
       $w->emptyTag ([xmpp_ns ('roster'), 'query']);
 
    }, sub {
-      my ($node, $errnode, $errar) = @_;
+      my ($node, $error) = @_;
       if ($node) {
          $self->store_roster ($node);
       } else {
-         $self->event (roster_error => $errnode, $errar); # TODO: make error obj
+         $self->event (roster_error => $error);
       }
 
-      $self->send_presence if $init;
+      $cb->($self, $self->{roster}, $error) if $cb
    });
 }
 
 sub store_roster {
    my ($self, $node) = @_;
-
-   my ($query) = $node->find_all ([qw/roster query/]);
-   return unless $query;
-
-   my @upd;
-
-   for my $item ($query->find_all ([qw/roster item/])) {
-      my ($jid, $name, $subscription) =
-         ($item->attr ('jid'), $item->attr ('name'), $item->attr ('subscription'));
-      my @groups;
-      push @groups, $_->text for $item->find_all ([qw/roster group/]);
-
-      push @upd,
-         $self->{roster}->set_contact ($jid,
-            name         => $name,
-            subscription => $subscription,
-            groups       => [ @groups ]
-         );
-   }
-
+   my @upd = $self->{roster}->update ($node);
    $self->event (roster_update => $self->{roster}, \@upd);
 }
 
@@ -165,34 +159,15 @@ sub handle_iq_set {
 
    if ($node->find_all ([qw/roster query/])) {
       $self->store_roster ($node);
-      $self->reply_iq_result ($node, sub {});
+      $self->reply_iq_result ($node);
+      $$rhandled = 1
    }
 }
 
 sub handle_presence {
    my ($self, $node) = @_;
-
-   my $type       = $node->attr ('type');
-   my ($show)     = $node->find_all ([qw/client show/]);
-   my ($priority) = $node->find_all ([qw/client priority/]);
-
-   my $jid = $node->attr ('from');
-
-   my %stati;
-   $stati{$_->attr ('lang') || ''} = $_->text
-      for $node->find_all ([qw/client status/]);
-
-   my $old =
-      $self->{roster}->set_presence ($jid,
-         show     => $show     ? $show->text     : undef,
-         priority => $priority ? $priority->text : undef,
-         type     => $type,
-         status   => \%stati,
-      );
-
-   my $new = $self->{roster}->get_contact ($jid)->get_presence ($jid);
-
-   $self->event (presence_update => $self->{roster}, $self->{roster}->get_contact ($jid), $old, $new)
+   my ($contact, $old, $new) = $self->{roster}->update_presence ($node);
+   $self->event (presence_update => $self->{roster}, $contact, $old, $new)
 }
 
 sub handle_message {
@@ -241,12 +216,11 @@ These additional events can be registered on with C<reg_cb>:
 This event is generated when the session has been fully established and
 can be used to send around messages and other stuff.
 
-=item session_error => $erriq, $errarr
+=item session_error => $error
 
 If an error happened during establishment of the session this
-event will be generated. C<$erriq> is the L<Net::XMPP2::Node> object
-of the error iq tag and C<$errar> is an error array as described in
-L<Net::XMPP2::Connection::send_iq> for error responses for iq requests.
+event will be generated. C<$error> will be an L<Net::XMPP2::Error::IQ>
+error object.
 
 =item roster_update => $roster, $contacts
 
@@ -254,7 +228,14 @@ This event is emitted when a roster update has been received.
 C<$roster> is the L<Net::XMPP2::IM::Roster> object you get by
 calling C<get_roster>.
 C<$contacts> is an array reference of L<Net::XMPP2::IM::Contact> objects
-which have changed.
+which have changed. If a contact was removed it will return 'remove'
+when you call the C<subscription> method on it.
+
+=item roster_error => $error
+
+If an error happened during retrival of the roster this event will
+be generated.
+C<$error> will be an L<Net::XMPP2::Error::IQ> error object.
 
 =item presence_update => $roster, $contact, $old_presence, $new_presence
 

@@ -12,20 +12,29 @@ sub new {
 sub clone {
    my ($self) = @_;
    my $p = $self->new (connection => $self->{connection});
-   $p->_set (
-      show     => $self->{show},
-      jid      => $self->{jid},
-      priority => $self->{priority},
-      status   => $self->{status},
-   );
+   $p->{$_} = $self->{$_} for qw/show jid priority status/;
    $p
 }
 
-sub _set {
-   my ($self, %data) = @_;
-   $self->{show}     = $data{show} || '';
-   $self->{priority} = $data{priority};
-   $self->{status}   = $data{status};
+sub update {
+   my ($self, $node) = @_;
+
+   my $type       = $node->attr ('type');
+   my ($show)     = $node->find_all ([qw/client show/]);
+   my ($priority) = $node->find_all ([qw/client priority/]);
+
+   my %stati;
+   $stati{$_->attr ('lang') || ''} = $_->text
+      for $node->find_all ([qw/client status/]);
+
+   my $old = $self->clone;
+
+   $self->{show}     = $show     ? $show->text     : undef;
+   $self->{priority} = $priority ? $priority->text : undef;
+   $self->{status}   = \%stati;
+   $self->{type}     = $type;
+
+   $old
 }
 
 sub jid { $_[0]->{jid} }

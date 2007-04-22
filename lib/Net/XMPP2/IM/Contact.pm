@@ -1,6 +1,7 @@
 package Net::XMPP2::IM::Contact;
 use strict;
 use Net::XMPP2::Util;
+use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::IM::Presence;
 use Net::XMPP2::IM::Message;
 
@@ -34,10 +35,151 @@ sub new {
    bless { @_ }, $class;
 }
 
-sub _set {
-   my ($self, %data) = @_;
-   $self->{$_} = $data{$_} for keys %data;
+=head2 send_update ($cb, %upd)
+
+This method updates a contact. If the request is finished
+it will call C<$cb>. If it resulted in an error the first argument
+of that callback will be a L<Net::XMPP2::Error::IQ> object.
+
+The C<%upd> hash should have one of the following keys and defines
+what parts of the contact to update:
+
+=over 4
+
+=item name => $name
+
+Updates the name of the contact. C<$name> = '' erases the contact.
+
+=item add_group => $groups
+
+Addes the contact to the groups in the arrayreference C<$groups>.
+
+=item remove_group => $groups
+
+Removes the contact from the groups in the arrayreference C<$groups>.
+
+=item groups => $groups
+
+This sets the groups of the contact. C<$groups> should be an array reference
+of the groups.
+
+=back
+
+=cut
+
+sub send_update {
+   my ($self, $cb, %upd) = @_;
+
+   if ($upd{groups}) {
+      $self->{groups} = $upd{groups};
+   }
+   for my $g (@{$upd{add_group} || []}) {
+      push @{$self->{groups}}, $g unless grep { $g eq $_ } $self->groups;
+   }
+   for my $g (@{$upd{remove_group} || []}) {
+      push @{$self->{groups}}, grep { $g ne $_ } $self->groups;
+   }
+
+   $self->{connection}->send_iq (
+      set => sub {
+         my ($w) = @_;
+         $w->addPrefix (xmpp_ns ('roster'), '');
+         $w->startTag ([xmpp_ns ('roster'), 'query']);
+            $w->startTag ([xmpp_ns ('roster'), 'item'], 
+               jid => $self->jid,
+               (defined $upd{name} ? (name => $upd{name}) : ())
+            );
+               for ($self->groups) {
+                  $w->startTag ([xmpp_ns ('roster'), 'group']);
+                  $w->characters ($_);
+                  $w->endTag;
+               }
+            $w->endTag;
+         $w->endTag;
+      },
+      sub {
+         my ($node, $error) = @_;
+         $cb->($error) if $cb
+      }
+   );
+}
+
+=head2 send_subscribe ()
+
+This method sends this contact a subscription request.
+
+=cut
+
+sub send_subscribe {
+   my ($self) = @_;
+   $self->{connection}->send_presence ('subscribe', undef, to => $self->jid);
+}
+
+=head2 send_unsubscribe ()
+
+This method sends this contact a unsubscription request.
+
+=cut
+
+sub send_unsubscribe {
+   my ($self) = @_;
+   $self->{connection}->send_presence ('unsubscribe', undef, to => $self->jid);
+}
+
+=head2 update ($item)
+
+This method wants a L<Net::XMPP2::Node> in C<$item> which
+should be a roster item received from the server. The method will
+update the contact accordingly and return it self.
+
+=cut
+
+sub update {
+   my ($self, $item) = @_;
+
+   my ($jid, $name, $subscription, $ask) =
+      (
+         $item->attr ('jid'),
+         $item->attr ('name'),
+         $item->attr ('subscription'),
+         $item->attr ('ask')
+      );
+
+   $self->{name}         = $name;
+   $self->{subscription} = $subscription;
+   $self->{groups}       = [ map { $_->text } $item->find_all ([qw/roster group/]) ];
+   $self->{ask}          = $ask;
+
    $self
+}
+
+=head2 update_presence ($presence)
+
+This method updates the presence of contacts on the roster.
+C<$presence> must be a L<Net::XMPP2::Node> object and should be
+a presence packet.
+
+=cut
+
+sub update_presence {
+   my ($self, $node) = @_;
+
+   my $type = $node->attr ('type');
+   my $jid  = $node->attr ('from');
+   # XXX: should check whether C<$jid> is nice JID.
+
+   $self->touch_presence ($jid);
+
+   my $old;
+   my $new;
+   if ($type eq 'unavailable') {
+      $old = $self->remove_presence ($jid);
+   } else {
+      $old = $self->touch_presence ($jid)->update ($node);
+      $new = $self->touch_presence ($jid);
+   }
+
+   ($self, $old, $new)
 }
 
 sub remove_presence {
@@ -79,19 +221,6 @@ L<Net::XMPP2::IM::Presence> objects.
 =cut
 
 sub get_presences { values %{$_[0]->{presences}} }
-
-sub set_presence {
-   my ($self, $jid, %data) = @_;
-   my $old;
-   if ($data{type} eq 'unavailable') {
-      $old = $self->remove_presence ($jid);
-   } else {
-      my $p = $self->touch_presence ($jid);
-      $old = $p->clone;
-      $p->_set (%data);
-   }
-   $old
-}
 
 =head2 groups
 
@@ -143,10 +272,27 @@ can be one of:
 
    'none', 'to', 'from', 'both'
 
+If the contact isn't on the roster anymore this method
+returns:
+
+   'remove'
+
 =cut
 
 sub subscription {
    $_[0]->{subscription}
+}
+
+=head2 subscription_pending
+
+Returns true if this contact has a pending subscription.
+That means: the contact has to aknowledge the subscription.
+
+=cut
+
+sub subscription_pending {
+   my ($self) = @_;
+   $self->{ask}
 }
 
 sub make_message {

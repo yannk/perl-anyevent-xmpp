@@ -341,7 +341,7 @@ sub send_presence {
 
    my %fattrs =
       map { $_ => $attrs{$_} }
-         grep { my $k = $_; not grep { $k ne $_ } qw/show priority status/ }
+         grep { my $k = $_; not grep { $k eq $_ } qw/show priority status/ }
             keys %attrs;
 
    if (defined $create_cb) {
@@ -410,7 +410,7 @@ sub send_message {
 
    my %fattrs =
       map { $_ => $attrs{$_} }
-         grep { my $k = $_; not grep { $k ne $_ } qw/subject body thread/ }
+         grep { my $k = $_; not grep { $k eq $_ } qw/subject body thread/ }
             keys %attrs;
 
    if (defined $create_cb) {

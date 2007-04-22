@@ -1,6 +1,8 @@
 package Net::XMPP2::IM::Roster;
 use Net::XMPP2::IM::Contact;
 use Net::XMPP2::IM::Presence;
+use Net::XMPP2::Util qw/prep_bare_jid/;
+use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use strict;
 
 =head1 NAME
@@ -35,9 +37,58 @@ sub new {
    bless { @_ }, $class;
 }
 
+sub update {
+   my ($self, $node) = @_;
+
+   my ($query) = $node->find_all ([qw/roster query/]);
+   return unless $query;
+
+   my @upd;
+
+   for my $item ($query->find_all ([qw/roster item/])) {
+      my $jid = $item->attr ('jid');
+
+      my $sub = $item->attr ('subscription'),
+      $self->touch_jid ($jid);
+
+      if ($sub eq 'remove') {
+         my $c = $self->remove_contact ($jid);
+         $c->update ($item);
+      } else {
+         push @upd, $self->get_contact ($jid)->update ($item);
+      }
+   }
+
+   @upd
+}
+
+sub update_presence {
+   my ($self, $node) = @_;
+   my $jid  = $node->attr ('from');
+   # XXX: should check whether C<$jid> is nice JID.
+
+   my $type = $node->attr ('type');
+
+   if ($type eq 'subscribe') {
+   } elsif ($type eq 'subscribed') {
+      # FIXME: Implement this!!
+      if (my $c = $self->get_contact ($jid)) {
+         my $doit = 1;
+         $self->{connection}->event (subscribed_confirm => $self, $c, \$doit);
+         if ($doit) {
+         } else {
+         }
+      }
+   } elsif ($type eq 'unsubscribe') {
+   } elsif ($type eq 'unsubscribed') {
+   } else {
+      $self->touch_jid ($jid)->update_presence ($node)
+   }
+}
+
 sub touch_jid {
    my ($self, $jid) = @_;
-   my $bjid = Net::XMPP2::Util::prep_bare_jid ($jid);
+   my $bjid = prep_bare_jid ($jid);
 
    unless ($self->{contacts}->{$bjid}) {
       $self->{contacts}->{$bjid} =
@@ -50,16 +101,72 @@ sub touch_jid {
    $self->{contacts}->{$bjid}
 }
 
-sub set_presence {
-   my ($self, $jid, %data) = @_;
-   $self->touch_jid ($jid);
-   $self->get_contact ($jid)->set_presence ($jid, %data)
+sub remove_contact {
+   my ($self, $jid) = @_;
+   my $bjid = prep_bare_jid ($jid);
+   delete $self->{contacts}->{$bjid};
 }
 
-sub set_contact {
-   my ($self, $jid, %data) = @_;
-   $self->touch_jid ($jid);
-   $self->get_contact ($jid)->_set (%data)
+=head2 new_contact ($jid, $name, $groups, $cb)
+
+This method sends a roster item creation request to
+the server. C<$jid> is the JID of the contact.
+C<$name> is the nickname of the contact, which can be
+undef. C<$groups> should be a array reference containing
+the groups this contact should be in.
+
+The callback in C<$cb> will be called when the creation
+is finished. The first argument will be an L<Net::XMPP2::Error::IQ>
+object if the request resulted in an error.
+
+=cut
+
+sub new_contact {
+   my ($self, $jid, $name, $groups, $cb) = @_;
+
+   my $c = Net::XMPP2::IM::Contact->new (
+      connection => $self->{connection},
+      jid        => prep_bare_jid ($jid)
+   );
+   $c->send_update (
+       $cb,
+       (defined $name ? (name => $name) : ()),
+       groups => ($groups || [])
+   );
+}
+
+=head2 delete_contact ($jid, $cb)
+
+This method will send a request to the server to delete this contact
+from the roster. It will result in cancelling all subscriptions.
+
+C<$cb> will be called when the request was finished. The first argument
+to the callback might be a L<Net::XMPP2::Error::IQ> object if the
+request resulted in an error.
+
+=cut
+
+sub delete_contact {
+   my ($self, $jid, $cb) = @_;
+
+   $jid = prep_bare_jid $jid;
+
+   $self->{connection}->send_iq (
+      set => sub {
+         my ($w) = @_;
+         $w->addPrefix (xmpp_ns ('roster'), '');
+         $w->startTag ([xmpp_ns ('roster'), 'query']);
+            $w->emptyTag ([xmpp_ns ('roster'), 'item'], 
+               jid => $jid,
+               subscription => 'remove'
+            );
+         $w->endTag;
+      },
+      sub {
+         my ($node, $error) = @_;
+         $cb->($error) if $cb
+      }
+   );
 }
 
 =head2 get_contact ($jid)

@@ -11,10 +11,9 @@ Net::XMPP2 missing functionality to be RFC 3920 conform:
 
 Net::XMPP2::IM missing functionality to be RFC 3921 conform:
    - message and presence sending (mostly done?)
+      - handle subscriptions
    - message and presence receiving
    - 7.2.  Business Rules
-   - complete roster stuff
-   - handle subscriptions
 
 objectvies to look out for:
    - add high-level events together with low-level events which just

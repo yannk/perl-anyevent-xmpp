@@ -25,17 +25,42 @@ binmode STDOUT, ":utf8";
 my $j = AnyEvent->condvar;
 
 my $cl = Net::XMPP2::Client->new;
-$cl->add_account ('elmex@jabber.org/Net::XどなPP2', 'xxxxxxxx');
+#$cl->add_account ('elmex@jabber.org/Net::XどなPP2', 'xxxxxxxx');
+$cl->add_account ('elmor@jabber.org/Net::XどなPP2', 'xxxxxxxx');
 $cl->reg_cb (
    connected => sub {
-      $cl->send_message ("Hello!" => 'elmex@jabber.org');
+     # $cl->send_message ("Hello!" => 'elmex@jabber.org');
       0
+   },
+   roster_update => sub {
+      my ($cl, $acc, $roster, $contacts) = @_;
+      warn "ROSTER UPD\n";
+      $roster->debug_dump;
+      1
+   },
+   presence_update => sub {
+      my ($cl, $acc, $roster, $contact, $old, $new) = @_;
+      warn "PRESENCE UPD\n";
+      $roster->debug_dump;
+      1
    },
    sasl_error => sub {
       my ($cl, $acc, $error) = @_;
       print "SASL ERROR".$error->string."\n";
    }
 );
+
+$cl->reg_cb (roster_update => sub {
+   my ($cl, $acc, $roster, $contacts) = @_;
+
+  # $roster->new_contact ('elmex@jabber.org', 'Der elmex', ['ABC', 'TEst'], sub {
+  #    $roster->get_contact ('elmex@jabber.org')->send_subscribe;
+  #    $roster->delete_contact ('elmex@jabber.org');
+  # });
+
+   0
+});
+
 
 $cl->start;
 
