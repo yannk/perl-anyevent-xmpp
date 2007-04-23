@@ -231,6 +231,9 @@ C<$contacts> is an array reference of L<Net::XMPP2::IM::Contact> objects
 which have changed. If a contact was removed it will return 'remove'
 when you call the C<subscription> method on it.
 
+The first time this event is sent is when the roster was received
+for the first time.
+
 =item roster_error => $error
 
 If an error happened during retrival of the roster this event will
