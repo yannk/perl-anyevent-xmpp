@@ -61,10 +61,14 @@ Please look in RFC 3066 how C<$tag> should look like.
 This can be used to set the settings C<username>, C<domain>
 (and optionally C<resource>) from a C<$jid>.
 
-=item register => $bool
+=item register => $mode
 
-If C<$bool> is true the connection will attempt to automatically try
-an in-band registration.
+If this settings is given this connection will attempt to register
+an account in band on the server if C<$mode> is 'auto'.
+
+If C<$mode> is 'manual' the event C<in_band_register_form> will be
+emitted (see also EVENTS documentation about the arguments of that
+event, and how to continue the login procedure).
 
 =item resource => $resource
 
@@ -435,28 +439,92 @@ sub send_sasl_auth {
    );
 }
 
+=head2 request_inband_register_form ($finish_cb)
+
+This method starts a in-band-registration attempt.  When finished C<$finish_cb>
+will be called with the first argument being a L<Net::XMPP2::RegisterForm>
+object (will be undef if an error occured) and the second an optional error
+object of type L<Net::XMPP2::Error::Register> if an error occured.
+
+=cut
+
+sub request_inband_register_form {
+   my ($self, $finish_cb) = @_;
+
+   $self->send_iq (
+      get =>
+         sub {
+            my ($w) = @_;
+            $w->addPrefix (xmpp_ns ('register'), '');
+            $w->emptyTag ([qw/register query/]);
+         },
+         sub {
+            my ($node, $error) = @_;
+            my $form;
+            $form = Net::XMPP2::RegisterForm (node => $node, connection => $self)
+               unless $error;
+            $finish_cb->($form, $error);
+         }
+   );
+}
+
+sub do_auto_register {
+   my ($self, $mechs) = @_;
+
+   $self->request_inband_register_form (sub {
+      my ($form, $error) = @_;
+
+      if ($error) {
+         $self->event (in_band_register_error => $error);
+
+      } else {
+         if ($self->{register} ne 'manual') {
+            # of course this blows up if the form was more complicated
+            # any ideas?
+            $form->auto_submit (
+               username => $self->{username},
+               password => $self->{password},
+               cb => sub {
+                  my ($form, $error) = @_;
+                  if ($error) {
+                     $self->event (auto_in_band_register_error => $error);
+                  } else {
+                     $self->event ('auto_in_band_register_ok');
+                     $self->send_sasl_auth (@$mechs) if @$mechs;
+                  }
+               }
+            );
+
+         } else {
+            $self->event (
+               in_band_register_form =>
+                  $form,
+                  sub { $self->send_sasl_auth (@$mechs) if @$mechs }
+            )
+         }
+      }
+   });
+
+}
+
 sub handle_stream_features {
    my ($self, $node) = @_;
    my @mechs = $node->find_all ([qw/sasl mechanisms/], [qw/sasl mechanism/]);
    my @bind  = $node->find_all ([qw/bind bind/]);
    my @tls   = $node->find_all ([qw/tls starttls/]);
-   my @reg   = $node->find_all ([qw/register register/]);
+
+   # and yet another weird thingie: in XEP-0077 it's said that
+   # the register feature MAY be advertised by the server. That means:
+   # it MAY not be advertised even if it is available... so we don't
+   # care about it...
+   # my @reg   = $node->find_all ([qw/register register/]);
 
    if (not ($self->{disable_ssl}) && not ($self->{ssl_enabled}) && @tls) {
       $self->{writer}->send_starttls;
 
    } elsif (not $self->{authenticated}) {
-      if ($self->{register} and @reg) {
-         # XXX: Continue here!!!
-         $self->do_in_band_register (sub {
-            my ($self, $error) = @_;
-            if ($error) {
-               $self->event (in_band_register_error => $error);
-            } else {
-               $self->event ('in_band_register_successful');
-               $self->send_sasl_auth (@mechs) if @mechs;
-            }
-         });
+      if ($self->{register}) {
+         $self->do_auto_register (\@mechs);
       } else {
          $self->send_sasl_auth (@mechs) if @mechs;
       }
@@ -554,9 +622,9 @@ sub do_rebind {
             }
          },
          sub {
-            my ($ret_iq, $error, $err) = @_;
+            my ($ret_iq, $error) = @_;
 
-            if ($err) {
+            if ($error) {
                my ($res) = $error->xml_node ()->find_all ([qw/bind bind/], [qw/bind resource/]);
                $self->event (bind_error => $error, ($res ? $res : $self->{resource}));
 

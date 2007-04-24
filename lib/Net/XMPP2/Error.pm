@@ -228,6 +228,8 @@ sub init {
    $self->{error_text} = @txt ? $txt[0]->text : '';
 }
 
+=head2 METHODS
+
 =head3 xml_node ()
 
 Returns the L<Net::XMPP2::Node> object for this stream error.
@@ -310,6 +312,8 @@ sub init {
    $self->{error_cond} = $error;
 }
 
+=head2 METHODS
+
 =head3 xml_node ()
 
 Returns the L<Net::XMPP2::Node> object for this stream error.
@@ -343,6 +347,39 @@ sub string {
 
    sprintf "sasl error: %s",
       $self->condition
+}
+
+package Net::XMPP2::Error::Register;
+our @ISA = qw/Net::XMPP2::Error::IQ/;
+
+=head1 SUBCLASS
+
+Net::XMPP2::Error::Register - In band registration error
+
+=cut
+
+=head2 METHODS
+
+=head3 register_state ()
+
+Returns the state of registration, one of:
+
+   form-request
+   form-submitted
+
+=cut
+
+sub register_state {
+   my ($self) = @_;
+   $self->{register_state}
+}
+
+sub string {
+   my ($self) = @_;
+
+   sprintf "ibb registration error (in %s): %s",
+      $self->register_state,
+      $self->SUPER::string
 }
 
 =head1 AUTHOR
