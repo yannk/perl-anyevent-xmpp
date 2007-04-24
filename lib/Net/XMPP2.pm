@@ -2,8 +2,6 @@ package Net::XMPP2;
 use warnings;
 use strict;
 
-our %EXTENSION_ENABLED;
-
 =head1 NAME
 
 Net::XMPP2 - An implementation of the XMPP Protocol
@@ -38,8 +36,7 @@ L<Net::XMPP2::IM::Connection> is a more highlevel module, which is derived
 from L<Net::XMPP2::Connection>. It handles all the instant messaging client
 functionality described in RFC 3921.
 
-Some extensions for XMPP are also implemented and can be activated as described
-below in L<Supportet extensions>.
+For a list of L<Supportet extensions> see below.
 
 There are also other modules in this distribution, for example:
 L<Net::XMPP2::Util>, L<Net::XMPP2::Writer>, L<Net::XMPP2::Parser> and those i
@@ -64,12 +61,9 @@ speed hit. I also think that a simple event based I/O framework might be a bit e
 to handle than threads.
 
 Another thing was that I didn't like the APIs of the other modules. In L<Net::XMPP2>
-i try to provide low level modules for speaking XMPP as defined in RFC 3920 and RFC 3921
-(see also L<Net::XMPP2::Connection> and L<Net::XMPP2::IM::Connection>). But i also
-try to provide a high level API.
-
-I also try to have all additional features and functionality as optional as possible
-to give the client writers enough freedom.
+I try to provide low level modules for speaking XMPP as defined in RFC 3920 and RFC 3921
+(see also L<Net::XMPP2::Connection> and L<Net::XMPP2::IM::Connection>). But I also
+try to provide a high level API for easier usage for instant messaging tasks and clients.
 
 =head1 A note about TLS
 
@@ -92,17 +86,6 @@ events in L<Net::XMPP2::Connection>.
 
 =head1 Supportet extensions
 
-You can extend the functionality of this modules either by giving C<use Net::XMPP2>
-an argument like this:
-
-   use Net::XMPP2 qw/xep-0086/;
-
-There are other extensions that don't change the behaviour of the client
-to the outside, those are implemented silently. They are listed below the
-list of supported XMPP extensions.
-
-=head2 List of supported extensions
-
 This is the list of supported XMPP extensions:
 
 =over 4
@@ -122,25 +105,7 @@ method of L<Net::XMPP2::Connection>.
 
 =back
 
-=head2 List of silently supported extensions
-
-This is the list of silently supported extensions which don'tt
-change the behaviour of the modules.
-
-=over 4
-
-=back
-
 =cut
-
-sub import {
-   my ($mod, @exts) = @_;
-   for (@exts) {
-      if (/^xep-(\d+)$/i) {
-         $EXTENSION_ENABLED{''. (1*$1)} = 1;
-      }
-   }
-}
 
 =head1 AUTHOR
 

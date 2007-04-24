@@ -58,7 +58,6 @@ sub new {
    my $class = ref($this) || $this;
    my $self = $class->SUPER::new (@_);
 
-   $self->{ext} = {}; # reserved for extensions
    $self->{roster} = Net::XMPP2::IM::Roster->new (connection => $self);
 
    $self->reg_cb (message_xml =>

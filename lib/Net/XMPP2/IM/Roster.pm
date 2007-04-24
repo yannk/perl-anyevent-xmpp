@@ -92,7 +92,7 @@ sub update_presence {
       }
 
    } elsif ($type eq 'unsubscribed') {
-      $self->{connection}->event (contact_unsubscribed => $self, $c);
+      $self->{connection}->event (contact_unsubscribed => $self, $contact);
 
    } else {
       $contact->update_presence ($node)

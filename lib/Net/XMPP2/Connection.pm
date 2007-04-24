@@ -657,20 +657,6 @@ Returns the last received <features> tag in form of an L<Net::XMPP2::Node> objec
 
 sub features { $_[0]->{features} }
 
-#sub enable_extension {
-#   my ($self, @exts) = @_;
-#   for (@exts) {
-#      if (/^xep-(\d+)$/i) {
-#         $self->{ext}->{''.(1*$1)} = 1;
-#      }
-#   }
-#}
-#
-#sub check_extension {
-#   my ($self, $extnum) = @_;
-#   return $self->{ext}->{"$extnum"} || $Net::XMPP2::EXTENSION_ENABLED{"$extnum"};
-#}
-
 =head1 EVENTS
 
 These events can be registered on with C<reg_cb>:

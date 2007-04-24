@@ -1,24 +1,37 @@
-Net::XMPP2 missing functionality to be RFC 3920 conform:
+* Net::XMPP2 missing functionality to be RFC 3920 conform:
    - improve error handling for SASL to 
      support retries as specified in RFC 3920.
      (eg. by supporting a method sasl_retry() which takes
       the changed credentials)
-   - SRV record lookup: weight handling!
-   - test Net::XMPP2::Error for bind_error and stream_error.
+   - SRV record lookup
+      - weight handling!
+   - test Net::XMPP2::Error: bind_error and stream_error.
+   - in band registration and un-registration!!!
+      - finish in-band-registration XEP
    later:
       - make dns resolution async!
       - make extensions more optional and reentrant
 
-Net::XMPP2::IM missing functionality to be RFC 3921 conform:
-   - message and presence sending (mostly done?)
+* Net::XMPP2::IM missing functionality to be RFC 3921 conform:
+   - message and presence
       - handle subscriptions
-   - message and presence receiving
    - 7.2.  Business Rules
-   - in band registration and un-registration!!!
 
-objectvies to look out for:
-   - add high-level events together with low-level events which just
-     pass on the XML nodes.
+* Implement XEP-0004: Data Forms
+   - see also: XEP-0068: Field Standardization for Data Forms
+
+* Implement XEP-0082: XMPP Date and Time Profiles
+   - util functions to convert them to unix timestamps
+
+* Implement XEP-0030: Service Discovery
+   - see also: XEP-0128: Service Discovery Extensions
+
+* Implement XEP-0115: Entity Capabilities
+
+* Implement XEP-0045: Multi-User Chat
+   - think about: make seperate MUC handler class
+
+* keep an eye on:
    - TLS: implemented, just do some extensive testing WRT blocking,
           i don't trust the current way the watchers are handled,
           i'm in fear of deadlocks...

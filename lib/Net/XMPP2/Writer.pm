@@ -494,9 +494,7 @@ sub write_error_tag {
       $type = $STANZA_ERRORS{$error}->[0];
    }
 
-   if ($Net::XMPP2::EXTENSION_ENABLED{'86'} and defined $STANZA_ERRORS{$error}) {
-      push @add, (code => $STANZA_ERRORS{$error}->[1]);
-   }
+   push @add, (code => $STANZA_ERRORS{$error}->[1]);
 
    $w->addPrefix (xmpp_ns ('client'), '');
    $w->startTag ([xmpp_ns ('client') => 'error'], type => $type, @add);
