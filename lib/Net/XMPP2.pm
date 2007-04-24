@@ -114,6 +114,12 @@ This is the list of supported XMPP extensions:
 This extension will enable sending of the old error codes when generating a stanza
 error with for example: L<Net::XMPP2::Writer::write_error_tag>
 
+=item XEP-0077 - In-Band Registration
+
+This extension lets you register new accounts "in-band".
+To use this look at the description of the C<register> option to the C<new>
+method of L<Net::XMPP2::Connection>.
+
 =back
 
 =head2 List of silently supported extensions

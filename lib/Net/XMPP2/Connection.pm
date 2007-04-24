@@ -61,6 +61,11 @@ Please look in RFC 3066 how C<$tag> should look like.
 This can be used to set the settings C<username>, C<domain>
 (and optionally C<resource>) from a C<$jid>.
 
+=item register => $bool
+
+If C<$bool> is true the connection will attempt to automatically try
+an in-band registration.
+
 =item resource => $resource
 
 If this argument is given C<$resource> will be passed as desired
@@ -422,20 +427,39 @@ sub handle_iq {
    }
 }
 
+sub send_sasl_auth {
+   my ($self, @mechs) = @_;
+   $self->{writer}->send_sasl_auth (
+      (join ' ', map { $_->text } @mechs),
+      $self->{username}, $self->{domain}, $self->{password}
+   );
+}
+
 sub handle_stream_features {
    my ($self, $node) = @_;
    my @mechs = $node->find_all ([qw/sasl mechanisms/], [qw/sasl mechanism/]);
    my @bind  = $node->find_all ([qw/bind bind/]);
    my @tls   = $node->find_all ([qw/tls starttls/]);
+   my @reg   = $node->find_all ([qw/register register/]);
 
    if (not ($self->{disable_ssl}) && not ($self->{ssl_enabled}) && @tls) {
       $self->{writer}->send_starttls;
 
-   } elsif (not ($self->{authenticated}) and @mechs) {
-      $self->{writer}->send_sasl_auth (
-         (join ' ', map { $_->text } @mechs),
-         $self->{username}, $self->{domain}, $self->{password}
-      );
+   } elsif (not $self->{authenticated}) {
+      if ($self->{register} and @reg) {
+         # XXX: Continue here!!!
+         $self->do_in_band_register (sub {
+            my ($self, $error) = @_;
+            if ($error) {
+               $self->event (in_band_register_error => $error);
+            } else {
+               $self->event ('in_band_register_successful');
+               $self->send_sasl_auth (@mechs) if @mechs;
+            }
+         });
+      } else {
+         $self->send_sasl_auth (@mechs) if @mechs;
+      }
 
    } elsif (@bind) {
       $self->do_rebind ($self->{resource});

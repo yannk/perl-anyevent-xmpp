@@ -14,6 +14,7 @@ Net::XMPP2::IM missing functionality to be RFC 3921 conform:
       - handle subscriptions
    - message and presence receiving
    - 7.2.  Business Rules
+   - in band registration and un-registration!!!
 
 objectvies to look out for:
    - add high-level events together with low-level events which just

@@ -18,6 +18,7 @@ our %NAMESPACES = (
    session    => 'urn:ietf:params:xml:ns:xmpp-session',
    xml        => 'http://www.w3.org/XML/1998/namespace',
    disco_info => 'http://jabber.org/protocol/disco#info',
+   register   => 'http://jabber.org/features/iq-register',
 );
 
 =head1 NAME
@@ -55,6 +56,8 @@ which make handling of namepsaces a bit easier:
    client  => jabber:client
    roster  => jabber:iq:roster
    version => jabber:iq:version
+
+   register => http://jabber.org/features/iq-register
 
 =head1 FUNCTIONS
 

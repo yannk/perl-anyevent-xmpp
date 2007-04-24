@@ -31,7 +31,7 @@ my $res = "Net::XどなPP2";
 #my $res = "Net::XMPP2";
 
 my $con = Net::XMPP2::IM::Connection->new (
-            username => 'elmex', password => 'xxxxxxxx', domain => 'jabber.org',
+            username => 'admin', password => 'xxxxxx', domain => 'localhost',
             resource => $res,
             disable_ssl => 0,
           );

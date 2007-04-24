@@ -68,21 +68,34 @@ sub update_presence {
    # XXX: should check whether C<$jid> is nice JID.
 
    my $type = $node->attr ('type');
+   my $contact = $self->touch_jid ($jid);
 
    if ($type eq 'subscribe') {
-   } elsif ($type eq 'subscribed') {
-      # FIXME: Implement this!!
-      if (my $c = $self->get_contact ($jid)) {
-         my $doit = 1;
-         $self->{connection}->event (subscribed_confirm => $self, $c, \$doit);
-         if ($doit) {
-         } else {
-         }
+      my $doit;
+      $self->{connection}->event (contact_request_subscribe => $self, $contact, \$doit);
+      return unless defined $doit;
+
+      if ($doit) {
+      } else {
       }
+
+   } elsif ($type eq 'subscribed') {
+      $self->{connection}->event (contact_subscribed => $self, $contact);
+
    } elsif ($type eq 'unsubscribe') {
+      my $doit;
+      $self->{connection}->event (contact_request_unsubscribe => $self, $contact, \$doit);
+      return unless defined $doit;
+
+      if ($doit) {
+      } else {
+      }
+
    } elsif ($type eq 'unsubscribed') {
+      $self->{connection}->event (contact_unsubscribed => $self, $c);
+
    } else {
-      $self->touch_jid ($jid)->update_presence ($node)
+      $contact->update_presence ($node)
    }
 }
 
