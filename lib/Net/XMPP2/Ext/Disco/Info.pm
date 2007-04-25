@@ -1,9 +1,9 @@
-package Net::XMPP2::Disco::Info;
+package Net::XMPP2::Ext::Disco::Info;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 
 =head1 NAME
 
-Net::XMPP2::Disco::Info - Service discovery items
+Net::XMPP2::Ext::Disco::Info - Service discovery items
 
 =head1 SYNOPSIS
 
@@ -11,7 +11,7 @@ Net::XMPP2::Disco::Info - Service discovery items
 =head1 DESCRIPTION
 
 This class represents the result of a disco info request
-sent by a C<Net::XMPP2::Disco> handler.
+sent by a C<Net::XMPP2::Ext::Disco> handler.
 
 =head1 METHODS
 

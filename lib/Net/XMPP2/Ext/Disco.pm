@@ -1,20 +1,20 @@
-package Net::XMPP2::Disco;
+package Net::XMPP2::Ext::Disco;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
-use Net::XMPP2::Disco::Items;
-use Net::XMPP2::Disco::Info;
+use Net::XMPP2::Ext::Disco::Items;
+use Net::XMPP2::Ext::Disco::Info;
 
 =head1 NAME
 
-Net::XMPP2::Disco - A service discovery manager class for XEP-0030
+Net::XMPP2::Ext::Disco - A service discovery manager class for XEP-0030
 
 =head1 SYNOPSIS
 
    package foo;
-   use Net::XMPP2::Disco;
+   use Net::XMPP2::Ext::Disco;
 
    my $con = Net::XMPP2::IM::Connection->new (...);
    ...
-   my $disco = Net::XMPP2::Disco->new (connection => $con);
+   my $disco = Net::XMPP2::Ext::Disco->new (connection => $con);
 
    $disco->request_items ('romeo@montague.net',
       node => 'http://jabber.org/protocol/tune',
@@ -231,7 +231,7 @@ This method does send a items request to the JID entity C<$from>.
 C<$node> is the optional node to send the request to, which can be
 undef.
 The callback C<$cb> will be called when the request returns with 3 arguments:
-the disco handle, an L<Net::XMPP2::Disco::Items> object (or undef)
+the disco handle, an L<Net::XMPP2::Ext::Disco::Items> object (or undef)
 and an L<Net::XMPP2::Error::IQ> object when an error occured and no items
 were received.
 
@@ -261,7 +261,7 @@ sub request_items {
 
          if ($xmlnode) {
             my (@query) = $xmlnode->find_all ([qw/disco_items query/]);
-            $items = Net::XMPP2::Disco::Items->new (
+            $items = Net::XMPP2::Ext::Disco::Items->new (
                jid     => $dest,
                node    => $node,
                xmlnode => $query[0]
@@ -280,7 +280,7 @@ This method does send a info request to the JID entity C<$from>.
 C<$node> is the optional node to send the request to, which can be
 undef.
 The callback C<$cb> will be called when the request returns with 3 arguments:
-the disco handle, an L<Net::XMPP2::Disco::Info> object (or undef)
+the disco handle, an L<Net::XMPP2::Ext::Disco::Info> object (or undef)
 and an L<Net::XMPP2::Error::IQ> object when an error occured and no items
 were received.
 
@@ -310,7 +310,7 @@ sub request_info {
 
          if ($xmlnode) {
             my (@query) = $xmlnode->find_all ([qw/disco_info query/]);
-            $info = Net::XMPP2::Disco::Info->new (
+            $info = Net::XMPP2::Ext::Disco::Info->new (
                jid     => $dest,
                node    => $node,
                xmlnode => $query[0]

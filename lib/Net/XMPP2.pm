@@ -86,26 +86,7 @@ events in L<Net::XMPP2::Connection>.
 
 =head1 Supportet extensions
 
-This is the list of supported XMPP extensions:
-
-=over 4
-
-=item XEP-0086 - Error Condition Mappings
-
-   "A mapping to enable legacy entities to correctly handle errors from XMPP-aware entities."
-
-This extension will enable sending of the old error codes when generating a stanza
-error with for example: L<Net::XMPP2::Writer::write_error_tag>
-
-=item XEP-0077 - In-Band Registration
-
-This extension lets you register new accounts "in-band".
-To use this look at the description of the C<register> option to the C<new>
-method of L<Net::XMPP2::Connection>.
-
-=back
-
-=cut
+See L<Net::XMPP2::Ext> for a list.
 
 =head1 AUTHOR
 

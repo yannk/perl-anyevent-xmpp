@@ -476,9 +476,9 @@ sub send_sasl_auth {
 =head2 request_inband_register_form ($finish_cb)
 
 This method starts a in-band-registration attempt.  When finished C<$finish_cb>
-will be called with the first argument being a L<Net::XMPP2::RegisterForm>
+will be called with the first argument being a L<Net::XMPP2::Ext::RegisterForm>
 object (will be undef if an error occured) and the second an optional error
-object of type L<Net::XMPP2::Error::Register> if an error occured.
+object of type L<Net::XMPP2::Error::Ext::Register> if an error occured.
 
 =cut
 
@@ -495,7 +495,7 @@ sub request_inband_register_form {
          sub {
             my ($node, $error) = @_;
             my $form;
-            $form = Net::XMPP2::RegisterForm (node => $node, connection => $self)
+            $form = Net::XMPP2::Ext::RegisterForm (node => $node, connection => $self)
                unless $error;
             $finish_cb->($form, $error);
          }
