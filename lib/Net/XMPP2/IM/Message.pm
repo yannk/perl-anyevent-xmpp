@@ -83,6 +83,12 @@ tag from the C<lang> attached or without any language tag.
 If you want to attach the subject with a different language use the C<add_subject>
 method.
 
+=item type => $type
+
+This field sets the type of the message. See also the L<type> method below.
+
+The default value for C<$type> is 'normal'.
+
 =back
 
 =cut
@@ -99,6 +105,7 @@ sub new {
       $self->add_body ($body);
    }
 
+   $self->{type} ||= 'normal'; # default it to 'normal'
    $self->{lang} ||= '';
 
    $self
