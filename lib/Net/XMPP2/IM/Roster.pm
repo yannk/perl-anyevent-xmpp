@@ -275,7 +275,7 @@ sub debug_dump {
 
       for my $grp (sort keys %groups) {
          print "=== $grp ====\n";
-         $_->debug_dump for @{$groups{$grp}};
+         $_->debug_dump for grep { not $_->is_on_roster } @{$groups{$grp}};
       }
    }
 

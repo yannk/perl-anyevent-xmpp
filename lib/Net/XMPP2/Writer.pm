@@ -28,7 +28,7 @@ The whole "XML" concept of XMPP is fundamentally broken anyway. It's supposed
 to be an subset of XML. But a subset of XML productions is not XML. Strictly
 speaking you need a special XMPP "XML" parser and writer to be 100% conformant.
 
-On top of that XMPP E<requires> you to parse these partial "XML" documents.
+On top of that XMPP B<requires> you to parse these partial "XML" documents.
 But a partial XML document is not well-formed, heck, it's not even a XML document!.
 And a parser should bail out with an error. But XMPP doesn't care, it just relies on
 implementation dependend behaviour of chunked parsing modes for SAX parsing.
@@ -40,7 +40,7 @@ But I try to be as "XML" XMPP conformant as possible (it should be around 99-100
 But it's hard to say what XML is conformant, as the specifications of XMPP "XML" and XML
 are contradicting. For example XMPP also says you only have to generated and accept
 utf-8 encodings of XML, but the XML recommendation says that each parser has
-to accept utf-8 E<and> utf-16. So, what do you do? Do you use a XML conformant parser
+to accept utf-8 B<and> utf-16. So, what do you do? Do you use a XML conformant parser
 or do you write your own?
 
 I'm using XML::Parser::Expat because expat knows how to parse broken (aka 'partial')

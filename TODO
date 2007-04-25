@@ -21,26 +21,6 @@
    + message and presence
       - handle subscriptions
    - 7.2.  Business Rules
-   - fix bug:
-      ### ROSTER BEGIN ###
-      === ABC ====
-      - elmex@jabber.org                  [Der elmex           ] (to)
-         * elmex@jabber.org/Gaim          [     ] (  1)          {}
-      === TEst ====
-      - elmex@jabber.org                  [Der elmex           ] (to)
-         * elmex@jabber.org/Gaim          [     ] (  1)          {}
-      ### OFF ROSTER ###
-      ===  ====
-      - elmor@jabber.org                  [                    ] ()
-         * elmor@jabber.org/Psi           [     ] (  5)          {}
-      === ABC ====
-      - elmex@jabber.org                  [Der elmex           ] (to)
-         * elmex@jabber.org/Gaim          [     ] (  1)          {}
-      === TEst ====
-      - elmex@jabber.org                  [Der elmex           ] (to)
-         * elmex@jabber.org/Gaim          [     ] (  1)          {}
-      ### ROSTER END ###
-
 
 * Implement XEP-0004: Data Forms
    - see also: XEP-0068: Field Standardization for Data Forms
