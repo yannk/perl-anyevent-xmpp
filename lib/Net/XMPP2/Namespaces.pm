@@ -6,19 +6,20 @@ our @EXPORT_OK = qw/xmpp_ns set_xmpp_ns_alias/;
 our @ISA = qw/Exporter/;
 
 our %NAMESPACES = (
-   client     => 'jabber:client',
-   stream     => 'http://etherx.jabber.org/streams',
-   streams    => 'urn:ietf:params:xml:ns:xmpp-streams',
-   stanzas    => 'urn:ietf:params:xml:ns:xmpp-stanzas',
-   sasl       => 'urn:ietf:params:xml:ns:xmpp-sasl',
-   bind       => 'urn:ietf:params:xml:ns:xmpp-bind',
-   tls        => 'urn:ietf:params:xml:ns:xmpp-tls',
-   roster     => 'jabber:iq:roster',
-   version    => 'jabber:iq:version',
-   session    => 'urn:ietf:params:xml:ns:xmpp-session',
-   xml        => 'http://www.w3.org/XML/1998/namespace',
-   disco_info => 'http://jabber.org/protocol/disco#info',
-   register   => 'http://jabber.org/features/iq-register',
+   client      => 'jabber:client',
+   stream      => 'http://etherx.jabber.org/streams',
+   streams     => 'urn:ietf:params:xml:ns:xmpp-streams',
+   stanzas     => 'urn:ietf:params:xml:ns:xmpp-stanzas',
+   sasl        => 'urn:ietf:params:xml:ns:xmpp-sasl',
+   bind        => 'urn:ietf:params:xml:ns:xmpp-bind',
+   tls         => 'urn:ietf:params:xml:ns:xmpp-tls',
+   roster      => 'jabber:iq:roster',
+   version     => 'jabber:iq:version',
+   session     => 'urn:ietf:params:xml:ns:xmpp-session',
+   xml         => 'http://www.w3.org/XML/1998/namespace',
+   disco_info  => 'http://jabber.org/protocol/disco#info',
+   disco_items => 'http://jabber.org/protocol/disco#items',
+   register    => 'http://jabber.org/features/iq-register',
 );
 
 =head1 NAME

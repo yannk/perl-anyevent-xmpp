@@ -29,20 +29,46 @@ This method registers a callback C<$cb1> for the event with the
 name C<$eventname1>. You can also pass multiple of these eventname => callback
 pairs.
 
+The return value will be an ID that represents the set of callbacks you have installed.
+Call C<unreg_cb> with that ID to remove those callbacks again.
+
 To see a documentation of emitted events please take a look at the EVENTS section
-below.
+in the classes that inherit from this one.
 
 =cut
 
 sub reg_cb {
    my ($self, %regs) = @_;
 
+   $self->{id}++;
+
    for my $cmd (keys %regs) {
-      push @{$self->{events}->{lc $cmd}}, $regs{$cmd}
+      push @{$self->{events}->{lc $cmd}}, [$self->{id}, $regs{$cmd}]
    }
 
-   1;
+   $self->{id}
 }
+
+=head2 unreg_cb ($id)
+
+Removes the set C<$id> of registered callbacks. C<$id> is the
+return value of a C<reg_cb> call.
+
+=cut
+
+sub unreg_cb {
+   my ($self, $id) = @_;
+
+   my $set = delete $self->{ids}->{$id};
+
+   for my $key (keys %{$self->{events}}) {
+      @{$self->{events}->{$key}} =
+         grep {
+            $_->[0] ne $id
+         } @{$self->{events}->{$key}};
+   }
+}
+
 
 =head2 event ($eventname, @args)
 
@@ -57,7 +83,7 @@ sub event {
 
    my $handled;
    for (@{$self->{events}->{lc $ev}}) {
-      $_->($self, @arg) and push @$nxt, $_;
+      $_->[1]->($self, @arg) and push @$nxt, $_;
    }
 
    $self->{events}->{lc $ev} = $nxt;
