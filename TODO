@@ -1,4 +1,5 @@
 * Net::XMPP2 missing functionality to be RFC 3920 conform:
+   - add timeouts to IQs!
    - improve error handling for SASL to 
      support retries as specified in RFC 3920.
      (eg. by supporting a method sasl_retry() which takes
