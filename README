@@ -5,11 +5,89 @@ VERSION
     Version 0.01
 
 SYNOPSIS
-       use Net::XMPP2;
-       ...
+       use Net::XMPP2::Connection;
 
-FUNCTIONS
-  init
+    or:
+
+       use Net::XMPP2::IM::Connection;
+
+DESCRIPTION
+    This is the head module of the Net::XMPP2 XMPP client protocol (as
+    described in RFC 3920 and RFC 3921) framework.
+
+    Net::XMPP2::Connection is a RFC 3920 conformant "XML" stream
+    implementation for clients, which handles tcp connect up to the resource
+    binding. And provides low-level access to the XML nodes on the XML
+    stream along with some high level methods to send the predefined XML
+    stanzas.
+
+    Net::XMPP2::IM::Connection is a more highlevel module, which is derived
+    from Net::XMPP2::Connection. It handles all the instant messaging client
+    functionality described in RFC 3921.
+
+    For a list of "Supportet extensions" see below.
+
+    There are also other modules in this distribution, for example:
+    Net::XMPP2::Util, Net::XMPP2::Writer, Net::XMPP2::Parser and those i
+    forgot :-) Those modules might be helpful and/or required if you want to
+    use this framework for XMPP.
+
+    See also Net::XMPP2::Writer for a discussion about the brokeness of XML
+    in the XMPP specification.
+
+Why (yet) another XMPP module?
+    The main outstanding feature of this module in comparsion to the other
+    XMPP (aka Jabber) modules out there is the support for AnyEvent.
+    AnyEvent permits you to use this module together with other I/O event
+    based programs and libraries (ie. Gtk2 or Event).
+
+    The other modules could often only be integrated in those applications
+    or librarys by using threads. I decided to write this module because i
+    think CPAN lacks an event based XMPP module. Threads are unfortunately
+    not an alternative in Perl at the moment due the limited threading
+    functionality they provide and the global speed hit. I also think that a
+    simple event based I/O framework might be a bit easier to handle than
+    threads.
+
+    Another thing was that I didn't like the APIs of the other modules. In
+    Net::XMPP2 I try to provide low level modules for speaking XMPP as
+    defined in RFC 3920 and RFC 3921 (see also Net::XMPP2::Connection and
+    Net::XMPP2::IM::Connection). But I also try to provide a high level API
+    for easier usage for instant messaging tasks and clients.
+
+A note about TLS
+    This module also supports TLS, as the specification of XMPP requires an
+    implementation to support TLS.
+
+    There are maybe still some bugs in the handling of TLS in
+    Net::XMPP2::Connection. So keep an eye on TLS with this module. If you
+    encounter any problems it would be very helpful if you could debug them
+    or at least send me a detailed report on how to reproduce the problem.
+
+    (As I use this module myself I don't expect TLS to be completly broken,
+    but it might break under different circumstances than I have here. Those
+    circumstances might be a different load of data pumped through the TLS
+    connection.)
+
+    I mainly expect problems where aviable data isn't properly read from the
+    socket or written to it. You might want to take a look at the
+    "debug_send" and "debug_recv" events in Net::XMPP2::Connection.
+
+Supportet extensions
+    This is the list of supported XMPP extensions:
+
+    XEP-0086 - Error Condition Mappings
+           "A mapping to enable legacy entities to correctly handle errors from XMPP-aware entities."
+
+        This extension will enable sending of the old error codes when
+        generating a stanza error with for example:
+        Net::XMPP2::Writer::write_error_tag
+
+    XEP-0077 - In-Band Registration
+        This extension lets you register new accounts "in-band". To use this
+        look at the description of the "register" option to the "new" method
+        of Net::XMPP2::Connection.
+
 AUTHOR
     Robin Redeker, "<elmex at ta-sa.org>"
 

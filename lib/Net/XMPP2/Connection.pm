@@ -376,9 +376,10 @@ sub send_iq {
    my $timeout = delete $attrs{timeout} || $self->{default_iq_timeout};
    if ($timeout) {
       $self->{iq_timers}->{$id} =
-         AnyEvent->timer (after => 60, sub {
+         AnyEvent->timer (after => $timeout, sub {
+            delete $self->{iq_timers}->{$id};
             my $cb = delete $self->{iqs}->{$id};
-            $cb->(undef, Net::XMPP2::Error::IQ->new (timeout => 1))
+            $cb->(undef, Net::XMPP2::Error::IQ->new)
          });
    }
 
