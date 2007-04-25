@@ -1,5 +1,7 @@
 package Net::XMPP2::Disco;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Disco::Items;
+use Net::XMPP2::Disco::Info;
 
 =head1 NAME
 
@@ -220,6 +222,105 @@ sub handle_disco_query {
 sub DESTROY {
    my ($self) = @_;
    $self->{connection}->unreg_cb ($self->{cb_id})
+}
+
+
+=head2 request_items ($dest, $node, $cb)
+
+This method does send a items request to the JID entity C<$from>.
+C<$node> is the optional node to send the request to, which can be
+undef.
+The callback C<$cb> will be called when the request returns with 3 arguments:
+the disco handle, an L<Net::XMPP2::Disco::Items> object (or undef)
+and an L<Net::XMPP2::Error::IQ> object when an error occured and no items
+were received.
+
+   $disco->request_items ('a@b.com', undef, sub {
+      my ($disco, $items, $error) = @_;
+      die $error->string if $error;
+
+      # do something with the items here ;_)
+   });
+
+=cut
+
+sub request_items {
+   my ($self, $dest, $node, $cb) = @_;
+
+   $self->{connection}->send_iq (
+      get => sub {
+         my ($w) = @_;
+         $w->addPrefix (xmpp_ns ('disco_items'), '');
+         $w->emptyTag ([xmpp_ns ('disco_items'), 'query'],
+            (defined $node ? (node => $node) : ())
+         );
+      },
+      sub {
+         my ($xmlnode, $error) = @_;
+         my $items;
+
+         if ($xmlnode) {
+            my (@query) = $xmlnode->find_all ([qw/disco_items query/]);
+            $items = Net::XMPP2::Disco::Items->new (
+               jid     => $dest,
+               node    => $node,
+               xmlnode => $query[0]
+            )
+         }
+
+         $cb->($self, $items, $error)
+      },
+      to => $dest
+   );
+}
+
+=head2 request_info ($dest, $node, $cb)
+
+This method does send a info request to the JID entity C<$from>.
+C<$node> is the optional node to send the request to, which can be
+undef.
+The callback C<$cb> will be called when the request returns with 3 arguments:
+the disco handle, an L<Net::XMPP2::Disco::Info> object (or undef)
+and an L<Net::XMPP2::Error::IQ> object when an error occured and no items
+were received.
+
+   $disco->request_info ('a@b.com', undef, sub {
+      my ($disco, $info, $error) = @_;
+      die $error->string if $error;
+
+      # do something with info here ;_)
+   });
+
+=cut
+
+sub request_info {
+   my ($self, $dest, $node, $cb) = @_;
+
+   $self->{connection}->send_iq (
+      get => sub {
+         my ($w) = @_;
+         $w->addPrefix (xmpp_ns ('disco_info'), '');
+         $w->emptyTag ([xmpp_ns ('disco_info'), 'query'],
+            (defined $node ? (node => $node) : ())
+         );
+      },
+      sub {
+         my ($xmlnode, $error) = @_;
+         my $info;
+
+         if ($xmlnode) {
+            my (@query) = $xmlnode->find_all ([qw/disco_info query/]);
+            $info = Net::XMPP2::Disco::Info->new (
+               jid     => $dest,
+               node    => $node,
+               xmlnode => $query[0]
+            )
+         }
+
+         $cb->($self, $info, $error)
+      },
+      to => $dest
+   );
 }
 
 =head1 AUTHOR

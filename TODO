@@ -1,3 +1,6 @@
+* todo group that is mostly unfinished
+- todo group that is mostly finished
+
 * Net::XMPP2 missing functionality to be RFC 3920 conform:
    - add timeouts to IQs!
    - improve error handling for SASL to 
@@ -44,10 +47,6 @@
 * Implement XEP-0082: XMPP Date and Time Profiles
    - util functions to convert them to unix timestamps
 
-* Implement XEP-0030: Service Discovery
-   - see also: XEP-0128: Service Discovery Extensions
-   - missing support multiple identities when answering requests
-
 * Implement XEP-0115: Entity Capabilities
 
 * Implement XEP-0045: Multi-User Chat
@@ -57,3 +56,7 @@
    - TLS: implemented, just do some extensive testing WRT blocking,
           i don't trust the current way the watchers are handled,
           i'm in fear of deadlocks...
+
+- Implement XEP-0030: Service Discovery
+   - see also: XEP-0128: Service Discovery Extensions
+   - missing support multiple identities when answering requests

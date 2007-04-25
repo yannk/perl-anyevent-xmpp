@@ -1,0 +1,117 @@
+package Net::XMPP2::Disco::Items;
+use Net::XMPP2::Namespaces qw/xmpp_ns/;
+
+=head1 NAME
+
+Net::XMPP2::Disco::Items - Service discovery items
+
+=head1 SYNOPSIS
+
+
+=head1 DESCRIPTION
+
+This class represents the result of a disco items request
+sent by a C<Net::XMPP2::Disco> handler.
+
+=head1 METHODS
+
+=cut
+
+sub new {
+   my $this = shift;
+   my $class = ref($this) || $this;
+   my $self = bless { @_ }, $class;
+   $self->init;
+   $self
+}
+
+=head2 xml_node ()
+
+Returns the L<Net::XMPP2::Node> object of the IQ query.
+
+=cut
+
+sub xml_node {
+   my ($self) = @_;
+   $self->{xmlnode}
+}
+
+sub init {
+   my ($self) = @_;
+   my $node = $self->{xmlnode};
+
+   my (@items) = $node->find_all ([qw/disco_items item/]);
+   for (@items) {
+      push @{$self->{items}}, {
+         jid  => $_->attr ('jid'),
+         name => $_->attr ('name'),
+         node => $_->attr ('node'),
+         xml_node => $_,
+      };
+   }
+}
+
+=head2 jid ()
+
+Returns the JID these items belong to.
+
+=cut
+
+sub jid { $_[0]->{jid} }
+
+=head2 node ()
+
+Returns the node these items belong to (may be undef).
+
+=cut
+
+sub node { $_[0]->{node} }
+
+=head2 items ()
+
+Returns a list of hashreferences which contain following keys:
+
+  jid, name, node and xml_node
+
+C<jid> contains the JID of the item.
+C<name> contains the name of the item and might be undef.
+C<node> contains the node id of the item and might be undef.
+C<xml_node> contains the L<Net::XMPP2::Node> object of the item
+for further analyses.
+
+=cut
+
+sub items {
+   my ($self) = @_;
+   @{$self->{items}}
+}
+
+=head2 debug_dump ()
+
+Prints these items to stdout for debugging.
+
+=cut
+
+sub debug_dump {
+   my ($self) = @_;
+   printf "ITEMS FOR %s (%s):\n", $self->jid, $self->node;
+   for ($self->items) {
+      printf "   - %-40s (%30s): %s\n", $_->{jid}, $_->{node}, $_->{name}
+   }
+   print "END ITEMS\n";
+}
+
+=head1 AUTHOR
+
+Robin Redeker, C<< <elmex at ta-sa.org> >>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2007 Robin Redeker, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
+
+1;
