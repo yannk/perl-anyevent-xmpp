@@ -137,7 +137,8 @@ sub new {
       $self->handle_stanza (@_);
    });
 
-   $self->{iq_id} = 1;
+   $self->{iq_id}              = 1;
+   $self->{default_iq_timeout} = 60;
 
    $self->{disconnect_cb} = sub {
       my ($host, $port, $message) = @_;
@@ -329,20 +330,39 @@ sub is_connected {
    $self->{authenticated}
 }
 
+=head2 set_default_iq_timeout ($seconds)
+
+This sets the default timeout for IQ requests. If the timeout runs out
+the request will be aborted and the callback called with a L<Net::XMPP2::Error::IQ> object
+where the C<condition> method returns a special value (see also L<Net::XMPP2::Error::IQ::condition>).
+
+The default timeout for IQ is 60 seconds.
+
+=cut
+
+sub set_default_iq_timeout {
+   my ($self, $sec) = @_;
+   $self->{default_iq_timeout} = $sec;
+}
+
 =head2 send_iq ($type, $create_cb, $result_cb, %attrs)
 
 This method sends an IQ XMPP request.
 
 Please take a look at the documentation for C<send_iq> in Net::XMPP2::Writer
-about the meaning of C<$type>, C<$create_cb> and C<%attrs>.
+about the meaning of C<$type>, C<$create_cb> and C<%attrs> (with the exception
+of the 'timeout' key of C<%attrs>, see below).
 
-C<$result_cb> will be called when a result was received. The first argument to
-C<$result_cb> will be a Net::XMPP2::Node instance containing the IQ result
-stanza contents.
+C<$result_cb> will be called when a result was received or the timeout reached.
+The first argument to C<$result_cb> will be a Net::XMPP2::Node instance
+containing the IQ result stanza contents.
 
 If the IQ resulted in a stanza error the second argument to C<$result_cb> will
 be C<undef> (if the error type was not 'continue') and the third argument will
 be a L<Net::XMPP2::Error::IQ> object.
+
+The timeout can be set by C<set_default_iq_timeout> or passed seperatly
+in the C<%attrs> array as the value for the key C<timeout> (timeout in seconds btw.).
 
 This method returns the newly generated id for this iq request.
 
@@ -352,6 +372,16 @@ sub send_iq {
    my ($self, $type, $create_cb, $result_cb, %attrs) = @_;
    my $id = $self->{iq_id}++;
    $self->{iqs}->{$id} = $result_cb;
+
+   my $timeout = delete $attrs{timeout} || $self->{default_iq_timeout};
+   if ($timeout) {
+      $self->{iq_timers}->{$id} =
+         AnyEvent->timer (after => 60, sub {
+            my $cb = delete $self->{iqs}->{$id};
+            $cb->(undef, Net::XMPP2::Error::IQ->new (timeout => 1))
+         });
+   }
+
    $self->{writer}->send_iq ($id, $type, $create_cb, %attrs);
    $id
 }
@@ -406,13 +436,16 @@ sub handle_iq {
 
    my $type = $node->attr ('type');
 
+   my $id = $node->attr ('id');
+   delete $self->{iq_timers}->{$id} if defined $id;
+
    if ($type eq 'result') {
-      if (my $cb = delete $self->{iqs}->{$node->attr ('id')}) {
+      if (my $cb = delete $self->{iqs}->{$id}) {
          $cb->($node);
       }
 
    } elsif ($type eq 'error') {
-      if (my $cb = delete $self->{iqs}->{$node->attr ('id')}) {
+      if (my $cb = delete $self->{iqs}->{$id}) {
 
          my $error = Net::XMPP2::Error::IQ->new (node => $node);
          $cb->(($error->type eq 'continue' ? $node : undef), $error);

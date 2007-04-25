@@ -1,15 +1,16 @@
 * todo group that is mostly unfinished
 - todo group that is mostly finished
++ todo item that is mostly finished
 
 * Net::XMPP2 missing functionality to be RFC 3920 conform:
-   - add timeouts to IQs!
+   + add timeouts to IQs!
    - improve error handling for SASL to 
      support retries as specified in RFC 3920.
      (eg. by supporting a method sasl_retry() which takes
       the changed credentials)
    - SRV record lookup
       - weight handling!
-   - test Net::XMPP2::Error: bind_error and stream_error.
+   + test Net::XMPP2::Error: bind_error and stream_error.
    - in band registration and un-registration!!!
       - finish in-band-registration XEP
    later:
@@ -17,7 +18,7 @@
       - make extensions more optional and reentrant
 
 * Net::XMPP2::IM missing functionality to be RFC 3921 conform:
-   - message and presence
+   + message and presence
       - handle subscriptions
    - 7.2.  Business Rules
    - fix bug:

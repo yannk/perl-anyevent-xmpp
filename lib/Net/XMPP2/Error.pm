@@ -62,6 +62,12 @@ sub init {
    my ($self) = @_;
    my $node = $self->xml_node;
 
+   unless (defined $node) {
+      $self->{iq_error_cond} = 'client-timeout';
+      $self->{iq_error_type} = 'cancel';
+      return;
+   }
+
    my @error;
    my ($err) = $node->find_all ([qw/client error/]);
 
@@ -100,12 +106,18 @@ sub init {
 =head3 xml_node ()
 
 Returns the L<Net::XMPP2::Node> object for this IQ error.
+This method returns undef if the IQ timeouted.
+
+In the case of a timeout the C<condition> method returns C<client-timeout>,
+C<type> returns 'cancel' and C<code> undef.
 
 =cut
 
 sub xml_node {
    $_[0]->{node}
 }
+
+=head3 
 
 =head3 type ()
 
@@ -125,7 +137,7 @@ This method returns the error code if one was found.
 
 sub code { $_[0]->{iq_error_code} }
 
-=head3 error_condition ()
+=head3 condition ()
 
 Returns the error condition string if one was found when receiving the IQ error.
 It can be undef or one of:
@@ -152,6 +164,10 @@ It can be undef or one of:
    subscription-required
    undefined-condition
    unexpected-request
+
+Or, in case of a IQ timeout it returns:
+
+   'client-timeout'
 
 =cut
 
