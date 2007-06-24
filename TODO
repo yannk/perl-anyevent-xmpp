@@ -2,6 +2,10 @@
 - todo group that is mostly finished
 + todo item that is mostly finished
 
+* Net::XMPP2::Client
+  - find a way to distinguish presences from JIDs that
+    are in multiple account's roster.
+
 * Net::XMPP2 missing functionality to be RFC 3920 conform:
    + add timeouts to IQs!
    - improve error handling for SASL to 
@@ -19,7 +23,7 @@
 
 * Net::XMPP2::IM missing functionality to be RFC 3921 conform:
    + message and presence
-      - handle subscriptions
+      + handle subscriptions
    - 7.2.  Business Rules
 
 * Implement XEP-0004: Data Forms

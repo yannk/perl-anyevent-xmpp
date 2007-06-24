@@ -146,6 +146,34 @@ sub update_connections {
    }
 }
 
+=item disconnect ($msg)
+
+Disconnect all accounts.
+
+=cut
+
+sub disconnect {
+   my ($self, $msg) = @_;
+   for my $acc (values %{$self->{accounts}}) {
+      if ($acc->is_connected) { $acc->connection ()->disconnect ($msg) }
+   }
+}
+
+=item remove_accounts ($msg)
+
+Removes all accounts and disconnects.
+
+=cut
+
+sub remove_accounts {
+   my ($self, $msg) = @_;
+   for my $acc (keys %{$self->{accounts}}) {
+      my $acca = $self->{accounts}->{$acc};
+      if ($acca->is_connected) { $acca->connection ()->disconnect ($msg) }
+      delete $self->{accounts}->{$acc};
+   }
+}
+
 =item send_message ($msg, $dest_jid, $src)
 
 Sends a message to the destination C<$dest_jid>.

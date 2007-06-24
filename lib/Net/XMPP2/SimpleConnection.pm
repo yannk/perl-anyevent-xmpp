@@ -4,6 +4,7 @@ use Errno;
 use Fcntl;
 use Encode;
 use Net::SSLeay;
+use IO::Handle;
 
 BEGIN {
    Net::SSLeay::load_error_strings ();
@@ -90,13 +91,11 @@ sub connect {
          } else {
             return if $! == Errno::EAGAIN;
             if (defined $l) {
-               $self->{disconnect_cb}->($self->{host}, $self->{port}, "EOF from server '$self->{host}:$self->{port}'");
-               $self->end_sockets;
+               $self->disconnect ("EOF from server '$self->{host}:$self->{port}'");
                return;
 
             } else {
-               $self->{disconnect_cb}->($self->{host}, $self->{port}, "Error while reading from server '$self->{host}:$port': $!");
-               $self->end_sockets;
+               $self->disconnect ("Error while reading from server '$self->{host}:$port': $!");
                return;
             }
          }
@@ -108,13 +107,14 @@ sub end_sockets {
    my ($self) = @_;
    delete $self->{r};
    delete $self->{w};
-   delete $self->{socket};
    if (delete $self->{ssl_enabled}) {
       Net::SSLeay::free ($self->{ssl});
       delete $self->{ssl};
       Net::SSLeay::CTX_free ($self->{ctx});
       delete $self->{ctx};
    }
+   close ($self->{socket});
+   delete $self->{socket};
 }
 
 sub try_ssl_write {
@@ -124,9 +124,7 @@ sub try_ssl_write {
 
    if ($l <= 0) {
       if ($l == 0) {
-         $self->{disconnect_cb}->($self->{host}, $self->{port},
-            "unexpected EOF from server (ssl) '$self->{host}:$self->{port}'");
-         $self->end_sockets;
+         $self->disconnect ("unexpected EOF from server (ssl) '$self->{host}:$self->{port}'");
          return;
 
       } else {
@@ -140,12 +138,11 @@ sub try_ssl_write {
          if ($! != Errno::EAGAIN
              or my $err = Net::SSLeay::ERR_get_error) {
 
-            $self->{disconnect_cb}->($self->{host}, $self->{port},
+            $self->disconnect (
                sprintf (
                   "Error while writing from server '$self->{host}:$self->{port}': (%d|%s|%s)",
                $err2, (Net::SSLeay::ERR_error_string $err), "$!")
             );
-            $self->end_sockets;
             return;
          }
       }
@@ -177,13 +174,12 @@ sub try_ssl_read {
       if ($! != Errno::EAGAIN
           or my $err = Net::SSLeay::ERR_get_error) {
 
-         $self->{disconnect_cb}->($self->{host}, $self->{port},
+         $self->disconnect (
             sprintf (
                "Error while reading from server '$self->{host}:$self->{port}':"
                ."(%d|%s|%s)",
                $err2, (Net::SSLeay::ERR_error_string $err), "$!")
          );
-         $self->end_sockets;
          return;
       }
    }
@@ -275,6 +271,12 @@ sub enable_ssl {
 
    $self->{ssl_read_data} = "";
    $self->make_ssl_read_watcher;
+}
+
+sub disconnect {
+   my ($self, $msg) = @_;
+   $self->end_sockets;
+   $self->{disconnect_cb}->($self->{host}, $self->{port}, $msg);
 }
 
 1;

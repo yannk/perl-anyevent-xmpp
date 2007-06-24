@@ -1,6 +1,6 @@
 package Net::XMPP2::IM::Contact;
 use strict;
-use Net::XMPP2::Util;
+use Net::XMPP2::Util qw/split_jid/;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::IM::Presence;
 use Net::XMPP2::IM::Message;
@@ -246,6 +246,24 @@ L<Net::XMPP2::IM::Presence> objects.
 
 sub get_presences { values %{$_[0]->{presences}} }
 
+=head2 get_priority_presence
+
+Returns the presence with the highest priority.
+
+=cut
+
+sub get_priority_presence {
+   my ($self) = @_;
+
+   my (@pres) =
+      sort {
+         $self->{presences}->{$b}->priority <=> $self->{presences}->{$a}->priority
+      } keys %{$self->{presences}};
+
+   return unless defined $pres[0];
+   $self->{presences}->{$pres[0]}
+}
+
 =head2 groups
 
 Returns the list of groups (strings) this contact is in.
@@ -317,6 +335,18 @@ That means: the contact has to aknowledge the subscription.
 sub subscription_pending {
    my ($self) = @_;
    $self->{ask}
+}
+
+=head2 nickname
+
+Returns the nickname of this contact.
+
+=cut
+
+sub nickname {
+   my ($self) = @_;
+   my ($user) = split_jid $self->jid;
+   $user
 }
 
 sub make_message {

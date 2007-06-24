@@ -1,6 +1,6 @@
 package Net::XMPP2::IM::Account;
 use strict;
-use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid/;
+use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid split_jid/;
 use Net::XMPP2::IM::Connection;
 
 =head1 NAME
@@ -43,6 +43,7 @@ sub spawn_connection {
    $self->{con} = Net::XMPP2::IM::Connection->new (
       jid      => $self->jid,
       password => $self->{password},
+      disable_ssl => 1,
       ($self->{host} ? (override_host => $self->{host}) : ()),
       ($self->{port} ? (override_port => $self->{port}) : ()),
    )
@@ -92,6 +93,20 @@ Returns always the bare jid of this account.
 sub bare_jid {
    my ($self) = @_;
    prep_bare_jid $self->jid
+}
+
+=head2 nickname ()
+
+Your nickname for this account.
+
+=cut
+
+sub nickname {
+   my ($self) = @_;
+   # FIXME: fetch real nickname from server somehow? Does that exist?
+   # eg. from the roster?
+   my ($user, $host, $res) = split_jid ($self->bare_jid);
+   $user
 }
 
 1;

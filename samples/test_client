@@ -66,10 +66,11 @@ $cl->reg_cb (contact_did_unsubscribe => sub {
 $cl->reg_cb (roster_update => sub {
    my ($cl, $acc, $roster, $contacts) = @_;
 
-   $roster->new_contact ('elmex@jabber.org', 'Der elmex', ['ABC', 'TEst'], sub {
+ #  $roster->new_contact ('elmex@jabber.org', 'Der elmex', ['ABC', 'TEst'], sub {
   #    $roster->get_contact ('elmex@jabber.org')->send_subscribe;
   #    $roster->delete_contact ('elmex@jabber.org');
-   });
+  # });
+  $cl->remove_accounts ("TEST");
 
    0
 });
