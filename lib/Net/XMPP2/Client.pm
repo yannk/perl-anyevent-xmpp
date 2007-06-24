@@ -123,6 +123,11 @@ sub update_connections {
       unless ($acc->is_connected) {
          my $con = $acc->spawn_connection;
 
+         $con->add_forward ($self, sub {
+            my ($con, $self, $ev, @arg) = @_;
+            $self->event ($ev, $acc, @arg);
+         });
+
          $con->reg_cb (
             session_ready => sub {
                my ($con) = @_;
@@ -132,26 +137,6 @@ sub update_connections {
             },
             debug_recv      => sub { print "RRRRRRRRECVVVVVV:\n"; _dumpxml ($_[1]); 1 },
             debug_send      => sub { print "SSSSSSSSENDDDDDD:\n"; _dumpxml ($_[1]); 1 },
-            message         => sub {
-               my ($con, $msg) = @_;
-               $self->event (message => $acc, $msg);
-               1
-            },
-            roster_update => sub {
-               my ($con, $roster, $contacts) = @_;
-               $self->event (roster_update => $acc, $roster, $contacts);
-               1
-            },
-            sasl_error => sub {
-               my ($con, $error) = @_;
-               $self->event (sasl_error => $acc, $error);
-               1
-            },
-            presence_update => sub {
-               my ($con, $roster, $contact, $old, $new) = @_;
-               $self->event (presence_update => $acc, $roster, $contact, $old, $new);
-               1
-            }
          );
 
          $con->connect
@@ -241,10 +226,13 @@ sub find_account_for_dest_jid {
 
 =head1 EVENTS
 
-These events can be registered on with C<reg_cb>:
-
 In the following event descriptions the argument C<$account>
 is always a L<Net::XMMP2::IM::Account> object.
+
+All events from L<Net::XMPP2::IM::Connection> are forwarded to the client,
+only that the first argument for every event is a C<$account> object.
+
+Aside fom those, these events can be registered on with C<reg_cb>:
 
 =over 4
 
@@ -261,17 +249,6 @@ account C<$account>.
 
 This event is emitted when any error occured while communicating
 over the connection to the C<$account> - after a connection was established.
-
-=item presence_update => $account, $roster, $contact, $old_presence, $new_presence
-
-This event is emitted when a presence update was received on the C<$account>.
-For a description of the other argument please look at the documentation
-of the C<presence_update> event in L<Net::XMPP2::IM::Connection>.
-
-=item message => $account, $msg
-
-This event is emited when a message has been received on the C<$account>.
-C<$msg> is a L<Net::XMPP2::IM::Message> object.
 
 =back
 

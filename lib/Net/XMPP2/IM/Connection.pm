@@ -208,6 +208,9 @@ sub handle_disconnect {
 
 These additional events can be registered on with C<reg_cb>:
 
+In the following events C<$roster> is the L<Net::XMPP2::IM::Roster>
+object you get by calling C<get_roster>.
+
 =over 4
 
 =item session_ready
@@ -224,8 +227,6 @@ error object.
 =item roster_update => $roster, $contacts
 
 This event is emitted when a roster update has been received.
-C<$roster> is the L<Net::XMPP2::IM::Roster> object you get by
-calling C<get_roster>.
 C<$contacts> is an array reference of L<Net::XMPP2::IM::Contact> objects
 which have changed. If a contact was removed it will return 'remove'
 when you call the C<subscription> method on it.
@@ -242,8 +243,6 @@ C<$error> will be an L<Net::XMPP2::Error::IQ> error object.
 =item presence_update => $roster, $contact, $old_presence, $new_presence
 
 This event is emitted when the presence of a contact has changed.
-C<$roster> is the L<Net::XMPP2::IM::Roster> object you get by
-calling C<get_roster>.
 C<$contact> is the L<Net::XMPP2::IM::Contact> object which presence status
 has changed.
 C<$old_presence> is a L<Net::XMPP2::IM::Presence> object which represents the
@@ -255,6 +254,35 @@ presence after to the change.
 
 This event is emitted when a message was received.
 C<$msg> is a L<Net::XMPP2::IM::Message> object.
+
+=item contact_request_subscribe => $roster, $contact, $rdoit
+
+This event is generated when the C<$contact> wants to subscribe
+to your presence. C<$rdoit> is a reference to a scalar. Setting
+the referenced scalar to 1 will accept the subscription request and send
+a subscribed presence.
+
+If you want to accept or decline the request laster call
+L<Net::XMPP2::IM::Contact::send_subscribed> or
+L<Net::XMPP2::IM::Contact::send_unsubscribed> on C<$contact>.
+
+=item contact_subscribed => $roster, $contact
+
+This event is generated when C<$contact> subscribed to your presence successfully.
+
+=item contact_did_unsubscribe => $roster, $contact, $rdoit
+
+This event is generated when C<$contact> unsubscribes from your presence.
+Setting the in C<$rdoit> referenced scalar to 1 will also let you unsubscribe
+from his presence.
+
+If you want to unsubscribe later from him call L<Net::XMPP2::IM::Contact::send_unsubscribed> on C<$contact>.
+
+=item contact_unsubscribed => $roster, $contact
+
+This event is generated when C<$contact> unsubscribed you from his presence.
+
+=item
 
 =back
 

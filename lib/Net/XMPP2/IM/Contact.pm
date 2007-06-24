@@ -115,6 +115,17 @@ sub send_subscribe {
    $self->{connection}->send_presence ('subscribe', undef, to => $self->jid);
 }
 
+=head2 send_subscribed ()
+
+This method accepts a contact's subscription request.
+
+=cut
+
+sub send_subscribed {
+   my ($self) = @_;
+   $self->{connection}->send_presence ('subscribed', undef, to => $self->jid);
+}
+
 =head2 send_unsubscribe ()
 
 This method sends this contact a unsubscription request.
@@ -125,6 +136,19 @@ sub send_unsubscribe {
    my ($self) = @_;
    $self->{connection}->send_presence ('unsubscribe', undef, to => $self->jid);
 }
+
+=head2 send_unsubscribed ()
+
+This method sends this contact a unsubscription request which unsubscribes
+ones own presence from him (he wont get any further presence from us).
+
+=cut
+
+sub send_unsubscribed {
+   my ($self) = @_;
+   $self->{connection}->send_presence ('unsubscribed', undef, to => $self->jid);
+}
+
 
 =head2 update ($item)
 

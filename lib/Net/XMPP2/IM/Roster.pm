@@ -76,7 +76,9 @@ sub update_presence {
       return unless defined $doit;
 
       if ($doit) {
+         $contact->send_subscribed;
       } else {
+         $contact->send_unsubscribed;
       }
 
    } elsif ($type eq 'subscribed') {
@@ -84,11 +86,11 @@ sub update_presence {
 
    } elsif ($type eq 'unsubscribe') {
       my $doit;
-      $self->{connection}->event (contact_request_unsubscribe => $self, $contact, \$doit);
+      $self->{connection}->event (contact_did_unsubscribe => $self, $contact, \$doit);
       return unless defined $doit;
 
       if ($doit) {
-      } else {
+         $contact->send_unsubscribe;
       }
 
    } elsif ($type eq 'unsubscribed') {

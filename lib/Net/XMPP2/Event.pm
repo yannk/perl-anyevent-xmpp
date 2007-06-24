@@ -86,7 +86,27 @@ sub event {
       $_->[1]->($self, @arg) and push @$nxt, $_;
    }
 
+   for (values %{$self->{event_forwards}}) {
+      $_->[1]->($self, $_->[0], $ev, @arg);
+   }
+
    $self->{events}->{lc $ev} = $nxt;
+}
+
+=head2 add_forward ($obj, $forward_cb)
+
+This method allows to forward or copy all events to a object.
+C<$forward_cb> will be called everytime a event is generated in C<$self>.
+The first argument to the callback C<$forward_cb> will be <$self>, the second
+will be C<$obj>, the third will be the event name and the rest will be
+the event arguments. (For third and rest of argument also see description
+of C<event>).
+
+=cut
+
+sub add_forward {
+   my ($self, $obj, $forward_cb) = @_;
+   $self->{event_forwards}->{$obj} = [$obj, $forward_cb];
 }
 
 =head1 AUTHOR

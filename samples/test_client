@@ -50,17 +50,29 @@ $cl->reg_cb (
    }
 );
 
+$cl->reg_cb (contact_request_subscribe => sub {
+   my ($cl, $acc, $roster, $contact, $rdoit) = @_;
+   $$rdoit = 1;
+   $contact->send_subscribe;
+   1
+});
+
+$cl->reg_cb (contact_did_unsubscribe => sub {
+   my ($cl, $acc, $roster, $contact, $rdoit) = @_;
+   $$rdoit = 1;
+   1
+});
+
 $cl->reg_cb (roster_update => sub {
    my ($cl, $acc, $roster, $contacts) = @_;
 
-  # $roster->new_contact ('elmex@jabber.org', 'Der elmex', ['ABC', 'TEst'], sub {
+   $roster->new_contact ('elmex@jabber.org', 'Der elmex', ['ABC', 'TEst'], sub {
   #    $roster->get_contact ('elmex@jabber.org')->send_subscribe;
   #    $roster->delete_contact ('elmex@jabber.org');
-  # });
+   });
 
    0
 });
-
 
 $cl->start;
 
