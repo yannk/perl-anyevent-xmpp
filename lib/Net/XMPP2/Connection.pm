@@ -265,6 +265,11 @@ sub write_data {
 sub handle_stanza {
    my ($self, $p, $node) = @_;
 
+   if (not defined $node) { # got stream end
+      $self->disconnect ("end of 'XML' stream encountered");
+      return;
+   }
+
    if ($node->eq (stream => 'features')) {
       $self->event (stream_features => $node);
       $self->handle_stream_features ($node);
@@ -546,6 +551,7 @@ sub handle_stream_features {
    my @mechs = $node->find_all ([qw/sasl mechanisms/], [qw/sasl mechanism/]);
    my @bind  = $node->find_all ([qw/bind bind/]);
    my @tls   = $node->find_all ([qw/tls starttls/]);
+   my @iqa   = $node->find_all ([qw/iqauth auth/]);
 
    # and yet another weird thingie: in XEP-0077 it's said that
    # the register feature MAY be advertised by the server. That means:
@@ -559,8 +565,10 @@ sub handle_stream_features {
    } elsif (not $self->{authenticated}) {
       if ($self->{register}) {
          $self->do_auto_register (\@mechs);
-      } else {
-         $self->send_sasl_auth (@mechs) if @mechs;
+      } elsif (@mechs) {
+         $self->send_sasl_auth (@mechs)
+      } elsif (@iqa) {
+         $self->do_iq_auth;
       }
 
    } elsif (@bind) {
@@ -585,8 +593,13 @@ sub handle_error {
    my ($self, $node) = @_;
    my $error = Net::XMPP2::Error::Stream->new (node => $node);
 
-   $self->event (stream_error     => $error);
+   $self->event (stream_error => $error);
    $self->{writer}->send_end_of_stream;
+}
+
+sub do_iq_auth {
+   my ($self) = @_;
+   # TODO
 }
 
 =head2 send_presence ($type, $create_cb, %attrs)

@@ -20,6 +20,7 @@ our %NAMESPACES = (
    disco_info  => 'http://jabber.org/protocol/disco#info',
    disco_items => 'http://jabber.org/protocol/disco#items',
    register    => 'http://jabber.org/features/iq-register',
+   iqauth      => 'http://jabber.org/features/iq-auth',
 );
 
 =head1 NAME

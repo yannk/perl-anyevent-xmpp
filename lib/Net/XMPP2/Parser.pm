@@ -142,6 +142,8 @@ sub cb_end_tag {
 
    if (@{$self->{nodestack}} == 1) {
       $self->{stanza_cb}->($self, $node);
+   } elsif (@{$self->{nodestack}} == 0) {
+      $self->{stanza_cb}->($self, undef);
    }
 }
 

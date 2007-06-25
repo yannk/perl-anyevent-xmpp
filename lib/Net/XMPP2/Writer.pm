@@ -184,7 +184,9 @@ sub send_sasl_auth {
    my $sasl = Authen::SASL->new (
       mechanism => $mechanisms,
       callback => {
-         authname => $user,# . '@' . $domain,
+ # XXX: removed authname, because it ensures maximum connectivitiy
+ #      along multiple server implementations - XMPP is such a crap
+ #        authname => $user . '@' . $domain,
          user => $user,
          pass => $pass,
       }

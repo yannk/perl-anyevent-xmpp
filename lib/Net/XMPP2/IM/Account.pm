@@ -43,7 +43,6 @@ sub spawn_connection {
    $self->{con} = Net::XMPP2::IM::Connection->new (
       jid      => $self->jid,
       password => $self->{password},
-      disable_ssl => 1,
       ($self->{host} ? (override_host => $self->{host}) : ()),
       ($self->{port} ? (override_port => $self->{port}) : ()),
    )

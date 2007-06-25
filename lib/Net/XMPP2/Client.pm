@@ -132,15 +132,20 @@ sub update_connections {
             session_ready => sub {
                my ($con) = @_;
                $self->event (connected => $acc);
-               warn "ADDED ACCOUNT $acc->{jid} [$con]\n";
                0 # do once
             },
             debug_recv      => sub { print "RRRRRRRRECVVVVVV:\n"; _dumpxml ($_[1]); 1 },
             debug_send      => sub { print "SSSSSSSSENDDDDDD:\n"; _dumpxml ($_[1]); 1 },
+            disconnect => sub {
+               delete $self->{accounts}->{$acc};
+               0
+            }
          );
 
-         $con->connect
-            or die "Couldn't connect to ".($acc->jid).": $!";
+         unless ($con->connect) {
+            $self->event (connect_error => "Couldn't connect to ".($acc->jid).": $!");
+            next
+         }
          $con->init
       }
    }
@@ -172,6 +177,20 @@ sub remove_accounts {
       if ($acca->is_connected) { $acca->connection ()->disconnect ($msg) }
       delete $self->{accounts}->{$acc};
    }
+}
+
+=item remove_account ($acc)
+
+Removes and disconnects account C<$acc>.
+
+=cut
+
+sub remove_account {
+   my ($self, $acc, $reason) = @_;
+   if ($acc->is_connected) {
+      $acc->connection ()->disconnect ($reason);
+   }
+   delete $self->{accounts}->{$acc};
 }
 
 =item send_message ($msg, $dest_jid, $src)
@@ -233,6 +252,12 @@ sub get_account {
    $self->{accounts}->{prep_bare_jid $jid}
 }
 
+sub get_connected_accounts {
+   my ($self, $jid) = @_;
+   my (@a) = grep $_->is_connected, values %{$self->{accounts}};
+   @a
+}
+
 sub find_account_for_dest_jid {
    my ($self, $jid) = @_;
 
@@ -250,6 +275,17 @@ sub find_account_for_dest_jid {
    }
 
    $any_acc
+}
+
+sub get_contacts_for_jid {
+   my ($self, $jid) = @_;
+   my @cons;
+   for ($self->get_connected_accounts) {
+      my $roster = $_->connection ()->get_roster ();
+      my $con = $roster->get_contact ($jid);
+      push @cons, $con if $con;
+   }
+   return @cons;
 }
 
 =head1 EVENTS

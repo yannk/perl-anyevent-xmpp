@@ -345,8 +345,13 @@ Returns the nickname of this contact.
 
 sub nickname {
    my ($self) = @_;
-   my ($user) = split_jid $self->jid;
-   $user
+   my $n = $self->name;
+
+   if ($n eq '') {
+      my ($user) = split_jid $self->jid;
+      $n = $user;
+   }
+   $n
 }
 
 sub make_message {

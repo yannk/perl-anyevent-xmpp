@@ -2,6 +2,8 @@
 - todo group that is mostly finished
 + todo item that is mostly finished
 
+* implement iq-auth!!!!
+
 * Net::XMPP2::Client
   - find a way to distinguish presences from JIDs that
     are in multiple account's roster.

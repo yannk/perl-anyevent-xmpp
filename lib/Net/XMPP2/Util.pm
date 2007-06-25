@@ -53,7 +53,7 @@ sub prep_join_jid {
    my ($node, $domain, $resource) = @_;
    my $jid = "";
 
-   if (defined $node) {
+   if ($node ne '') {
       $node = nodeprep ($node);
       return undef unless defined $node;
       $jid .= "$node\@";
@@ -62,7 +62,7 @@ sub prep_join_jid {
    $domain = $domain; # TODO: apply IDNA!
    $jid .= $domain;
 
-   if (defined $resource) {
+   if ($resource ne '') {
       $resource = resourceprep ($resource);
       return undef unless defined $resource;
       $jid .= "/$resource";
@@ -83,9 +83,9 @@ See also L<prep_join_jid>
 sub join_jid {
    my ($node, $domain, $resource) = @_;
    my $jid = "";
-   $jid .= "$node\@" if defined $node;
+   $jid .= "$node\@" if $node ne '';
    $jid .= $domain;
-   $jid .= "/$resource" if defined $resource;
+   $jid .= "/$resource" if $resource ne '';
    $jid
 }
 
