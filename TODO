@@ -9,6 +9,7 @@
     are in multiple account's roster.
 
 * Net::XMPP2 missing functionality to be RFC 3920 conform:
+   * implement message and presence errors!!!!
    + add timeouts to IQs!
    - improve error handling for SASL to 
      support retries as specified in RFC 3920.
