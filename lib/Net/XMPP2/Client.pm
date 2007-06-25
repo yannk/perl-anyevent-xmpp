@@ -288,6 +288,24 @@ sub get_contacts_for_jid {
    return @cons;
 }
 
+sub get_priority_presence_for_jid {
+   my ($self, $jid) = @_;
+
+   my $lpres;
+   for ($self->get_connected_accounts) {
+      my $roster = $_->connection ()->get_roster ();
+      my $con = $roster->get_contact ($jid);
+      next unless defined $con;
+      my $pres = $con->get_priority_presence ($jid);
+      next unless defined $pres;
+      if ((not defined $lpres) || $lpres->priority < $pres->priority) {
+         $lpres = $pres;
+      }
+   }
+
+   $lpres
+}
+
 =head1 EVENTS
 
 In the following event descriptions the argument C<$account>
