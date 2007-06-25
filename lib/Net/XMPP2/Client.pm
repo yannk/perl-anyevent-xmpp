@@ -252,6 +252,11 @@ sub get_account {
    $self->{accounts}->{prep_bare_jid $jid}
 }
 
+sub get_accounts {
+   my ($self) = @_;
+   values %{$self->{accounts}}
+}
+
 sub get_connected_accounts {
    my ($self, $jid) = @_;
    my (@a) = grep $_->is_connected, values %{$self->{accounts}};
@@ -304,6 +309,20 @@ sub get_priority_presence_for_jid {
    }
 
    $lpres
+}
+
+sub set_presence {
+   my ($self, $show, $status, $priority) = @_;
+
+   for my $ac ($self->get_connected_accounts) {
+      my $con = $ac->connection ();
+      $con->send_presence (
+         undef, undef,
+         show => $show,
+         status => $status,
+         priority => $priority
+      );
+   }
 }
 
 =head1 EVENTS
