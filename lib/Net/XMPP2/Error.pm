@@ -213,7 +213,7 @@ sub init {
    my ($self) = @_;
    my $node = $self->xml_node;
 
-   my @txt = $node->find_all ([qw/stream text/]);
+   my @txt = $node->find_all ([qw/streams text/]);
    my $error;
    for my $er (
       qw/bad-format bad-namespace-prefix conflict connection-timeout host-gone
@@ -223,19 +223,17 @@ sub init {
          see-other-host system-shutdown undefined-condition unsupported-stanza-type
          unsupported-version xml-not-well-formed/)
    {
-      for ($node->nodes) {
-         if ($node->eq (streams => $er)) {
-            $error = $_->name;
-            last
-         }
+      if (my (@n) = $node->find_all ([streams => $er])) {
+         $error = $n[0]->name;
+         last;
       }
    }
 
    unless ($error) {
       #d# warn "got undefined error stanza, trying to find any undefined error...";
-      for ($node->nodes) {
-         if ($node->eq_ns ('streams')) {
-            $error = $node->name;
+      for my $n ($node->nodes) {
+         if ($n->eq_ns ('streams')) {
+            $error = $n->name;
          }
       }
    }
@@ -301,9 +299,9 @@ sub text { $_[0]->{error_text} }
 sub string {
    my ($self) = @_;
 
-   sprintf "stream error: %s: %s",
+   sprintf ("stream error: %s: %s",
       $self->name,
-      $self->text
+      $self->text)
 }
 
 package Net::XMPP2::Error::SASL;
