@@ -31,7 +31,11 @@ This creates a new Net::XMPP2::Parser and calls C<init>.
 sub new {
    my $this = shift;
    my $class = ref($this) || $this;
-   my $self = { stanza_cb => sub { die "No stanza callback provided!" }, @_ };
+   my $self = {
+      stanza_cb => sub { die "No stanza callback provided!" },
+      error_cb  => sub { warn "No error callback provided: $_[0]: $_[1]!" },
+      @_
+   };
    bless $self, $class;
    $self->init;
    $self
@@ -45,11 +49,26 @@ C<$cb> must be a code reference. The first argument to
 the callback will be this Net::XMPP2::Parser instance and
 the second will be the stanzas root Net::XMPP2::Node as first argument.
 
+If the second argument is undefined the end of the stream has been found.
+
 =cut
 
 sub set_stanza_cb {
    my ($self, $cb) = @_;
    $self->{stanza_cb} = $cb;
+}
+
+=head2 set_error_cb ($cb)
+
+This sets the error callback that will be called when
+the parser encounters an syntax error. The first argument
+is the exception and the second is the data which caused the error.
+
+=cut
+
+sub set_error_cb {
+   my ($self, $cb) = @_;
+   $self->{error_cb} = $cb;
 }
 
 =head2 init
@@ -102,7 +121,12 @@ This method feeds a chunk of unparsed data to the parser.
 
 sub feed {
    my ($self, $data) = @_;
-   $self->{parser}->parse_more ($data);
+   eval {
+      $self->{parser}->parse_more ($data);
+   };
+   if ($@) {
+      $self->{error_cb}->($@, $data);
+   }
 }
 
 

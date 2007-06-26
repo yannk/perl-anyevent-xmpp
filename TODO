@@ -4,6 +4,8 @@
 
 * implement iq-auth!!!!
 
+* make error callback of parser ultimately to an error object
+
 * Net::XMPP2::Client
   - find a way to distinguish presences from JIDs that
     are in multiple account's roster.

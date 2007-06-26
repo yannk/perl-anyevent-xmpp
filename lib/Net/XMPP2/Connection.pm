@@ -136,6 +136,10 @@ sub new {
    $self->{parser}->set_stanza_cb (sub {
       $self->handle_stanza (@_);
    });
+   $self->{parser}->set_error_cb (sub {
+      $self->event (xml_parser_error => $_[0], $_[1]);
+      $self->disconnect ("xml error: $_[0], $_[1]");
+   });
 
    $self->{iq_id}              = 1;
    $self->{default_iq_timeout} = 60;
