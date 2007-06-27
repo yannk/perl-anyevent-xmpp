@@ -134,8 +134,8 @@ sub update_connections {
                $self->event (connected => $acc);
                0 # do once
             },
-            debug_recv      => sub { print "RRRRRRRRECVVVVVV:\n"; _dumpxml ($_[1]); 1 },
-            debug_send      => sub { print "SSSSSSSSENDDDDDD:\n"; _dumpxml ($_[1]); 1 },
+            # debug_recv      => sub { print "RRRRRRRRECVVVVVV:\n"; _dumpxml ($_[1]); 1 },
+            # debug_send      => sub { print "SSSSSSSSENDDDDDD:\n"; _dumpxml ($_[1]); 1 },
             disconnect => sub {
                delete $self->{accounts}->{$acc};
                0
