@@ -26,7 +26,8 @@ my $j = AnyEvent->condvar;
 
 my $cl = Net::XMPP2::Client->new;
 #$cl->add_account ('elmex@jabber.org/Net::XどなPP2', 'xxxxxxxx');
-$cl->add_account ('elmor@jabber.org/Net::XどなPP2', 'xxxxxxxx');
+#$cl->add_account ('elmor@jabber.org/Net::XどなPP2', 'xxxxxxxx');
+$cl->add_account ('elmex@localhost/Net::XどなPP2', 'xxxxxxxx');
 $cl->reg_cb (
    connected => sub {
      # $cl->send_message ("Hello!" => 'elmex@jabber.org');
@@ -47,7 +48,16 @@ $cl->reg_cb (
    sasl_error => sub {
       my ($cl, $acc, $error) = @_;
       print "SASL ERROR".$error->string."\n";
-   }
+   },
+   disconnect => sub { warn "DISCON[@_]\n"; 1 },
+   debug_send => sub {
+      warn "send: @_\n";
+      1
+   },
+   debug_recv => sub {
+      warn "recv: @_\n";
+      1
+   },
 );
 
 $cl->reg_cb (contact_request_subscribe => sub {
@@ -66,11 +76,13 @@ $cl->reg_cb (contact_did_unsubscribe => sub {
 $cl->reg_cb (roster_update => sub {
    my ($cl, $acc, $roster, $contacts) = @_;
 
+  $roster->debug_dump;
+  print "ROSTER!\n";
  #  $roster->new_contact ('elmex@jabber.org', 'Der elmex', ['ABC', 'TEst'], sub {
   #    $roster->get_contact ('elmex@jabber.org')->send_subscribe;
   #    $roster->delete_contact ('elmex@jabber.org');
   # });
-  $cl->remove_accounts ("TEST");
+  #$cl->remove_accounts ("TEST");
 
    0
 });

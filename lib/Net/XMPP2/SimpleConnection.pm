@@ -1,4 +1,6 @@
 package Net::XMPP2::SimpleConnection;
+use strict;
+
 use IO::Socket::INET;
 use Errno;
 use Fcntl;
@@ -160,10 +162,25 @@ sub try_ssl_read {
    my $r = Net::SSLeay::read ($self->{ssl});
 
    if (defined $r) {
+      if ($r eq '') {
+         if (my $err = Net::SSLeay::ERR_get_error) {
+            $self->disconnect (
+               sprintf (
+                  "Error while reading from server '$self->{host}:$self->{port}':"
+                  ."(%s|%s)",
+                  (Net::SSLeay::ERR_error_string $err), "$!")
+            );
+            return;
+         }
+         # is this right? $r = '' => EOF? sucky Net::SSLeay... arg...
+         $self->disconnect ("EOF from server '$self->{host}:$self->{port}'.");
+         return;
+      }
+
       $self->{read_buffer} .= decode_utf8 ($r);
       $self->handle_data (\$self->{read_buffer});
    } else {
-      my $err2 = Net::SSLeay::get_error $self->{ssl}, $l;
+      my $err2 = Net::SSLeay::get_error $self->{ssl}, $r;
       if ($err2 == 2 || $err2 == 3) {
          #d# warn "READ RETRY $err2\n";
          delete $self->{r};
