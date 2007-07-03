@@ -49,12 +49,12 @@ sub string {
    $self->{text}
 }
 
-package Net::XMPP2::Error::IQ;
+package Net::XMPP2::Error::Stanza;
 our @ISA = qw/Net::XMPP2::Error/;
 
 =head1 SUBCLASS
 
-Net::XMPP2::Error::IQ - IQ errors
+Net::XMPP2::Error::Stanza - Stanza errors
 
 =cut
 
@@ -63,8 +63,8 @@ sub init {
    my $node = $self->xml_node;
 
    unless (defined $node) {
-      $self->{iq_error_cond} = 'client-timeout';
-      $self->{iq_error_type} = 'cancel';
+      $self->{error_cond} = 'client-timeout';
+      $self->{error_type} = 'cancel';
       return;
    }
 
@@ -73,15 +73,15 @@ sub init {
 
    unless ($err) {
       warn "No error element found in error stanza!";
-      $self->{text} = "Unknown IQ error";
+      $self->{text} = "Unknown Stanza error";
       return
    }
 
-   $self->{iq_error_type} = $err->attr ('type');
-   $self->{iq_error_code} = $err->attr ('code');
+   $self->{error_type} = $err->attr ('type');
+   $self->{error_code} = $err->attr ('code');
 
    if (my ($txt) = $err->find_all ([qw/stanzas text/])) {
-      $self->{iq_error_text} = $txt->text;
+      $self->{error_text} = $txt->text;
    }
 
    for my $er (
@@ -94,8 +94,8 @@ sub init {
         unexpected-request/)
    {
       if (my ($el) = $err->find_all ([stanzas => $er])) {
-         $self->{iq_error_cond}      = $er;
-         $self->{iq_error_cond_node} = $el;
+         $self->{error_cond}      = $er;
+         $self->{error_cond_node} = $el;
          last;
       }
    }
@@ -105,8 +105,8 @@ sub init {
 
 =head3 xml_node ()
 
-Returns the L<Net::XMPP2::Node> object for this IQ error.
-This method returns undef if the IQ timeouted.
+Returns the L<Net::XMPP2::Node> object for this Stanza error.
+This method returns undef if the Stanza timeouted.
 
 In the case of a timeout the C<condition> method returns C<client-timeout>,
 C<type> returns 'cancel' and C<code> undef.
@@ -127,7 +127,7 @@ This method returns one of:
 
 =cut
 
-sub type { $_[0]->{iq_error_type} }
+sub type { $_[0]->{error_type} }
 
 =head3 code ()
 
@@ -135,11 +135,11 @@ This method returns the error code if one was found.
 
 =cut
 
-sub code { $_[0]->{iq_error_code} }
+sub code { $_[0]->{error_code} }
 
 =head3 condition ()
 
-Returns the error condition string if one was found when receiving the IQ error.
+Returns the error condition string if one was found when receiving the Stanza error.
 It can be undef or one of:
 
    bad-request
@@ -165,22 +165,19 @@ It can be undef or one of:
    undefined-condition
    unexpected-request
 
-Or, in case of a IQ timeout it returns:
-
-   'client-timeout'
 
 =cut
 
-sub condition { $_[0]->{iq_error_cond} }
+sub condition { $_[0]->{error_cond} }
 
 =head3 condition_node ()
 
-Returns the error condition node if one was found when receiving the IQ error.
+Returns the error condition node if one was found when receiving the Stanza error.
 This is mostly for debugging purposes.
 
 =cut
 
-sub condition_node { $_[0]->{iq_error_cond_node} }
+sub condition_node { $_[0]->{error_cond_node} }
 
 =head3 text ()
 
@@ -188,7 +185,92 @@ The humand readable error portion. Might be undef if none was received.
 
 =cut
 
-sub text { $_[0]->{iq_error_text} }
+sub text { $_[0]->{error_text} }
+
+sub string {
+   my ($self) = @_;
+
+   sprintf "stanza error: %s/%s (type %s): %s",
+      $self->code || '',
+      $self->condition || '',
+      $self->type,
+      $self->text
+}
+
+package Net::XMPP2::Error::Presence;
+our @ISA = qw/Net::XMPP2::Error::Stanza/;
+
+=head1 SUBCLASS
+
+Net::XMPP2::Error::Presence - Message errors
+
+(Subclass of L<Net::XMPP2::Error::Stanza>)
+
+=cut
+
+sub string {
+   my ($self) = @_;
+
+   sprintf "presence error: %s/%s (type %s): %s",
+      $self->code || '',
+      $self->condition || '',
+      $self->type,
+      $self->text
+}
+
+package Net::XMPP2::Error::Message;
+our @ISA = qw/Net::XMPP2::Error::Stanza/;
+
+=head1 SUBCLASS
+
+Net::XMPP2::Error::Message - Message errors
+
+(Subclass of L<Net::XMPP2::Error::Stanza>)
+
+=cut
+
+sub string {
+   my ($self) = @_;
+
+   sprintf "message error: %s/%s (type %s): %s",
+      $self->code || '',
+      $self->condition || '',
+      $self->type,
+      $self->text
+}
+
+package Net::XMPP2::Error::IQ;
+our @ISA = qw/Net::XMPP2::Error::Stanza/;
+
+=head1 SUBCLASS
+
+Net::XMPP2::Error::IQ - IQ errors
+
+(Subclass of L<Net::XMPP2::Error::Stanza>)
+
+=cut
+
+sub init {
+   my ($self) = @_;
+   my $node = $self->xml_node;
+
+   unless (defined $node) {
+      $self->{error_cond} = 'client-timeout';
+      $self->{error_type} = 'cancel';
+      return;
+   }
+
+   $self->SUPER::init;
+}
+
+=head3 condition ()
+
+Same as L<Net::XMPP2::Error::Stanza> except that
+in case of a IQ timeout it returns:
+
+   'client-timeout'
+
+=cut
 
 sub string {
    my ($self) = @_;

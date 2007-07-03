@@ -30,24 +30,34 @@ my $cl = Net::XMPP2::Client->new;
 $cl->add_account ('elmex@localhost/Net::XどなPP2', 'xxxxxxxx');
 $cl->reg_cb (
    connected => sub {
-     # $cl->send_message ("Hello!" => 'elmex@jabber.org');
+      $cl->send_message ("Hello!" => 'elmex@jabbfer.org');
+
       0
    },
    roster_update => sub {
       my ($cl, $acc, $roster, $contacts) = @_;
-      warn "ROSTER UPD\n";
       $roster->debug_dump;
+      $acc->connection ()->send_presence ('probe' => undef, to => 'elmex@jabfber.org');
       1
    },
    presence_update => sub {
       my ($cl, $acc, $roster, $contact, $old, $new) = @_;
-      warn "PRESENCE UPD\n";
       $roster->debug_dump;
       1
    },
    sasl_error => sub {
       my ($cl, $acc, $error) = @_;
       print "SASL ERROR".$error->string."\n";
+   },
+   presence_error => sub {
+      my ($cl, $acc, $error) = @_;
+      print "PRESENCE ERROR: " .  $error->string . "\n";
+      1;
+   },
+   message_error => sub {
+      my ($cl, $acc, $error) = @_;
+      print "MESSAGE ERROR: " .  $error->string . "\n";
+      1;
    },
    disconnect => sub { warn "DISCON[@_]\n"; 1 },
    debug_send => sub {

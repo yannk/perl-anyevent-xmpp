@@ -165,12 +165,24 @@ sub handle_iq_set {
 
 sub handle_presence {
    my ($self, $node) = @_;
+   if ($node->attr ('type') eq 'error') {
+      my $error = Net::XMPP2::Error::Presence->new (node => $node);
+      $self->event (presence_error => $error);
+      return if $error->type ne 'continue';
+   }
+
    my ($contact, $old, $new) = $self->{roster}->update_presence ($node);
    $self->event (presence_update => $self->{roster}, $contact, $old, $new)
 }
 
 sub handle_message {
    my ($self, $node) = @_;
+
+   if ($node->attr ('type') eq 'error') {
+      my $error = Net::XMPP2::Error::Message->new (node => $node);
+      $self->event (message_error => $error);
+      return if $error->type ne 'continue';
+   }
 
    my $from     = $node->attr ('from');
    my $to       = $node->attr ('to');
@@ -250,10 +262,20 @@ presence prior to the change.
 C<$new_presence> is a L<Net::XMPP2::IM::Presence> object which represents the
 presence after to the change.
 
+=item presence_error => $error
+
+This event is emitted when a presence stanza error was received.
+C<$error> will be an L<Net::XMPP2::Error::Presence> error object.
+
 =item message => $msg
 
 This event is emitted when a message was received.
 C<$msg> is a L<Net::XMPP2::IM::Message> object.
+
+=item message_error => $error
+
+This event is emitted when a message stanza error was received.
+C<$error> will be an L<Net::XMPP2::Error::Message> error object.
 
 =item contact_request_subscribe => $roster, $contact, $rdoit
 
