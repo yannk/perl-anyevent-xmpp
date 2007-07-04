@@ -123,7 +123,28 @@ sub remove_contact {
    delete $self->{contacts}->{$bjid};
 }
 
-=head2 new_contact ($jid, $name, $groups, $cb)
+sub set_retrieved {
+   my ($self) = @_;
+   $self->{retrieved} = 1;
+}
+
+=head1 METHODS
+
+=over 4
+
+=item B<is_retrieved>
+
+Returns true if this roster was fetched from the server or false if this
+roster hasn't been retrieved yet.
+
+=cut
+
+sub is_retrieved {
+   my ($self) = @_;
+   return $self->{retrieved}
+}
+
+=item B<new_contact ($jid, $name, $groups, $cb)>
 
 This method sends a roster item creation request to
 the server. C<$jid> is the JID of the contact.
@@ -151,7 +172,7 @@ sub new_contact {
    );
 }
 
-=head2 delete_contact ($jid, $cb)
+=item B<delete_contact ($jid, $cb)>
 
 This method will send a request to the server to delete this contact
 from the roster. It will result in cancelling all subscriptions.
@@ -185,7 +206,7 @@ sub delete_contact {
    );
 }
 
-=head2 get_contact ($jid)
+=item B<get_contact ($jid)>
 
 Returns the contact on the roster with the JID C<$jid>.
 (If C<$jid> is not bare the resource part will be stripped
@@ -201,7 +222,7 @@ sub get_contact {
    $self->{contacts}->{$bjid}
 }
 
-=head2 get_contacts
+=item B<get_contacts>
 
 Returns the contacts that are on this roster as
 L<Net::XMPP2::IM::Contact> objects.
@@ -219,7 +240,7 @@ sub get_contacts {
    grep { $_->is_on_roster } values %{$self->{contacts}}
 }
 
-=head2 get_contacts_off_roster
+=item B<get_contacts_off_roster>
 
 Returns the contacts that are not on the roster
 but for which we have received presence.
@@ -235,7 +256,7 @@ sub get_contacts_off_roster {
    grep { not $_->is_on_roster } values %{$self->{contacts}}
 }
 
-=head2 subscribe ($jid)
+=item B<subscribe ($jid)>
 
 This method sends a subscription request to C<$jid>.
 If the optional C<$not_mutual> paramenter is true
@@ -248,7 +269,7 @@ sub subscribe {
    # FIXME / TODO
 }
 
-=head2 debug_dump
+=item B<debug_dump>
 
 This prints the roster and all it's contacts
 and their presences.
@@ -270,7 +291,6 @@ sub debug_dump {
    }
    if ($self->get_contacts_off_roster) {
       print "### OFF ROSTER ###\n";
-      %groups;
       for my $contact ($self->get_contacts_off_roster) {
          push @{$groups{$_}}, $contact for $contact->groups;
          push @{$groups{''}}, $contact unless $contact->groups;
@@ -285,9 +305,11 @@ sub debug_dump {
    print "### ROSTER END ###\n";
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 SEE ALSO
 

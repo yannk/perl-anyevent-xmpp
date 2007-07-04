@@ -22,7 +22,9 @@ See also L<Net::XMPP2::Writer> for a discussion of the issues with XML in XMPP.
 
 =head1 METHODS
 
-=head2 new
+=over 4
+
+=item B<new>
 
 This creates a new Net::XMPP2::Parser and calls C<init>.
 
@@ -41,7 +43,7 @@ sub new {
    $self
 }
 
-=head2 set_stanza_cb ($cb)
+=item B<set_stanza_cb ($cb)>
 
 Sets the 'XML stanza' callback.
 
@@ -58,7 +60,7 @@ sub set_stanza_cb {
    $self->{stanza_cb} = $cb;
 }
 
-=head2 set_error_cb ($cb)
+=item B<set_error_cb ($cb)>
 
 This sets the error callback that will be called when
 the parser encounters an syntax error. The first argument
@@ -71,7 +73,7 @@ sub set_error_cb {
    $self->{error_cb} = $cb;
 }
 
-=head2 init
+=item B<init>
 
 This methods (re)initializes the parser.
 
@@ -92,7 +94,7 @@ sub init {
    $self->{nodestack} = [];
 }
 
-=head2 nseq ($namespace, $tagname, $cmptag)
+=item B<nseq ($namespace, $tagname, $cmptag)>
 
 This method checks whether the C<$cmptag> matches the C<$tagname>
 in the C<$namespace>.
@@ -113,7 +115,7 @@ sub nseq {
    return $self->{parser}->eq_name ($self->{nso}->{$ns}->{$name}, $tag);
 }
 
-=head2 feed ($data)
+=item B<feed ($data)>
 
 This method feeds a chunk of unparsed data to the parser.
 
@@ -171,9 +173,11 @@ sub cb_end_tag {
    }
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

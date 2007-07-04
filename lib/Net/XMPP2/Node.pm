@@ -21,9 +21,23 @@ Net::XMPP2::Node - A XML node tree helper for the parser.
    use Net::XMPP2::Node;
    ...
 
+=head1 DESCRIPTION
+
+This class represens a XML node. L<Net::XMPP2> should usually not
+require messing with the parse tree, but sometimes it is neccessary.
+
+If you experience any need for messing with these and feel L<Net::XMPP2> should
+rather take care of it drop me a mail, feature request or most preferably a patch!
+
+Every L<Net::XMPP2::Node> has a namespace, attributes, text and child nodes.
+
+You can access these with the following methods:
+
 =head1 METHODS
 
-=head2 new ($ns, $el, $attrs, $parser)
+=over 4
+
+=item B<new ($ns, $el, $attrs, $parser)>
 
 Creates a new Net::XMPP2::Node object with the node tag name C<$el> in the
 namespace URI C<$ns> and the attributes C<$attrs>. The C<$parser> must be
@@ -43,7 +57,7 @@ sub new {
    return $self
 }
 
-=head2 name
+=item B<name>
 
 The tag name of this node.
 
@@ -53,7 +67,7 @@ sub name {
    $_[0]->[NAME]
 }
 
-=head2 namespace
+=item B<namespace>
 
 Returns the namespace URI of this node.
 
@@ -63,7 +77,7 @@ sub namespace {
    $_[0]->[NS]
 }
 
-=head2 eq ($namespace_or_alias, $name) or eq ($node)
+=item B<eq ($namespace_or_alias, $name) or eq ($node)>
 
 Returns true whether the current element matches the tag name C<$name>
 in the namespaces pointed at by C<$namespace_or_alias>.
@@ -87,7 +101,7 @@ sub eq {
    }
 }
 
-=head2 eq_ns ($namespace_or_alias) or eq_ns ($node)
+=item B<eq_ns ($namespace_or_alias) or eq_ns ($node)>
 
 This method return true if the namespace of this instance of L<Net::XMPP2::Node>
 matches the namespace described by C<$namespace_or_alias> or the
@@ -108,7 +122,7 @@ sub eq_ns {
    }
 }
 
-=head2 attr ($name)
+=item B<attr ($name)>
 
 Returns the contents of the C<$name> attribute.
 
@@ -118,7 +132,7 @@ sub attr {
    $_[0]->[ATTRS]->{$_[1]};
 }
 
-=head2 add_node ($node)
+=item B<add_node ($node)>
 
 Adds a sub-node to the current node.
 
@@ -129,7 +143,7 @@ sub add_node {
    push @{$self->[NODES]}, $node;
 }
 
-=head2 nodes
+=item B<nodes>
 
 Returns a list of sub nodes.
 
@@ -139,7 +153,7 @@ sub nodes {
    @{$_[0]->[NODES] || []};
 }
 
-=head2 add_text ($string)
+=item B<add_text ($string)>
 
 Adds character data to the current node.
 
@@ -150,7 +164,7 @@ sub add_text {
    $self->[TEXT] .= $text;
 }
 
-=head2 text
+=item B<text>
 
 Returns the text for this node.
 
@@ -160,7 +174,7 @@ sub text {
    $_[0]->[TEXT];
 }
 
-=head2 find_all (@path)
+=item B<find_all (@path)>
 
 This method does a recursive descent through the sub-nodes and
 fetches all nodes that match the last element of C<@path>.
@@ -187,7 +201,7 @@ sub find_all {
    @ret
 }
 
-=head2 write_on ($writer)
+=item B<write_on ($writer)>
 
 This writes the current node out to the L<Net::XMPP2::Writer> object in C<$writer>.
 
@@ -207,9 +221,11 @@ sub write_on {
    }
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

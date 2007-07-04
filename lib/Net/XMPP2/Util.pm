@@ -3,7 +3,9 @@ use strict;
 use Encode;
 use Net::LibIDN qw/idn_prep_name idn_prep_resource idn_prep_node/;
 require Exporter;
-our @EXPORT_OK = qw/stringprep_jid split_jid prep_bare_jid/;
+our @EXPORT_OK = qw/resourceprep nodeprep prep_join_jid join_jid
+                    split_jid stringprep_jid prep_bare_jid bare_jid
+                    is_bare_jid/;
 our @ISA = qw/Exporter/;
 
 =head1 NAME
@@ -12,12 +14,16 @@ Net::XMPP2::Util - Utility functions for Net::XMPP2
 
 =head1 SYNOPSIS
 
-   use Net::XMPP2::Util;
+   use Net::XMPP2::Util qw/split_jid/;
    ...
 
 =head1 FUNCTIONS
 
-=head2 resourceprep ($string)
+These functions can be exported if you want:
+
+=over 4
+
+=item B<resourceprep ($string)>
 
 This function applies the stringprep profile for resources to C<$string>
 and returns the result.
@@ -29,7 +35,7 @@ sub resourceprep {
    decode_utf8 (idn_prep_resource (encode_utf8 ($str), 'UTF-8'))
 }
 
-=head2 nodeprep ($string)
+=item B<nodeprep ($string)>
 
 This function applies the stringprep profile for nodes to C<$string>
 and returns the result.
@@ -41,7 +47,7 @@ sub nodeprep {
    decode_utf8 (idn_prep_node (encode_utf8 ($str), 'UTF-8'))
 }
 
-=head2 prep_join_jid ($node, $domain, $resource)
+=item B<prep_join_jid ($node, $domain, $resource)>
 
 This function joins the parts C<$node>, C<$domain> and C<$resource>
 to a full jid and applies stringprep profiles. If the profiles couldn't
@@ -71,7 +77,7 @@ sub prep_join_jid {
    $jid
 }
 
-=head2 join_jid ($user, $domain, $resource)
+=item B<join_jid ($user, $domain, $resource)>
 
 This is a plain concatenation of C<$user>, C<$domain> and C<$resource>
 without stringprep.
@@ -89,7 +95,7 @@ sub join_jid {
    $jid
 }
 
-=head2 split_jid ($jid)
+=item B<split_jid ($jid)>
 
 This function splits up the C<$jid> into user/node, domain and resource
 part and will return them as list.
@@ -107,7 +113,7 @@ sub split_jid {
    }
 }
 
-=head2 stringprep_jid ($jid)
+=item B<stringprep_jid ($jid)>
 
 This applies stringprep to all parts of the jid according to the RFC 3920.
 Use this if you want to compare two jids like this:
@@ -126,7 +132,7 @@ sub stringprep_jid {
    return prep_join_jid ($user, $host, $res);
 }
 
-=head2 prep_bare_jid ($jid)
+=item B<prep_bare_jid ($jid)>
 
 This function makes the jid C<$jid> a bare jid, meaning:
 it will strip off the resource part. With stringprep.
@@ -139,7 +145,7 @@ sub prep_bare_jid {
    prep_join_jid ($user, $host)
 }
 
-=head2 bare_jid ($jid)
+=item B<bare_jid ($jid)>
 
 This function makes the jid C<$jid> a bare jid, meaning:
 it will strip off the resource part. But without stringprep.
@@ -152,7 +158,7 @@ sub bare_jid {
    join_jid ($user, $host)
 }
 
-=head2 is_bare_jid ($jid)
+=item B<is_bare_jid ($jid)>
 
 This method returns a boolean which indicates whether C<$jid> is a 
 bare JID.
@@ -165,9 +171,11 @@ sub is_bare_jid {
    defined $res
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

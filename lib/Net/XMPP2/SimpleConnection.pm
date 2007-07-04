@@ -28,7 +28,9 @@ Net::XMPP2::SimpleConnection - A low level TCP/TLS connection
 =head1 DESCRIPTION
 
 This module only implements the basic low level socket and SSL handling stuff.
-It is used by L<Net::XMPP2::Connection>.
+It is used by L<Net::XMPP2::Connection> and you shouldn't mess with it :-)
+
+(NOTE: This is the part of Net::XMPP2 which I feel least confident about :-)
 
 =cut
 

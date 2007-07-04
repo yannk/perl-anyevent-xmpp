@@ -15,6 +15,8 @@ sent by a C<Net::XMPP2::Ext::Disco> handler.
 
 =head1 METHODS
 
+=over 4
+
 =cut
 
 sub new {
@@ -25,7 +27,7 @@ sub new {
    $self
 }
 
-=head2 xml_node ()
+=item B<xml_node ()>
 
 Returns the L<Net::XMPP2::Node> object of the IQ query.
 
@@ -36,7 +38,7 @@ sub xml_node {
    $self->{xmlnode}
 }
 
-=head2 jid ()
+=item B<jid ()>
 
 Returns the JID these items belong to.
 
@@ -44,7 +46,7 @@ Returns the JID these items belong to.
 
 sub jid { $_[0]->{jid} }
 
-=head2 node ()
+=item B<node ()>
 
 Returns the node these items belong to (may be undef).
 
@@ -71,7 +73,7 @@ sub init {
 
 }
 
-=head2 identities ()
+=item B<identities ()>
 
 Returns a list of hashrefs which contain following keys:
 
@@ -93,7 +95,7 @@ sub identities {
    @{$self->{identities}}
 }
 
-=head2 features ()
+=item B<features ()>
 
 Returns a hashref of key/value pairs where the key is the feature name
 as listed on:
@@ -107,7 +109,7 @@ and the value is a L<Net::XMPP2::Node> object for the <feature/> node.
 sub features { $_[0]->{features} || {} }
 
 
-=head2 debug_dump ()
+=item B<debug_dump ()>
 
 Prints the information of this Info object to stdout.
 
@@ -122,13 +124,15 @@ sub debug_dump {
    for (sort keys %{$self->features}) {
       printf "   FEATURE: %s\n", $_;
    }
-   print "END ITEMS\n";p
+   print "END ITEMS\n";
 
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

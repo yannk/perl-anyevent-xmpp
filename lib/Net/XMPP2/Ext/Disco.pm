@@ -38,7 +38,9 @@ that others can walk and also lets you publish disco information.
 
 =head1 METHODS
 
-=head2 new (%args)
+=over 4
+
+=item B<new (%args)>
 
 Creates a new disco handle. Possible keys for the C<%args> hash are:
 
@@ -82,7 +84,7 @@ sub init {
       );
 }
 
-=head2 set_identity ($category, $type, $name)
+=item B<set_identity ($category, $type, $name)>
 
 This sets the identity of the top info node.
 The default is: C<$category = "client">, C<$type = "console">
@@ -113,7 +115,7 @@ sub set_identity {
 }
 
 
-=head2 enable_feature ($uri)
+=item B<enable_feature ($uri)>
 
 This method enables the feature C<$uri>, where C<$uri>
 should be one of the values from the B<Name> column on:
@@ -132,7 +134,7 @@ sub enable_feature {
    $self->{feat}->{$feature} = 1
 }
 
-=head2 disable_feature ($uri)
+=item B<disable_feature ($uri)>
 
 This method enables the feature C<$uri>, where C<$uri>
 should be one of the values from the B<Name> column on:
@@ -225,7 +227,7 @@ sub DESTROY {
 }
 
 
-=head2 request_items ($dest, $node, $cb)
+=item B<request_items ($dest, $node, $cb)>
 
 This method does send a items request to the JID entity C<$from>.
 C<$node> is the optional node to send the request to, which can be
@@ -274,7 +276,7 @@ sub request_items {
    );
 }
 
-=head2 request_info ($dest, $node, $cb)
+=item B<request_info ($dest, $node, $cb)>
 
 This method does send a info request to the JID entity C<$from>.
 C<$node> is the optional node to send the request to, which can be
@@ -323,9 +325,11 @@ sub request_info {
    );
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

@@ -19,7 +19,8 @@ Net::XMPP2::Writer - A "XML" writer for XMPP
 This module contains some helper functions for writing XMPP "XML",
 which is not real XML at all ;-( I use L<XML::Writer> and tune it
 until it creates "XML" that is accepted by most servers propably
-(all of the XMPP servers i tested yet work (jabberd14, jabberd2, ejabberd).
+(all of the XMPP servers I tested should work (jabberd14, jabberd2,
+ejabberd, googletalk).
 
 I hope the semantics of L<XML::Writer> don't change much over the future,
 but if they do and you run into problems, please report them!
@@ -82,7 +83,9 @@ XML-like, and some XML utilities allow you to process this kind of XML.".
 
 =head1 METHODS
 
-=head2 new (%args)
+=over 4
+
+=item B<new (%args)>
 
 This methods takes following arguments:
 
@@ -109,7 +112,7 @@ sub new {
    return $self;
 }
 
-=head2 init
+=item B<init>
 
 (Re)initializes the writer.
 
@@ -121,7 +124,7 @@ sub init {
    $self->{writer} = XML::Writer->new (OUTPUT => \$self->{write_buf}, NAMESPACES => 1);
 }
 
-=head2 flush ()
+=item B<flush ()>
 
 This method flushes the internal write buffer and will invoke the C<write_cb>
 callback. (see also C<new ()> above)
@@ -133,7 +136,7 @@ sub flush {
    $self->{write_cb}->(substr $self->{write_buf}, 0, (length $self->{write_buf}), '');
 }
 
-=head2 send_init_stream ($domain)
+=item B<send_init_stream ($domain)>
 
 This method will generate a XMPP stream header. C<$domain> has to be the
 domain of the server (or endpoint) we want to connect to.
@@ -157,7 +160,7 @@ sub send_init_stream {
    $self->flush;
 }
 
-=head2 send_end_of_stream
+=item B<send_end_of_stream>
 
 Sends end of the stream.
 
@@ -170,7 +173,7 @@ sub send_end_of_stream {
    $self->flush;
 }
 
-=head2 send_sasl_auth ($mechanisms)
+=item B<send_sasl_auth ($mechanisms)>
 
 This methods sends the start of a SASL authentication. C<$mechanisms> is
 a string with space seperated mechanisms that are supported by the other
@@ -202,7 +205,7 @@ sub send_sasl_auth {
    $self->flush;
 }
 
-=head2 send_sasl_response ($challenge)
+=item B<send_sasl_response ($challenge)>
 
 This method generated the SASL authentication response to a C<$challenge>.
 You must not call this method without calling C<send_sasl_auth ()> before.
@@ -227,7 +230,7 @@ sub send_sasl_response {
    $self->flush;
 }
 
-=head2 send_starttls
+=item B<send_starttls>
 
 Sends the starttls command to the server.
 
@@ -241,7 +244,7 @@ sub send_starttls {
    $self->flush;
 }
 
-=head2 send_iq ($id, $type, $create_cb, %attrs)
+=item B<send_iq ($id, $type, $create_cb, %attrs)>
 
 This method sends an IQ stanza of type C<$type> (to be compliant
 only use: 'get', 'set', 'result' and 'error'). C<$create_cb>
@@ -276,7 +279,7 @@ sub send_iq {
    $self->flush;
 }
 
-=head2 send_presence ($id, $type, $create_cb, %attrs)
+=item B<send_presence ($id, $type, $create_cb, %attrs)>
 
 Sends a presence stanza.
 
@@ -368,7 +371,7 @@ sub send_presence {
    $self->flush;
 }
 
-=head2 send_message ($id, $to, $type, $create_cb, %attrs)
+=item B<send_message ($id, $to, $type, $create_cb, %attrs)>
 
 Sends a message stanza.
 
@@ -438,7 +441,7 @@ sub send_message {
 }
 
 
-=head2 write_error_tag ($error_stanza_node, $error_type, $error)
+=item B<write_error_tag ($error_stanza_node, $error_type, $error)>
 
 C<$error_type> is one of 'cancel', 'continue', 'modify', 'auth' and 'wait'.
 C<$error> is the name of the error tag child element. If C<$error> is one of
@@ -505,9 +508,11 @@ sub write_error_tag {
    $w->endTag;
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

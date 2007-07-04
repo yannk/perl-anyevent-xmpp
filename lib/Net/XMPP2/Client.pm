@@ -7,19 +7,19 @@ use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Event;
 use Net::XMPP2::IM::Account;
 
-use XML::Twig;
-
-sub _dumpxml {
-   my $data = shift;
-   my $t = XML::Twig->new;
-   if ($t->safe_parse ("<deb>$data</deb>")) {
-      $t->set_pretty_print ('indented');
-      $t->print;
-      print "\n";
-   } else {
-      print "[$data]\n";
-   }
-}
+#use XML::Twig;
+#
+#sub _dumpxml {
+#   my $data = shift;
+#   my $t = XML::Twig->new;
+#   if ($t->safe_parse ("<deb>$data</deb>")) {
+#      $t->set_pretty_print ('indented');
+#      $t->print;
+#      print "\n";
+#   } else {
+#      print "[$data]\n";
+#   }
+#}
 
 our @ISA = qw/Net::XMPP2::Event/;
 
@@ -116,6 +116,12 @@ sub start {
    $self->update_connections;
 }
 
+=head2 update_connections ()
+
+This method tries to connect all unconnected accounts.
+
+=cut
+
 sub update_connections {
    my ($self) = @_;
 
@@ -151,7 +157,7 @@ sub update_connections {
    }
 }
 
-=item disconnect ($msg)
+=head2 disconnect ($msg)
 
 Disconnect all accounts.
 
@@ -164,7 +170,7 @@ sub disconnect {
    }
 }
 
-=item remove_accounts ($msg)
+=head2 remove_accounts ($msg)
 
 Removes all accounts and disconnects.
 
@@ -179,7 +185,7 @@ sub remove_accounts {
    }
 }
 
-=item remove_account ($acc)
+=head2 remove_account ($acc)
 
 Removes and disconnects account C<$acc>.
 
@@ -193,7 +199,7 @@ sub remove_account {
    delete $self->{accounts}->{$acc};
 }
 
-=item send_message ($msg, $dest_jid, $src)
+=head2 send_message ($msg, $dest_jid, $src)
 
 Sends a message to the destination C<$dest_jid>.
 C<$msg> can either be a string or a L<Net::XMPP2::IM::Message> object.
@@ -240,7 +246,7 @@ sub send_message {
    $msg->send ($srcacc->connection)
 }
 
-=item get_account ($jid)
+=head2 get_account ($jid)
 
 Returns the L<Net::XMPP2::IM::Account> account object for the JID C<$jid>
 if there is any such account added. (returns undef otherwise).
@@ -252,16 +258,43 @@ sub get_account {
    $self->{accounts}->{prep_bare_jid $jid}
 }
 
+=head2 get_accounts ()
+
+Returns a list of L<Net::XMPP2::IM::Account>s.
+
+=cut
+
 sub get_accounts {
    my ($self) = @_;
    values %{$self->{accounts}}
 }
+
+=head2 get_accounts ()
+
+Returns a list of connected L<Net::XMPP2::IM::Account>s.
+
+Same as:
+
+  grep { $_->is_connected } $client->get_accounts ();
+
+=cut
 
 sub get_connected_accounts {
    my ($self, $jid) = @_;
    my (@a) = grep $_->is_connected, values %{$self->{accounts}};
    @a
 }
+
+=head2 find_account_for_dest_jid ($jid)
+
+This method tries to find any account that has the contact C<$jid>
+on his roster. If no account with C<$jid> on his roster was found
+it takes the first one that is connected. (Return value is a L<Net::XMPP2::IM::Account>
+object).
+
+If no account is connected it returns undef.
+
+=cut
 
 sub find_account_for_dest_jid {
    my ($self, $jid) = @_;
@@ -282,6 +315,14 @@ sub find_account_for_dest_jid {
    $any_acc
 }
 
+=head2 get_contacts_for_jid ($jid)
+
+This method returns all contacts that we are connected to.
+That means: It joins the contact lists of all account's rosters
+that we are connected to.
+
+=cut
+
 sub get_contacts_for_jid {
    my ($self, $jid) = @_;
    my @cons;
@@ -292,6 +333,16 @@ sub get_contacts_for_jid {
    }
    return @cons;
 }
+
+=head2 get_priority_presence_for_jid ($jid)
+
+This method returns the presence for the contact C<$jid> with the highest
+priority.
+
+If the contact C<$jid> is on multiple account's rosters it's undefined which
+roster the presence belongs to.
+
+=cut
 
 sub get_priority_presence_for_jid {
    my ($self, $jid) = @_;
@@ -310,6 +361,14 @@ sub get_priority_presence_for_jid {
 
    $lpres
 }
+
+=head2 set_presence ($show, $status, $priority)
+
+This sets the presence of all accounts.  For a meaning of C<$show>, C<$status>
+and C<$priority> see the description of the C<%attrs> hash in
+L<Net::XMPP2::Writer::send_presence>.
+
+=cut
 
 sub set_presence {
    my ($self, $show, $status, $priority) = @_;
@@ -355,7 +414,7 @@ over the connection to the C<$account> - after a connection was established.
 
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

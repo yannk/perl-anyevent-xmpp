@@ -15,6 +15,8 @@ sent by a C<Net::XMPP2::Ext::Disco> handler.
 
 =head1 METHODS
 
+=over 4
+
 =cut
 
 sub new {
@@ -25,7 +27,7 @@ sub new {
    $self
 }
 
-=head2 xml_node ()
+=item B<xml_node ()>
 
 Returns the L<Net::XMPP2::Node> object of the IQ query.
 
@@ -51,7 +53,7 @@ sub init {
    }
 }
 
-=head2 jid ()
+=item B<jid ()>
 
 Returns the JID these items belong to.
 
@@ -59,7 +61,7 @@ Returns the JID these items belong to.
 
 sub jid { $_[0]->{jid} }
 
-=head2 node ()
+=item B<node ()>
 
 Returns the node these items belong to (may be undef).
 
@@ -67,7 +69,7 @@ Returns the node these items belong to (may be undef).
 
 sub node { $_[0]->{node} }
 
-=head2 items ()
+=item B<items ()>
 
 Returns a list of hashreferences which contain following keys:
 
@@ -86,7 +88,7 @@ sub items {
    @{$self->{items}}
 }
 
-=head2 debug_dump ()
+=item B<debug_dump ()>
 
 Prints these items to stdout for debugging.
 
@@ -101,9 +103,11 @@ sub debug_dump {
    print "END ITEMS\n";
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

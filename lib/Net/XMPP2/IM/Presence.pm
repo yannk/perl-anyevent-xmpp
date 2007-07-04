@@ -3,6 +3,24 @@ use strict;
 use Net::XMPP2::Util;
 use Net::XMPP2::IM::Message;
 
+=head1 NAME
+
+Net::XMPP2::IM::Presence - A XMPP presence
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+This module represents a XMPP presence. It stores
+the full JID of the contact, the show value, status value
+and priority.
+
+=head1 METHODS
+
+=over 4
+
+=cut
+
 sub new {
    my $this = shift;
    my $class = ref($this) || $this;
@@ -37,16 +55,52 @@ sub update {
    $old
 }
 
+=item B<jid>
+
+Returns the full JID of this presence.
+
+=cut
+
 sub jid { $_[0]->{jid} }
 
+=item B<priority>
+
+Returns the priority of this presence.
+
+=cut
+
 sub priority { $_[0]->{priority} }
+
+=item B<status_all_lang>
+
+Returns all language tags of available status descriptions.
+See also L<status>.
+
+=cut
 
 sub status_all_lang {
    my ($self, $jid) = @_;
    keys %{$self->{status} || []}
 }
 
+=item B<show>
+
+Returns the show value of this presence, which is one of:
+
+   'away', 'chat', 'dnd', 'xa'
+
+or the empty string if the presence is 'available'.
+
+=cut
+
 sub show { $_[0]->{show} }
+
+=item B<status ([$lang])>
+
+Returns the presence description. C<$lang> is optional can should be one of
+the tags returned by C<status_all_lang>.
+
+=cut
 
 sub status {
    my ($self, $lang) = @_;
@@ -62,6 +116,13 @@ sub status {
 
    undef
 }
+
+=item B<make_message>
+
+Returns a L<Net::XMPP2::IM::Message> object with the to field set to
+this presence full JID.
+
+=cut
 
 sub make_message {
    my ($self) = @_;
@@ -79,5 +140,20 @@ sub debug_dump {
       $self->priority || 0,
       $self->status   || '',
 }
+
+=back
+
+=head1 AUTHOR
+
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2007 Robin Redeker, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
 
 1;

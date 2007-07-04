@@ -59,11 +59,17 @@ which make handling of namepsaces a bit easier:
    roster  => jabber:iq:roster
    version => jabber:iq:version
 
+   disco_info  => http://jabber.org/protocol/disco#info
+   disco_items => http://jabber.org/protocol/disco#items
+
    register => http://jabber.org/features/iq-register
+   iqauth   => http://jabber.org/features/iq-auth
 
 =head1 FUNCTIONS
 
-=head2 xmpp_ns ($alias)
+=over 4
+
+=item B<xmpp_ns ($alias)>
 
 Returns am uri for the registered C<$alias> or undef if none exists.
 
@@ -71,7 +77,7 @@ Returns am uri for the registered C<$alias> or undef if none exists.
 
 sub xmpp_ns { return $NAMESPACES{$_[0]} }
 
-=head2 set_xmpp_ns_alias ($alias, $namespace_uri)
+=item B<set_xmpp_ns_alias ($alias, $namespace_uri)>
 
 Sets an C<$alias> for the C<$namespace_uri>.
 
@@ -79,9 +85,11 @@ Sets an C<$alias> for the C<$namespace_uri>.
 
 sub set_xmpp_ns_alias { return $NAMESPACES{$_[0]} }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

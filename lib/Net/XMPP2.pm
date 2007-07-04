@@ -22,6 +22,10 @@ or:
 
    use Net::XMPP2::IM::Connection;
 
+or:
+
+   use Net::XMPP2::Client;
+
 =head1 DESCRIPTION
 
 This is the head module of the L<Net::XMPP2> XMPP client protocol (as described in
@@ -36,15 +40,49 @@ L<Net::XMPP2::IM::Connection> is a more highlevel module, which is derived
 from L<Net::XMPP2::Connection>. It handles all the instant messaging client
 functionality described in RFC 3921.
 
+L<Net::XMPP2::Client> is a multi account client class. It manages connections
+to multiple XMPP accounts and tries to offer a nice highlevel interface
+to XMPP communication.
+
 For a list of L<Supportet extensions> see below.
 
 There are also other modules in this distribution, for example:
-L<Net::XMPP2::Util>, L<Net::XMPP2::Writer>, L<Net::XMPP2::Parser> and those i
+L<Net::XMPP2::Util>, L<Net::XMPP2::Writer>, L<Net::XMPP2::Parser> and those I
 forgot :-) Those modules might be helpful and/or required if you want to use
 this framework for XMPP.
 
 See also L<Net::XMPP2::Writer> for a discussion about the brokeness of XML in the XMPP
 specification.
+
+=head1 RELEASE NOTES
+
+Here are some notes to the releases (release of this version is at top):
+
+=head2 Version
+
+=over 4
+
+=item 0.01
+
+This release has beta status. The code is already used daily in my client
+and I keep looking out for bugs. If you find undocumented, missing or faulty
+code/methods please drop me a mail! See also L<BUGS> below.
+
+Potential edges when using this module: under-documented methods, missing
+functionality and generally bugs bugs and bugs. Even thought this module is in
+daily usage there are still lots of cases I might have missed.
+
+For the next release I'm planning to provide more examples in the documentation
+or samples/ directory, along with bugfixes and enhancements along with some
+todo items killed from the TODO file.
+
+=back
+
+=head2 TODO
+
+There are still lots of items on the TODO list (see also the TODO file
+in the distribution of Net::XMPP2). For further and more detailed todo items
+look there.
 
 =head1 Why (yet) another XMPP module?
 
@@ -54,7 +92,7 @@ permits you to use this module together with other I/O event based programs and
 libraries (ie. L<Gtk2> or L<Event>).
 
 The other modules could often only be integrated in those applications or librarys
-by using threads. I decided to write this module because i think CPAN lacks
+by using threads. I decided to write this module because I think CPAN lacks
 an event based XMPP module. Threads are unfortunately not an alternative in Perl
 at the moment due the limited threading functionality they provide and the global
 speed hit. I also think that a simple event based I/O framework might be a bit easier
@@ -63,7 +101,8 @@ to handle than threads.
 Another thing was that I didn't like the APIs of the other modules. In L<Net::XMPP2>
 I try to provide low level modules for speaking XMPP as defined in RFC 3920 and RFC 3921
 (see also L<Net::XMPP2::Connection> and L<Net::XMPP2::IM::Connection>). But I also
-try to provide a high level API for easier usage for instant messaging tasks and clients.
+try to provide a high level API for easier usage for instant messaging tasks
+and clients (eg. L<Net::XMPP2::IM::Client>).
 
 =head1 A note about TLS
 
@@ -90,7 +129,7 @@ See L<Net::XMPP2::Ext> for a list.
 
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 BUGS
 

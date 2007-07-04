@@ -43,7 +43,9 @@ If you need instant messaging stuff please take a look at C<Net::XMPP2::IM::Conn
 
 =head1 METHODS
 
-=head2 new (%args)
+=over 4
+
+=item B<new (%args)>
 
 Following arguments can be passed in C<%args>:
 
@@ -166,7 +168,7 @@ sub new {
    return $self;
 }
 
-=head2 connect ($no_srv_rr)
+=item B<connect ($no_srv_rr)>
 
 Try to connect to the domain and port passed in C<new>.
 
@@ -222,7 +224,7 @@ sub connect {
    }
 }
 
-=head2 may_try_connect
+=item B<may_try_connect>
 
 Returns the number of left alternatives of hosts to connect to for the
 domain passed to C<new>.
@@ -239,7 +241,7 @@ sub may_try_connect {
    # TODO
 }
 
-=head2 reset_connect_tries
+=item B<reset_connect_tries>
 
 This function resets the internal list of tried hosts for C<connect>.
 See also C<connect>.
@@ -316,7 +318,7 @@ sub handle_stanza {
    }
 }
 
-=head2 init ()
+=item B<init ()>
 
 Initiate the XML stream.
 
@@ -327,7 +329,7 @@ sub init {
    $self->{writer}->send_init_stream ($self->{language}, $self->{domain});
 }
 
-=head2 is_connected ()
+=item B<is_connected ()>
 
 Returns true if the connection is still connected and stanzas can be
 sent.
@@ -339,7 +341,7 @@ sub is_connected {
    $self->{authenticated}
 }
 
-=head2 set_default_iq_timeout ($seconds)
+=item B<set_default_iq_timeout ($seconds)>
 
 This sets the default timeout for IQ requests. If the timeout runs out
 the request will be aborted and the callback called with a L<Net::XMPP2::Error::IQ> object
@@ -354,7 +356,7 @@ sub set_default_iq_timeout {
    $self->{default_iq_timeout} = $sec;
 }
 
-=head2 send_iq ($type, $create_cb, $result_cb, %attrs)
+=item B<send_iq ($type, $create_cb, $result_cb, %attrs)>
 
 This method sends an IQ XMPP request.
 
@@ -396,7 +398,7 @@ sub send_iq {
    $id
 }
 
-=head2 reply_iq_result ($req_iq_node, $create_cb, %attrs)
+=item B<reply_iq_result ($req_iq_node, $create_cb, %attrs)>
 
 This method will generate a result reply to the iq request C<Net::XMPP2::Node>
 in C<$req_iq_node>.
@@ -415,7 +417,7 @@ sub reply_iq_result {
    $self->{writer}->send_iq ($iqnode->attr ('id'), 'result', $create_cb, %attrs);
 }
 
-=head2 reply_iq_error ($req_iq_node, $error_type, $error, %attrs)
+=item B<reply_iq_error ($req_iq_node, $error_type, $error, %attrs)>
 
 This method will generate an error reply to the iq request C<Net::XMPP2::Node>
 in C<$req_iq_node>.
@@ -482,7 +484,7 @@ sub send_sasl_auth {
    );
 }
 
-=head2 request_inband_register_form ($finish_cb)
+=item B<request_inband_register_form ($finish_cb)>
 
 This method starts a in-band-registration attempt.  When finished C<$finish_cb>
 will be called with the first argument being a L<Net::XMPP2::Ext::RegisterForm>
@@ -606,7 +608,7 @@ sub do_iq_auth {
    # TODO
 }
 
-=head2 send_presence ($type, $create_cb, %attrs)
+=item B<send_presence ($type, $create_cb, %attrs)>
 
 This method sends a presence stanza, for the meanings
 of C<$type>, C<$create_cb> and C<%attrs> please take a look
@@ -624,7 +626,7 @@ sub send_presence {
    $id
 }
 
-=head2 send_message ($to, $type, $create_cb, %attrs)
+=item B<send_message ($to, $type, $create_cb, %attrs)>
 
 This method sends a presence stanza, for the meanings
 of C<$to>, C<$type>, C<$create_cb> and C<%attrs> please take a look
@@ -642,7 +644,7 @@ sub send_message {
    $id
 }
 
-=head2 do_rebind ($resource)
+=item B<do_rebind ($resource)>
 
 In case you got a C<bind_error> event and want to retry
 binding you can call this function to set a new C<$resource>
@@ -691,7 +693,7 @@ sub do_rebind {
    );
 }
 
-=head2 jid
+=item B<jid>
 
 After the stream has been bound to a resource the JID can be retrieved via this
 method.
@@ -700,13 +702,15 @@ method.
 
 sub jid { $_[0]->{jid} }
 
-=head2 features
+=item B<features>
 
 Returns the last received <features> tag in form of an L<Net::XMPP2::Node> object.
 
 =cut
 
 sub features { $_[0]->{features} }
+
+=back
 
 =head1 EVENTS
 
@@ -750,7 +754,7 @@ was received.
 The C<condition> of the C<$error> might be one of: 'bad-request',
 'not-allowed' or 'conflict'.
 
-Node: this is untested, i couldn't get the server to send a bind error
+Node: this is untested, I couldn't get the server to send a bind error
 to test this.
 
 =item connect => $host, $port
@@ -803,7 +807,7 @@ is still false after all event handlers were executed an error iq will be genera
 
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

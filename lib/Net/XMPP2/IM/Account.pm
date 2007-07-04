@@ -23,7 +23,6 @@ method on a L<Net::XMPP2::Client> object.
 
 =cut
 
-
 sub new {
    my $this = shift;
    my $class = ref($this) || $this;
@@ -48,7 +47,11 @@ sub spawn_connection {
    )
 }
 
-=head2 connection ()
+=head1 METHODS
+
+=over 4
+
+=item B<connection ()>
 
 Returns the L<Net::XMPP2::IM::Connection> object if this account already
 has one (undef otherwise).
@@ -57,7 +60,7 @@ has one (undef otherwise).
 
 sub connection { $_[0]->{con} }
 
-=head2 is_connected ()
+=item B<is_connected ()>
 
 Returns true if this accunt is connected.
 
@@ -68,7 +71,7 @@ sub is_connected {
    $self->{con} && $self->{con}->is_connected
 }
 
-=head2 jid ()
+=item B<jid ()>
 
 Returns either the full JID if the account is
 connected or returns the bare jid if not.
@@ -83,7 +86,7 @@ sub jid {
    $_[0]->{jid}
 }
 
-=head2 bare_jid ()
+=item B<bare_jid ()>
 
 Returns always the bare jid of this account.
 
@@ -94,7 +97,7 @@ sub bare_jid {
    prep_bare_jid $self->jid
 }
 
-=head2 nickname ()
+=item B<nickname ()>
 
 Your nickname for this account.
 
@@ -107,5 +110,21 @@ sub nickname {
    my ($user, $host, $res) = split_jid ($self->bare_jid);
    $user
 }
+
+=back
+
+=head1 AUTHOR
+
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2007 Robin Redeker, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
+
 
 1;

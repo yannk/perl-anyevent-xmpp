@@ -28,9 +28,9 @@ For additional events that can be registered to look below in the EVENTS section
 
 =head1 METHODS
 
-=cut
+=over 4
 
-=head2 new (%args)
+=item B<new (%args)>
 
 This is the constructor. It takes the same arguments as
 the constructor of L<Net::XMPP2::Connection> along with a
@@ -93,7 +93,7 @@ sub send_session_iq {
       if ($node) {
          $self->init_connection;
       } else {
-         $self->event (session_error => $error); # TODO: make error obj
+         $self->event (session_error => $error);
       }
    });
 }
@@ -109,7 +109,7 @@ sub init_connection {
    $self->event ('session_ready');
 }
 
-=head2 retrieve_roster ($cb)
+=item B<retrieve_roster ($cb)>
 
 This method initiates a roster request. If you set C<dont_retrieve_roster>
 when creating this connection no roster was retrieved.
@@ -133,6 +133,7 @@ sub retrieve_roster {
    }, sub {
       my ($node, $error) = @_;
       if ($node) {
+         $self->{roster}->set_retrieved;
          $self->store_roster ($node);
       } else {
          $self->event (roster_error => $error);
@@ -147,6 +148,12 @@ sub store_roster {
    my @upd = $self->{roster}->update ($node);
    $self->event (roster_update => $self->{roster}, \@upd);
 }
+
+=item B<get_roster>
+
+Returns the roster object of type L<Net::XMPP2::IM::Roster>.
+
+=cut
 
 sub get_roster {
    my ($self) = @_;
@@ -215,6 +222,8 @@ sub handle_disconnect {
    my ($self) = @_;
    delete $self->{roster};
 }
+
+=back
 
 =head1 EVENTS
 
@@ -304,13 +313,11 @@ If you want to unsubscribe later from him call L<Net::XMPP2::IM::Contact::send_u
 
 This event is generated when C<$contact> unsubscribed you from his presence.
 
-=item
-
 =back
 
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

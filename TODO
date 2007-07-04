@@ -2,9 +2,13 @@
 - todo group that is mostly finished
 + todo item that is mostly finished
 
+* see also: grep 'XXX\|FIXME\|TODO' * -r
+  - lib/Net/XMPP2/Writer.pm: # XXX: removed authname, because it ensures maximum connectivitiy
+
 * implement iq-auth!!!!
 
 * make error callback of parser ultimately to an error object
+  - use exceptions maybe?
 
 * Net::XMPP2::Client
   - find a way to distinguish presences from JIDs that
@@ -38,6 +42,8 @@
 
 * Implement XEP-0045: Multi-User Chat
    - think about: make seperate MUC handler class
+
+* Implement XEP-0190: Best Practice for Closing Idle Streams
 
 * keep an eye on:
    - TLS: implemented, just do some extensive testing WRT blocking,

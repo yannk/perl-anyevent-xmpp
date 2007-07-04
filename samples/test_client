@@ -25,19 +25,17 @@ binmode STDOUT, ":utf8";
 my $j = AnyEvent->condvar;
 
 my $cl = Net::XMPP2::Client->new;
-#$cl->add_account ('elmex@jabber.org/Net::XどなPP2', 'xxxxxxxx');
-#$cl->add_account ('elmor@jabber.org/Net::XどなPP2', 'xxxxxxxx');
-$cl->add_account ('elmex@localhost/Net::XどなPP2', 'xxxxxxxx');
+$cl->add_account (@ARGV);
 $cl->reg_cb (
    connected => sub {
       $cl->send_message ("Hello!" => 'elmex@jabbfer.org');
-
       0
    },
    roster_update => sub {
       my ($cl, $acc, $roster, $contacts) = @_;
       $roster->debug_dump;
       $acc->connection ()->send_presence ('probe' => undef, to => 'elmex@jabfber.org');
+      print "OEOFWEFIEJWFEWO\n" if not $roster->is_retrieved;
       1
    },
    presence_update => sub {
@@ -87,8 +85,7 @@ $cl->reg_cb (roster_update => sub {
    my ($cl, $acc, $roster, $contacts) = @_;
 
   $roster->debug_dump;
-  print "ROSTER!\n";
- #  $roster->new_contact ('elmex@jabber.org', 'Der elmex', ['ABC', 'TEst'], sub {
+  # $roster->new_contact ('elmex@jabber.org', 'Der elmex', ['ABC', 'TEst'], sub {
   #    $roster->get_contact ('elmex@jabber.org')->send_subscribe;
   #    $roster->delete_contact ('elmex@jabber.org');
   # });

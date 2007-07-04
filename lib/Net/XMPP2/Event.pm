@@ -23,7 +23,11 @@ and client classes.
 
 You may only derive from this package.
 
-=head2 reg_cb ($eventname1, $cb1, [$eventname2, $cb2, ...])
+=head1 METHODS
+
+=over 4
+
+=item B<reg_cb ($eventname1, $cb1, [$eventname2, $cb2, ...])>
 
 This method registers a callback C<$cb1> for the event with the
 name C<$eventname1>. You can also pass multiple of these eventname => callback
@@ -49,7 +53,7 @@ sub reg_cb {
    $self->{id}
 }
 
-=head2 unreg_cb ($id)
+=item B<unreg_cb ($id)>
 
 Removes the set C<$id> of registered callbacks. C<$id> is the
 return value of a C<reg_cb> call.
@@ -70,7 +74,7 @@ sub unreg_cb {
 }
 
 
-=head2 event ($eventname, @args)
+=item B<event ($eventname, @args)>
 
 Emits the event C<$eventname> and passes the arguments C<@args>.
 
@@ -93,7 +97,7 @@ sub event {
    $self->{events}->{lc $ev} = $nxt;
 }
 
-=head2 add_forward ($obj, $forward_cb)
+=item B<add_forward ($obj, $forward_cb)>
 
 This method allows to forward or copy all events to a object.
 C<$forward_cb> will be called everytime a event is generated in C<$self>.
@@ -109,9 +113,11 @@ sub add_forward {
    $self->{event_forwards}->{$obj} = [$obj, $forward_cb];
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

@@ -26,8 +26,11 @@ a roster (L<Net::XMPP2::IM::Roster>.
 You can get an instance of this class only by calling the C<get_contact>
 function on a roster object.
 
-=cut
+=head1 METHODS
 
+=over 4
+
+=cut
 
 sub new {
    my $this = shift;
@@ -35,7 +38,7 @@ sub new {
    bless { @_ }, $class;
 }
 
-=head2 send_update ($cb, %upd)
+=item B<send_update ($cb, %upd)>
 
 This method updates a contact. If the request is finished
 it will call C<$cb>. If it resulted in an error the first argument
@@ -104,7 +107,7 @@ sub send_update {
    );
 }
 
-=head2 send_subscribe ()
+=item B<send_subscribe ()>
 
 This method sends this contact a subscription request.
 
@@ -115,7 +118,7 @@ sub send_subscribe {
    $self->{connection}->send_presence ('subscribe', undef, to => $self->jid);
 }
 
-=head2 send_subscribed ()
+=item B<send_subscribed ()>
 
 This method accepts a contact's subscription request.
 
@@ -126,7 +129,7 @@ sub send_subscribed {
    $self->{connection}->send_presence ('subscribed', undef, to => $self->jid);
 }
 
-=head2 send_unsubscribe ()
+=item B<send_unsubscribe ()>
 
 This method sends this contact a unsubscription request.
 
@@ -137,7 +140,7 @@ sub send_unsubscribe {
    $self->{connection}->send_presence ('unsubscribe', undef, to => $self->jid);
 }
 
-=head2 send_unsubscribed ()
+=item B<send_unsubscribed ()>
 
 This method sends this contact a unsubscription request which unsubscribes
 ones own presence from him (he wont get any further presence from us).
@@ -150,7 +153,7 @@ sub send_unsubscribed {
 }
 
 
-=head2 update ($item)
+=item B<update ($item)>
 
 This method wants a L<Net::XMPP2::Node> in C<$item> which
 should be a roster item received from the server. The method will
@@ -177,7 +180,7 @@ sub update {
    $self
 }
 
-=head2 update_presence ($presence)
+=item B<update_presence ($presence)>
 
 This method updates the presence of contacts on the roster.
 C<$presence> must be a L<Net::XMPP2::Node> object and should be
@@ -223,7 +226,7 @@ sub touch_presence {
    $self->{presences}->{$sjid}
 }
 
-=head2 get_presence ($jid)
+=item B<get_presence ($jid)>
 
 This method returns a presence of this contact if
 it is available. The return value is an instance of L<Net::XMPP2::IM::Presence>
@@ -237,7 +240,7 @@ sub get_presence {
    $self->{presences}->{$sjid}
 }
 
-=head2 get_presences
+=item B<get_presences>
 
 Returns all presences of this contact in form of
 L<Net::XMPP2::IM::Presence> objects.
@@ -246,7 +249,7 @@ L<Net::XMPP2::IM::Presence> objects.
 
 sub get_presences { values %{$_[0]->{presences}} }
 
-=head2 get_priority_presence
+=item B<get_priority_presence>
 
 Returns the presence with the highest priority.
 
@@ -264,7 +267,7 @@ sub get_priority_presence {
    $self->{presences}->{$pres[0]}
 }
 
-=head2 groups
+=item B<groups>
 
 Returns the list of groups (strings) this contact is in.
 
@@ -274,7 +277,7 @@ sub groups {
    @{$_[0]->{groups} || []}
 }
 
-=head2 jid
+=item B<jid>
 
 Returns the bare JID of this contact.
 
@@ -284,7 +287,7 @@ sub jid {
    $_[0]->{jid}
 }
 
-=head2 name
+=item B<name>
 
 Returns the (nick)name of this contact.
 
@@ -294,7 +297,7 @@ sub name {
    $_[0]->{name}
 }
 
-=head2 is_on_roster ()
+=item B<is_on_roster ()>
 
 Returns 1 if this is a contact that is officially on the
 roster and not just a contact we've received presence information
@@ -307,7 +310,7 @@ sub is_on_roster {
    $self->{subscription} && $self->{subscription} ne ''
 }
 
-=head2 subscription
+=item B<subscription>
 
 Returns the subscription state of this contact, which
 can be one of:
@@ -325,7 +328,7 @@ sub subscription {
    $_[0]->{subscription}
 }
 
-=head2 subscription_pending
+=item B<subscription_pending>
 
 Returns true if this contact has a pending subscription.
 That means: the contact has to aknowledge the subscription.
@@ -337,7 +340,7 @@ sub subscription_pending {
    $self->{ask}
 }
 
-=head2 nickname
+=item B<nickname>
 
 Returns the nickname of this contact.
 
@@ -353,6 +356,13 @@ sub nickname {
    }
    $n
 }
+
+=item B<make_message>
+
+This method returns a L<Net::XMPP2::IM::Message>
+object with the to field set to this contacts JID.
+
+=cut
 
 sub make_message {
    my ($self) = @_;
@@ -374,9 +384,11 @@ sub debug_dump {
    }
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

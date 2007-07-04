@@ -28,11 +28,11 @@ A L<Net::XMPP2::IM::Message> object overloads the stringification
 operation. The string represenation of this object is the return
 value of the C<any_body> method.
 
-=cut
-
 =head1 METHODS
 
-=head2 new (%args)
+=over 4
+
+=item B<new (%args)>
 
 This method creates a new instance of a L<Net::XMPP2::IM::Message>.
 
@@ -116,7 +116,7 @@ sub to_string {
    $self->any_body
 }
 
-=head2 from ([$jid])
+=item B<from ([$jid])>
 
 This method returns the source JID of this message.
 If C<$jid> is not undef it will replace the current
@@ -130,7 +130,7 @@ sub from {
    $self->{from}
 }
 
-=head2 to ([$jid])
+=item B<to ([$jid])>
 
 This method returns the destination JID of this message.
 If C<$jid> is not undef it will replace the current
@@ -144,7 +144,7 @@ sub to {
    $self->{to}
 }
 
-=head2 make_reply ([$msg])
+=item B<make_reply ([$msg])>
 
 This method returns a new instance of L<Net::XMPP2::IM::Message>.
 The destination address, connection and type of the returned message
@@ -170,7 +170,7 @@ sub make_reply {
    $msg
 }
 
-=head2 is_connected ()
+=item B<is_connected ()>
 
 This method returns 1 when the message is "connected".
 That means: It returns 1 when you can call the C<send> method
@@ -185,7 +185,7 @@ sub is_connected {
    $self->{connection}->is_connected
 }
 
-=head2 send ([$connection])
+=item B<send ([$connection])>
 
 This method send this message. If C<$connection>
 is defined it will set the connection of this
@@ -211,7 +211,7 @@ sub send {
    );
 }
 
-=head2 type ([$type])
+=item B<type ([$type])>
 
 This method returns the type of the message, which
 is either undefined or one of the following values:
@@ -230,7 +230,7 @@ sub type {
    $self->{type}
 }
 
-=head2 thread ([$thread])
+=item B<thread ([$thread])>
 
 This method returns the thread id of this message,
 which might be undefined.
@@ -247,7 +247,7 @@ sub thread {
    $self->{thread}
 }
 
-=head2 lang ([$lang])
+=item B<lang ([$lang])>
 
 This returns the default language tag of this message,
 which can be undefined.
@@ -267,7 +267,7 @@ sub lang {
    $self->{lang}
 }
 
-=head2 subject ([$lang])
+=item B<subject ([$lang])>
 
 This method returns the subject of this message.
 If the C<$lang> argument is defined a subject of that
@@ -289,7 +289,7 @@ sub subject {
    undef
 }
 
-=head2 any_subject ([$lang])
+=item B<any_subject ([$lang])>
 
 This method will try to find any subject on the message with the
 following try order of languagetags:
@@ -318,7 +318,7 @@ sub any_subject {
    return undef;
 }
 
-=head2 add_subject ($subject, [$lang], [$subject2, $lang2, ...])
+=item B<add_subject ($subject, [$lang], [$subject2, $lang2, ...])>
 
 This method adds the subject C<$subject> with the optional
 language tag C<$lang> to this message. If no C<$lang>
@@ -340,7 +340,7 @@ sub add_subject {
    $self
 }
 
-=head2 subjects
+=item B<subjects>
 
 This method returns a list of key value pairs
 with the language tag as key and the subject as value.
@@ -354,7 +354,7 @@ sub subjects {
    %{$_[0]->{subjects} || {}}
 }
 
-=head2 body ([$lang])
+=item B<body ([$lang])>
 
 This method returns the body of this message.
 If the C<$lang> argument is defined a body of that
@@ -377,7 +377,7 @@ sub body {
    undef
 }
 
-=head2 any_body ([$lang])
+=item B<any_body ([$lang])>
 
 This method will try to find any body on the message with the
 following try order of languagetags:
@@ -406,7 +406,7 @@ sub any_body {
    return undef;
 }
 
-=head2 add_body ($body, [$lang], [$body2, $lang2, ...])
+=item B<add_body ($body, [$lang], [$body2, $lang2, ...])>
 
 This method adds the body C<$body> with the optional
 language tag C<$lang> to this message. If no C<$lang>
@@ -428,7 +428,7 @@ sub add_body {
    $self
 }
 
-=head2 bodies
+=item B<bodies>
 
 This method returns a list of key value pairs
 with the language tag as key and the body as value.
@@ -442,9 +442,11 @@ sub bodies {
    %{$_[0]->{bodies} || {}}
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

@@ -38,7 +38,9 @@ Net::XMPP2::Error - The super class of all errors
 
 These methods are implemented by all subclasses.
 
-=head3 string ()
+=over 4
+
+=item B<string ()>
 
 Returns a humand readable string for this error.
 
@@ -48,6 +50,10 @@ sub string {
    my ($self) = @_;
    $self->{text}
 }
+
+=back
+
+=cut
 
 package Net::XMPP2::Error::Stanza;
 our @ISA = qw/Net::XMPP2::Error/;
@@ -103,7 +109,9 @@ sub init {
 
 =head2 METHODS
 
-=head3 xml_node ()
+=over 4
+
+=item B<xml_node ()>
 
 Returns the L<Net::XMPP2::Node> object for this Stanza error.
 This method returns undef if the Stanza timeouted.
@@ -117,9 +125,7 @@ sub xml_node {
    $_[0]->{node}
 }
 
-=head3 
-
-=head3 type ()
+=item B<type ()>
 
 This method returns one of:
 
@@ -129,7 +135,7 @@ This method returns one of:
 
 sub type { $_[0]->{error_type} }
 
-=head3 code ()
+=item B<code ()>
 
 This method returns the error code if one was found.
 
@@ -137,7 +143,7 @@ This method returns the error code if one was found.
 
 sub code { $_[0]->{error_code} }
 
-=head3 condition ()
+=item B<condition ()>
 
 Returns the error condition string if one was found when receiving the Stanza error.
 It can be undef or one of:
@@ -170,7 +176,7 @@ It can be undef or one of:
 
 sub condition { $_[0]->{error_cond} }
 
-=head3 condition_node ()
+=item B<condition_node ()>
 
 Returns the error condition node if one was found when receiving the Stanza error.
 This is mostly for debugging purposes.
@@ -179,7 +185,7 @@ This is mostly for debugging purposes.
 
 sub condition_node { $_[0]->{error_cond_node} }
 
-=head3 text ()
+=item B<text ()>
 
 The humand readable error portion. Might be undef if none was received.
 
@@ -196,6 +202,10 @@ sub string {
       $self->type,
       $self->text
 }
+
+=back
+
+=cut
 
 package Net::XMPP2::Error::Presence;
 our @ISA = qw/Net::XMPP2::Error::Stanza/;
@@ -263,7 +273,11 @@ sub init {
    $self->SUPER::init;
 }
 
-=head3 condition ()
+=head2 METHODS
+
+=over 4
+
+=item B<condition ()>
 
 Same as L<Net::XMPP2::Error::Stanza> except that
 in case of a IQ timeout it returns:
@@ -281,6 +295,10 @@ sub string {
       $self->type,
       $self->text
 }
+
+=back
+
+=cut
 
 package Net::XMPP2::Error::Stream;
 our @ISA = qw/Net::XMPP2::Error/;
@@ -326,7 +344,9 @@ sub init {
 
 =head2 METHODS
 
-=head3 xml_node ()
+=over 4
+
+=item B<xml_node ()>
 
 Returns the L<Net::XMPP2::Node> object for this stream error.
 
@@ -336,7 +356,7 @@ sub xml_node {
    $_[0]->{node}
 }
 
-=head3 name ()
+=item B<name ()>
 
 Returns the name of the error. That might be undef, one of the following
 strings or some other string that has been discovered by a heuristic
@@ -370,7 +390,7 @@ strings or some other string that has been discovered by a heuristic
 
 sub name { $_[0]->{error_name} }
 
-=head3 text ()
+=item B<text ()>
 
 The humand readable error portion. Might be undef if none was received.
 
@@ -385,6 +405,10 @@ sub string {
       $self->name,
       $self->text)
 }
+
+=back
+
+=cut
 
 package Net::XMPP2::Error::SASL;
 our @ISA = qw/Net::XMPP2::Error/;
@@ -410,7 +434,9 @@ sub init {
 
 =head2 METHODS
 
-=head3 xml_node ()
+=over 4
+
+=item B<xml_node ()>
 
 Returns the L<Net::XMPP2::Node> object for this stream error.
 
@@ -420,7 +446,7 @@ sub xml_node {
    $_[0]->{node}
 }
 
-=head3 condition ()
+=item B<condition ()>
 
 Returns the error condition, which might be one of:
 
@@ -445,6 +471,10 @@ sub string {
       $self->condition
 }
 
+=back
+
+=cut
+
 package Net::XMPP2::Error::Register;
 our @ISA = qw/Net::XMPP2::Error::IQ/;
 
@@ -456,7 +486,9 @@ Net::XMPP2::Error::Register - In band registration error
 
 =head2 METHODS
 
-=head3 register_state ()
+=over 4
+
+=item B<register_state ()>
 
 Returns the state of registration, one of:
 
@@ -478,9 +510,11 @@ sub string {
       $self->SUPER::string
 }
 
+=back
+
 =head1 AUTHOR
 
-Robin Redeker, C<< <elmex at ta-sa.org> >>
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 

@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.01
+        - fixed first bugs and tested in daily usage.
         - implemented XEP-0086
         - implemented XEP-0030
         - implemented XEP-0077
