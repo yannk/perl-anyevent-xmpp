@@ -54,6 +54,54 @@ this framework for XMPP.
 See also L<Net::XMPP2::Writer> for a discussion about the brokeness of XML in the XMPP
 specification.
 
+=head1 REQUIREMENTS
+
+One of the major drawbacks I see for Net::XMPP2 is the long list of required
+modules to make it work.
+
+=over 4
+
+=item AnyEvent
+
+For the I/O events and timers.
+
+=item XML::Writer
+
+For writing "XML".
+
+=item XML::Parser::Expat
+
+For parsing partial "XML" stuff.
+
+=item MIME::Base64
+
+For SASL authentication
+
+=item Authen::SASL
+
+For SASL authentication
+
+=item Net::LibIDN
+
+For stringprep profiles to handle JIDs.
+
+=item Net::SSLeay
+
+For SSL connections.
+
+=item Net::DNS
+
+For SRV RR lookups.
+
+=back
+
+And yes, all these are essential for XMPP communication. Even thought 'instant
+messaging' and 'presence' is a quite simple problem XMPP somehow was successful
+at complicating the task enough to keep me busy for a long time.  But all that
+time wasn't only for the technology required to get it started, mostly it
+was for all the quirks, hacks and badly applied "XML" in the protocol which
+complicated the matter.
+
 =head1 RELEASE NOTES
 
 Here are some notes to the releases (release of this version is at top):
@@ -133,6 +181,16 @@ Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 BUGS
 
+Please note that I'm currently (July 2007) the only developer on this project
+and I'm very busy with my studies in Computer Science in Summer 2007. If you
+want to ease my workload or want timely releases please send me patches instead
+only bug reports or feature requests. I won't forget the reports or requests if
+you can't or didn't send patches but it can take a long time until I get enough
+time to fix/implement them.
+
+Also try to be as precise as possible with bugreports and best, if you can't
+send a patch, would be if you find out which code doesn't work and tell me why.
+
 Please report any bugs or feature requests to
 C<bug-net-xmpp2 at rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-XMPP2>.
@@ -168,6 +226,8 @@ L<http://search.cpan.org/dist/Net-XMPP2>
 =back
 
 =head1 ACKNOWLEDGEMENTS
+
+Thanks to the XSF for the effords of messing around with the broken Jabber protocol.
 
 =head1 COPYRIGHT & LICENSE
 

@@ -15,6 +15,7 @@ WriteMakefile(
         'MIME::Base64'       => 0,
         'Net::LibIDN'        => 0,
         'Authen::SASL'       => 0,
+        'Net::SSLeay'        => 0,
         'Net::DNS'           => 0,
     },
     dist                => {
