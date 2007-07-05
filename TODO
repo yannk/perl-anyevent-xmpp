@@ -1,51 +1,47 @@
-* todo group that is mostly unfinished
-- todo group that is mostly finished
-+ todo item that is mostly finished
-
-* see also: grep 'XXX\|FIXME\|TODO' * -r
+- see also: grep 'XXX\|FIXME\|TODO' * -r
   - lib/Net/XMPP2/Writer.pm: # XXX: removed authname, because it ensures maximum connectivitiy
 
-* implement iq-auth!!!!
+- implement iq-auth!!!!
 
-* make error callback of parser ultimately to an error object
+- make error callback of parser ultimately to an error object
   - use exceptions maybe?
 
-* Net::XMPP2::Client
+- Net::XMPP2::Client
   - find a way to distinguish presences from JIDs that
     are in multiple account's roster.
 
-* Net::XMPP2 missing functionality to be RFC 3920 conform:
-   + add timeouts to IQs!
+- Net::XMPP2 missing functionality to be RFC 3920 conform:
+   - add timeouts to IQs! (mostly done)
    - improve error handling for SASL to 
      support retries as specified in RFC 3920.
      (eg. by supporting a method sasl_retry() which takes
       the changed credentials)
    - SRV record lookup
       - weight handling!
-   + test Net::XMPP2::Error: bind_error and stream_error.
+   - test Net::XMPP2::Error: bind_error and stream_error (mostly done).
    - in band registration and un-registration!!!
       - finish in-band-registration XEP
    later:
       - make dns resolution async!
       - make extensions more optional and reentrant
 
-* Net::XMPP2::IM missing functionality to be RFC 3921 conform:
+- Net::XMPP2::IM missing functionality to be RFC 3921 conform:
    - 7.2.  Business Rules
 
-* Implement XEP-0004: Data Forms
+- Implement XEP-0004: Data Forms
    - see also: XEP-0068: Field Standardization for Data Forms
 
-* Implement XEP-0082: XMPP Date and Time Profiles
+- Implement XEP-0082: XMPP Date and Time Profiles
    - util functions to convert them to unix timestamps
 
-* Implement XEP-0115: Entity Capabilities
+- Implement XEP-0115: Entity Capabilities
 
-* Implement XEP-0045: Multi-User Chat
+- Implement XEP-0045: Multi-User Chat
    - think about: make seperate MUC handler class
 
-* Implement XEP-0190: Best Practice for Closing Idle Streams
+- Implement XEP-0190: Best Practice for Closing Idle Streams
 
-* keep an eye on:
+- keep an eye on:
    - TLS: implemented, just do some extensive testing WRT blocking,
           i don't trust the current way the watchers are handled,
           i'm in fear of deadlocks...

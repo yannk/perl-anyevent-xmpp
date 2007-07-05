@@ -116,12 +116,12 @@ This release has beta status. The code is already used daily in my client
 and I keep looking out for bugs. If you find undocumented, missing or faulty
 code/methods please drop me a mail! See also L<BUGS> below.
 
-Potential edges when using this module: under-documented methods, missing
+Potential edges when using this module: sparely documented methods, missing
 functionality and generally bugs bugs and bugs. Even thought this module is in
 daily usage there are still lots of cases I might have missed.
 
 For the next release I'm planning to provide more examples in the documentation
-or samples/ directory, along with bugfixes and enhancements along with some
+and/or samples/ directory, along with bugfixes and enhancements along with some
 todo items killed from the TODO file.
 
 =back
@@ -129,8 +129,7 @@ todo items killed from the TODO file.
 =head2 TODO
 
 There are still lots of items on the TODO list (see also the TODO file
-in the distribution of Net::XMPP2). For further and more detailed todo items
-look there.
+in the distribution of Net::XMPP2).
 
 =head1 Why (yet) another XMPP module?
 
