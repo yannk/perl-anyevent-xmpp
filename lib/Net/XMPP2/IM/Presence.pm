@@ -11,7 +11,7 @@ Net::XMPP2::IM::Presence - XMPP presence
 
 =head1 DESCRIPTION
 
-This module represents a XMPP presence. It stores
+This module represents an XMPP presence. It stores
 the full JID of the contact, the show value, status value
 and priority.
 

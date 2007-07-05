@@ -501,7 +501,7 @@ sub request_inband_register_form {
          sub {
             my ($w) = @_;
             $w->addPrefix (xmpp_ns ('register'), '');
-            $w->emptyTag ([qw/register query/]);
+            $w->emptyTag ([xmpp_ns ('register'), 'query']);
          },
          sub {
             my ($node, $error) = @_;

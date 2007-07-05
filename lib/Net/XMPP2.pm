@@ -32,16 +32,16 @@ This is the head module of the L<Net::XMPP2> XMPP client protocol (as described 
 RFC 3920 and RFC 3921) framework.
 
 L<Net::XMPP2::Connection> is a RFC 3920 conformant "XML" stream implementation
-for clients, which handles tcp connect up to the resource binding. And provides
-low-level access to the XML nodes on the XML stream along with some high
+for clients, which handles TCP connect up to the resource binding. And provides
+low level access to the XML nodes on the XML stream along with some high
 level methods to send the predefined XML stanzas.
 
-L<Net::XMPP2::IM::Connection> is a more highlevel module, which is derived
+L<Net::XMPP2::IM::Connection> is a more high level module, which is derived
 from L<Net::XMPP2::Connection>. It handles all the instant messaging client
 functionality described in RFC 3921.
 
 L<Net::XMPP2::Client> is a multi account client class. It manages connections
-to multiple XMPP accounts and tries to offer a nice highlevel interface
+to multiple XMPP accounts and tries to offer a nice high level interface
 to XMPP communication.
 
 For a list of L</Supported extensions> see below.
@@ -97,11 +97,11 @@ For SRV RR lookups.
 
 =back
 
-And yes, all these are essential for XMPP communication. Even thought 'instant
+And yes, all these are essential for XMPP communication. Even though 'instant
 messaging' and 'presence' is a quite simple problem XMPP somehow was successful
-at complicating the task enough to keep me busy for a long time.  But all that
-time wasn't only for the technology required to get it started, mostly it
-was for all the quirks, hacks and badly applied "XML" in the protocol which
+at making the task complicated enough to keep me busy for a long time.  But all
+of that time wasn't only for the technology required to get it started, mostly
+it was for all the quirks, hacks and badly applied "XML" in the protocol which
 complicated the matter.
 
 =head1 RELEASE NOTES
@@ -119,7 +119,7 @@ and I keep looking out for bugs. If you find undocumented, missing or faulty
 code/methods please drop me a mail! See also L</BUGS> below.
 
 Potential edges when using this module: sparely documented methods, missing
-functionality and generally bugs bugs and bugs. Even thought this module is in
+functionality and generally bugs bugs and bugs. Even though this module is in
 daily usage there are still lots of cases I might have missed.
 
 For the next release I'm planning to provide more examples in the documentation
@@ -140,12 +140,12 @@ The main outstanding feature of this module in comparison to the other XMPP
 permits you to use this module together with other I/O event based programs and
 libraries (ie. L<Gtk2> or L<Event>).
 
-The other modules could often only be integrated in those applications or librarys
-by using threads. I decided to write this module because I think CPAN lacks
-an event based XMPP module. Threads are unfortunately not an alternative in Perl
-at the moment due the limited threading functionality they provide and the global
-speed hit. I also think that a simple event based I/O framework might be a bit easier
-to handle than threads.
+The other modules could often only be integrated in those applications or
+libraries by using threads. I decided to write this module because I think CPAN
+lacks an event based XMPP module. Threads are unfortunately not an alternative
+in Perl at the moment due the limited threading functionality they provide and
+the global speed hit. I also think that a simple event based I/O framework
+might be a bit easier to handle than threads.
 
 Another thing was that I didn't like the APIs of the other modules. In L<Net::XMPP2>
 I try to provide low level modules for speaking XMPP as defined in RFC 3920 and RFC 3921
@@ -158,7 +158,7 @@ and clients (eg. L<Net::XMPP2::Client>).
 This module also supports TLS, as the specification of XMPP requires an
 implementation to support TLS.
 
-There are maybe still some bugs in the handling of TLS in L<Net::XMPP2::Connection>.
+Maybe there are still some bugs in the handling of TLS in L<Net::XMPP2::Connection>.
 So keep an eye on TLS with this module. If you encounter any problems it would be
 very helpful if you could debug them or at least send me a detailed report on how
 to reproduce the problem.
@@ -168,7 +168,7 @@ might break under different circumstances than I have here.  Those
 circumstances might be a different load of data pumped through the TLS
 connection.)
 
-I mainly expect problems where aviable data isn't properly read from the socket
+I mainly expect problems where available data isn't properly read from the socket
 or written to it. You might want to take a look at the C<debug_send> and C<debug_recv>
 events in L<Net::XMPP2::Connection>.
 
@@ -190,18 +190,19 @@ Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 Please note that I'm currently (July 2007) the only developer on this project
 and I'm very busy with my studies in Computer Science in Summer 2007. If you
-want to ease my workload or want timely releases please send me patches instead
-only bug reports or feature requests. I won't forget the reports or requests if
-you can't or didn't send patches but it can take a long time until I get enough
+want to ease my workload or want timely releases, please send me patches instead
+of bug reports or feature requests. I won't forget the reports or requests if
+you can't or didn't send patches, but it can take a long time until I get enough
 time to fix/implement them.
 
-Also try to be as precise as possible with bugreports and best, if you can't
-send a patch, would be if you find out which code doesn't work and tell me why.
+Also try to be as precise as possible with bug reports, if you can't send a
+patch, it would be best if you find out which code doesn't work and tell me
+why.
 
 Please report any bugs or feature requests to
 C<bug-net-xmpp2 at rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-XMPP2>.
-I will be notified, and then you'll automatically be notified of progress on
+I will be notified and then you'll automatically be notified of progress on
 your bug as I make changes.
 
 =head1 SUPPORT
@@ -246,17 +247,17 @@ L<http://search.cpan.org/dist/Net-XMPP2>
 
 =head1 ACKNOWLEDGEMENTS
 
-Thanks to the XSF for the development of an open instant messaging protocol (even thought it uses "XML").
+Thanks to the XSF for the development of an open instant messaging protocol (even though it uses "XML").
 
 And thanks to all people who had to listen to my desperate curses about the
-brokeness/braindeadness of XMPP, without you I would've never brought this
+brokenness/braindeadness of XMPP. Without you I would've never brought this
 module to a usable state.
 
 Thanks to:
 
 =over 4
 
-=item lynx
+=item * Carlo von Loesch (aka lynX) L<http://www.psyced.org/>
 
 For pointing out some typos.
 

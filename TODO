@@ -21,6 +21,7 @@
    - test Net::XMPP2::Error: bind_error and stream_error (mostly done).
    - in band registration and un-registration!!!
       - finish in-band-registration XEP
+      - document events
    later:
       - make dns resolution async!
       - make extensions more optional and reentrant

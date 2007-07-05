@@ -4,7 +4,7 @@ our @ISA = qw/Net::XMPP2::Error::IQ/;
 
 =head1 NAME
 
-Net::XMPP2::Error::Register - In band registration error
+Net::XMPP2::Error::Register - In-band registration error
 
 Subclass of L<Net::XMPP2::Error>
 
