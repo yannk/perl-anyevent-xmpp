@@ -11,6 +11,10 @@ SYNOPSIS
 
        use Net::XMPP2::IM::Connection;
 
+    or:
+
+       use Net::XMPP2::Client;
+
 DESCRIPTION
     This is the head module of the Net::XMPP2 XMPP client protocol (as
     described in RFC 3920 and RFC 3921) framework.
@@ -25,15 +29,79 @@ DESCRIPTION
     from Net::XMPP2::Connection. It handles all the instant messaging client
     functionality described in RFC 3921.
 
+    Net::XMPP2::Client is a multi account client class. It manages
+    connections to multiple XMPP accounts and tries to offer a nice
+    highlevel interface to XMPP communication.
+
     For a list of "Supportet extensions" see below.
 
     There are also other modules in this distribution, for example:
-    Net::XMPP2::Util, Net::XMPP2::Writer, Net::XMPP2::Parser and those i
+    Net::XMPP2::Util, Net::XMPP2::Writer, Net::XMPP2::Parser and those I
     forgot :-) Those modules might be helpful and/or required if you want to
     use this framework for XMPP.
 
     See also Net::XMPP2::Writer for a discussion about the brokeness of XML
     in the XMPP specification.
+
+    If you have any questions or seek for help look below under "SUPPORT".
+
+REQUIREMENTS
+    One of the major drawbacks I see for Net::XMPP2 is the long list of
+    required modules to make it work.
+
+    AnyEvent
+        For the I/O events and timers.
+
+    XML::Writer
+        For writing "XML".
+
+    XML::Parser::Expat
+        For parsing partial "XML" stuff.
+
+    MIME::Base64
+        For SASL authentication
+
+    Authen::SASL
+        For SASL authentication
+
+    Net::LibIDN
+        For stringprep profiles to handle JIDs.
+
+    Net::SSLeay
+        For SSL connections.
+
+    Net::DNS
+        For SRV RR lookups.
+
+    And yes, all these are essential for XMPP communication. Even thought
+    'instant messaging' and 'presence' is a quite simple problem XMPP
+    somehow was successful at complicating the task enough to keep me busy
+    for a long time. But all that time wasn't only for the technology
+    required to get it started, mostly it was for all the quirks, hacks and
+    badly applied "XML" in the protocol which complicated the matter.
+
+RELEASE NOTES
+    Here are some notes to the releases (release of this version is at top):
+
+  Version
+    * 0.01
+        This release has beta status. The code is already used daily in my
+        client and I keep looking out for bugs. If you find undocumented,
+        missing or faulty code/methods please drop me a mail! See also
+        "BUGS" below.
+
+        Potential edges when using this module: sparely documented methods,
+        missing functionality and generally bugs bugs and bugs. Even thought
+        this module is in daily usage there are still lots of cases I might
+        have missed.
+
+        For the next release I'm planning to provide more examples in the
+        documentation and/or samples/ directory, along with bugfixes and
+        enhancements along with some todo items killed from the TODO file.
+
+  TODO
+    There are still lots of items on the TODO list (see also the TODO file
+    in the distribution of Net::XMPP2).
 
 Why (yet) another XMPP module?
     The main outstanding feature of this module in comparsion to the other
@@ -42,7 +110,7 @@ Why (yet) another XMPP module?
     based programs and libraries (ie. Gtk2 or Event).
 
     The other modules could often only be integrated in those applications
-    or librarys by using threads. I decided to write this module because i
+    or librarys by using threads. I decided to write this module because I
     think CPAN lacks an event based XMPP module. Threads are unfortunately
     not an alternative in Perl at the moment due the limited threading
     functionality they provide and the global speed hit. I also think that a
@@ -53,7 +121,8 @@ Why (yet) another XMPP module?
     Net::XMPP2 I try to provide low level modules for speaking XMPP as
     defined in RFC 3920 and RFC 3921 (see also Net::XMPP2::Connection and
     Net::XMPP2::IM::Connection). But I also try to provide a high level API
-    for easier usage for instant messaging tasks and clients.
+    for easier usage for instant messaging tasks and clients (eg.
+    Net::XMPP2::Client).
 
 A note about TLS
     This module also supports TLS, as the specification of XMPP requires an
@@ -74,24 +143,29 @@ A note about TLS
     "debug_send" and "debug_recv" events in Net::XMPP2::Connection.
 
 Supportet extensions
-    This is the list of supported XMPP extensions:
+    See Net::XMPP2::Ext for a list.
 
-    XEP-0086 - Error Condition Mappings
-           "A mapping to enable legacy entities to correctly handle errors from XMPP-aware entities."
-
-        This extension will enable sending of the old error codes when
-        generating a stanza error with for example:
-        Net::XMPP2::Writer::write_error_tag
-
-    XEP-0077 - In-Band Registration
-        This extension lets you register new accounts "in-band". To use this
-        look at the description of the "register" option to the "new" method
-        of Net::XMPP2::Connection.
+EXAMPLES
+    See "samples/test_client" for a first pointer. More examples will be
+    included in later releases, please feel free to ask the "AUTHOR" if you
+    have any questions about the API. There is also an IRC channel, see
+    "SUPPORT".
 
 AUTHOR
-    Robin Redeker, "<elmex at ta-sa.org>"
+    Robin Redeker, "<elmex at ta-sa.org>", JID: "<elmex at jabber.org>"
 
 BUGS
+    Please note that I'm currently (July 2007) the only developer on this
+    project and I'm very busy with my studies in Computer Science in Summer
+    2007. If you want to ease my workload or want timely releases please
+    send me patches instead only bug reports or feature requests. I won't
+    forget the reports or requests if you can't or didn't send patches but
+    it can take a long time until I get enough time to fix/implement them.
+
+    Also try to be as precise as possible with bugreports and best, if you
+    can't send a patch, would be if you find out which code doesn't work and
+    tell me why.
+
     Please report any bugs or feature requests to "bug-net-xmpp2 at
     rt.cpan.org", or through the web interface at
     <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-XMPP2>. I will be
@@ -104,6 +178,16 @@ SUPPORT
         perldoc Net::XMPP2
 
     You can also look for information at:
+
+    * IRC: Net::XMPP2 IRC Channel
+          IRC Network: http://freenode.net/
+          Server     : chat.freenode.net
+          Channel    : #net_xmpp2
+
+          Feel free to join and ask questions!
+
+    * Net::XMPP2 Project Site
+        <http://www.ta-sa.org/>
 
     * AnnoCPAN: Annotated CPAN documentation
         <http://annocpan.org/dist/Net-XMPP2>
@@ -118,6 +202,13 @@ SUPPORT
         <http://search.cpan.org/dist/Net-XMPP2>
 
 ACKNOWLEDGEMENTS
+    Thanks to the XSF for the development of an open instant messaging
+    protocol (even thought it uses "XML").
+
+    And thanks to all people who had to listen to my desperate curses about
+    the brokeness/braindeadness of XMPP, without you I would've never
+    brought this module to a usable state.
+
 COPYRIGHT & LICENSE
     Copyright 2007 Robin Redeker, all rights reserved.
 

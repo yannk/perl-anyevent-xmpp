@@ -6,7 +6,7 @@ README
 t/00-load.t
 t/boilerplate.t
 t/pod.t
-Changes
+samples/test_client
 lib/Net/XMPP2/IM/Contact.pm
 lib/Net/XMPP2/IM/Roster.pm
 lib/Net/XMPP2/IM/Connection.pm
@@ -21,6 +21,13 @@ lib/Net/XMPP2/Ext/RegisterForm.pm
 lib/Net/XMPP2/Namespaces.pm
 lib/Net/XMPP2/Util.pm
 lib/Net/XMPP2/Ext.pm
+lib/Net/XMPP2/Error/SASL.pm
+lib/Net/XMPP2/Error/IQ.pm
+lib/Net/XMPP2/Error/Register.pm
+lib/Net/XMPP2/Error/Stanza.pm
+lib/Net/XMPP2/Error/Stream.pm
+lib/Net/XMPP2/Error/Presence.pm
+lib/Net/XMPP2/Error/Message.pm
 lib/Net/XMPP2/Event.pm
 lib/Net/XMPP2/Client.pm
 lib/Net/XMPP2/SimpleConnection.pm
@@ -30,4 +37,3 @@ lib/Net/XMPP2/Connection.pm
 lib/Net/XMPP2/Error.pm
 lib/Net/XMPP2/Node.pm
 lib/Net/XMPP2.pm
-samples/test_client

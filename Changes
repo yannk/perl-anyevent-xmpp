@@ -1,10 +1,10 @@
 Revision history for Net-XMPP2
 
-0.01
-        - fixed first bugs and tested in daily usage.
-        - implemented XEP-0086
-        - implemented XEP-0030
-        - implemented XEP-0077
-        - implemented 95% of RFC 3921
-        - implemented 95% of RFC 3920
-        - first version, released to an unsuspecting world :-)
+0.01 Thu Jul  5 19:34:30 CEST 2007
+         - fixed first bugs and tested in daily usage.
+         - implemented XEP-0086
+         - implemented XEP-0030
+         - implemented XEP-0077
+         - implemented 95% of RFC 3921
+         - implemented 95% of RFC 3920
+         - first version, released to an unsuspecting world :-)

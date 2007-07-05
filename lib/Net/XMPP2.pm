@@ -176,6 +176,12 @@ events in L<Net::XMPP2::Connection>.
 
 See L<Net::XMPP2::Ext> for a list.
 
+=head1 EXAMPLES
+
+See C<samples/test_client> for a first pointer. More examples will be included
+in later releases, please feel free to ask the L</AUTHOR> if you have any questions
+about the API. There is also an IRC channel, see L</SUPPORT>.
+
 =head1 AUTHOR
 
 Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
@@ -213,6 +219,8 @@ You can also look for information at:
   IRC Network: http://freenode.net/
   Server     : chat.freenode.net
   Channel    : #net_xmpp2
+
+  Feel free to join and ask questions!
 
 =item * Net::XMPP2 Project Site
 
