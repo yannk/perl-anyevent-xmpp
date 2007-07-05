@@ -345,7 +345,7 @@ sub is_connected {
 
 This sets the default timeout for IQ requests. If the timeout runs out
 the request will be aborted and the callback called with a L<Net::XMPP2::Error::IQ> object
-where the C<condition> method returns a special value (see also L<Net::XMPP2::Error::IQ::condition>).
+where the C<condition> method returns a special value (see also C<condition> method of L<Net::XMPP2::Error::IQ>).
 
 The default timeout for IQ is 60 seconds.
 
@@ -424,7 +424,7 @@ in C<$req_iq_node>.
 
 C<$error_type> is one of 'cancel', 'continue', 'modify', 'auth' and 'wait'.
 C<$error> is one of the defined error conditions described in
-L<Net::XMPP2::Writer::write_error_tag>.
+C<write_error_tag> method of L<Net::XMPP2::Writer>.
 
 Please take a look at the documentation for C<send_iq> in Net::XMPP2::Writer
 about the meaning of C<%attrs>.
@@ -489,7 +489,7 @@ sub send_sasl_auth {
 This method starts a in-band-registration attempt.  When finished C<$finish_cb>
 will be called with the first argument being a L<Net::XMPP2::Ext::RegisterForm>
 object (will be undef if an error occured) and the second an optional error
-object of type L<Net::XMPP2::Error::Ext::Register> if an error occured.
+object of type L<Net::XMPP2::Error::Register> if an error occured.
 
 =cut
 
@@ -612,7 +612,7 @@ sub do_iq_auth {
 
 This method sends a presence stanza, for the meanings
 of C<$type>, C<$create_cb> and C<%attrs> please take a look
-at the documentation for L<Net::XMPP2::Writer::send_presence>.
+at the documentation for C<send_presence> method of L<Net::XMPP2::Writer>.
 
 This methods does attach an id attribute to the message stanza and
 will return the id that was used (so you can react on possible replies).
@@ -630,7 +630,7 @@ sub send_presence {
 
 This method sends a presence stanza, for the meanings
 of C<$to>, C<$type>, C<$create_cb> and C<%attrs> please take a look
-at the documentation for L<Net::XMPP2::Writer::send_message>.
+at the documentation for C<send_message> method of L<Net::XMPP2::Writer>.
 
 This methods does attach an id attribute to the message stanza and
 will return the id that was used (so you can react on possible replies).

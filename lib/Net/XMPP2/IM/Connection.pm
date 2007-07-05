@@ -293,9 +293,9 @@ to your presence. C<$rdoit> is a reference to a scalar. Setting
 the referenced scalar to 1 will accept the subscription request and send
 a subscribed presence.
 
-If you want to accept or decline the request laster call
-L<Net::XMPP2::IM::Contact::send_subscribed> or
-L<Net::XMPP2::IM::Contact::send_unsubscribed> on C<$contact>.
+If you want to accept or decline the request later, call
+C<send_subscribed> method of L<Net::XMPP2::IM::Contact> or
+C<send_unsubscribed> method of L<Net::XMPP2::IM::Contact> on C<$contact>.
 
 =item contact_subscribed => $roster, $contact
 

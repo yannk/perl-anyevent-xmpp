@@ -21,7 +21,7 @@ This is the list of supported XMPP extensions:
    "A mapping to enable legacy entities to correctly handle errors from XMPP-aware entities."
 
 This extension will enable sending of the old error codes when generating a stanza
-error with for example: L<Net::XMPP2::Writer::write_error_tag>
+error with for example the C<write_error_tag> method of L<Net::XMPP2::Writer>.
 
 =item XEP-0030 - Service Discovery
 

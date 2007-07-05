@@ -366,7 +366,7 @@ sub get_priority_presence_for_jid {
 
 This sets the presence of all accounts.  For a meaning of C<$show>, C<$status>
 and C<$priority> see the description of the C<%attrs> hash in
-L<Net::XMPP2::Writer::send_presence>.
+C<send_presence> method of L<Net::XMPP2::Writer>.
 
 =cut
 
@@ -387,7 +387,7 @@ sub set_presence {
 =head1 EVENTS
 
 In the following event descriptions the argument C<$account>
-is always a L<Net::XMMP2::IM::Account> object.
+is always a L<Net::XMPP2::IM::Account> object.
 
 All events from L<Net::XMPP2::IM::Connection> are forwarded to the client,
 only that the first argument for every event is a C<$account> object.

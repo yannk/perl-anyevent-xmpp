@@ -44,7 +44,7 @@ L<Net::XMPP2::Client> is a multi account client class. It manages connections
 to multiple XMPP accounts and tries to offer a nice highlevel interface
 to XMPP communication.
 
-For a list of L<Supportet extensions> see below.
+For a list of L</Supportet extensions> see below.
 
 There are also other modules in this distribution, for example:
 L<Net::XMPP2::Util>, L<Net::XMPP2::Writer>, L<Net::XMPP2::Parser> and those I
@@ -54,6 +54,8 @@ this framework for XMPP.
 See also L<Net::XMPP2::Writer> for a discussion about the brokeness of XML in the XMPP
 specification.
 
+If you have any questions or seek for help look below under L</SUPPORT>.
+
 =head1 REQUIREMENTS
 
 One of the major drawbacks I see for Net::XMPP2 is the long list of required
@@ -61,35 +63,35 @@ modules to make it work.
 
 =over 4
 
-=item AnyEvent
+=item L<AnyEvent>
 
 For the I/O events and timers.
 
-=item XML::Writer
+=item L<XML::Writer>
 
 For writing "XML".
 
-=item XML::Parser::Expat
+=item L<XML::Parser::Expat>
 
 For parsing partial "XML" stuff.
 
-=item MIME::Base64
+=item L<MIME::Base64>
 
 For SASL authentication
 
-=item Authen::SASL
+=item L<Authen::SASL>
 
 For SASL authentication
 
-=item Net::LibIDN
+=item L<Net::LibIDN>
 
 For stringprep profiles to handle JIDs.
 
-=item Net::SSLeay
+=item L<Net::SSLeay>
 
 For SSL connections.
 
-=item Net::DNS
+=item L<Net::DNS>
 
 For SRV RR lookups.
 
@@ -110,11 +112,11 @@ Here are some notes to the releases (release of this version is at top):
 
 =over 4
 
-=item 0.01
+=item * 0.01
 
 This release has beta status. The code is already used daily in my client
 and I keep looking out for bugs. If you find undocumented, missing or faulty
-code/methods please drop me a mail! See also L<BUGS> below.
+code/methods please drop me a mail! See also L</BUGS> below.
 
 Potential edges when using this module: sparely documented methods, missing
 functionality and generally bugs bugs and bugs. Even thought this module is in
@@ -149,7 +151,7 @@ Another thing was that I didn't like the APIs of the other modules. In L<Net::XM
 I try to provide low level modules for speaking XMPP as defined in RFC 3920 and RFC 3921
 (see also L<Net::XMPP2::Connection> and L<Net::XMPP2::IM::Connection>). But I also
 try to provide a high level API for easier usage for instant messaging tasks
-and clients (eg. L<Net::XMPP2::IM::Client>).
+and clients (eg. L<Net::XMPP2::Client>).
 
 =head1 A note about TLS
 
@@ -206,6 +208,16 @@ You can also look for information at:
 
 =over 4
 
+=item * IRC: Net::XMPP2 IRC Channel
+
+  IRC Network: http://freenode.net/
+  Server     : chat.freenode.net
+  Channel    : #net_xmpp2
+
+=item * Net::XMPP2 Project Site
+
+L<http://www.ta-sa.org/>
+
 =item * AnnoCPAN: Annotated CPAN documentation
 
 L<http://annocpan.org/dist/Net-XMPP2>
@@ -226,7 +238,7 @@ L<http://search.cpan.org/dist/Net-XMPP2>
 
 =head1 ACKNOWLEDGEMENTS
 
-Thanks to the XSF for the effords of messing around with XMPP.
+Thanks to the XSF for the development of an open instant messaging protocol (even thought it uses "XML").
 
 And thanks to all people who had to listen to my desperate curses about the
 brokeness/braindeadness of XMPP, without you I would've never brought this

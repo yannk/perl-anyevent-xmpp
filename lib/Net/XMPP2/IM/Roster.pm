@@ -246,8 +246,7 @@ Returns the contacts that are not on the roster
 but for which we have received presence.
 Return value is a list of L<Net::XMPP2::IM::Contact> objects.
 
-See also documentation of L<Net::XMPP2::IM::Roster::get_contacts>
-above.
+See also documentation of C<get_contacts> method of L<Net::XMPP2::IM::Roster> above.
 
 =cut
 
