@@ -471,7 +471,7 @@ sub handle_iq {
       push @from, (to => $node->attr ('from')) if $node->attr ('from');
 
       unless ($handled) {
-         $self->reply_iq_error ($node, undef, 'feature-not-implemented', @from);
+         $self->reply_iq_error ($node, undef, 'service-unavailable', @from);
       }
    }
 }
