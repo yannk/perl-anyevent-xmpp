@@ -5,7 +5,7 @@ use overload
 
 =head1 NAME
 
-Net::XMPP2::IM::Message - An instant message
+Net::XMPP2::IM::Message - Instant message
 
 =head1 SYNOPSIS
 

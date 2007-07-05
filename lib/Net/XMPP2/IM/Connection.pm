@@ -8,7 +8,7 @@ our @ISA = qw/Net::XMPP2::Connection/;
 
 =head1 NAME
 
-Net::XMPP2::IM::Connection - A XML stream that implements the XMPP RFC 3921.
+Net::XMPP2::IM::Connection - "XML" stream that implements the XMPP RFC 3921.
 
 =head1 SYNOPSIS
 

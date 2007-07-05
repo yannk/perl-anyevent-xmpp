@@ -11,7 +11,7 @@ use Net::XMPP2::Error::Message;
 
 =head1 NAME
 
-Net::XMPP2::Error - An error class hierarchy for error reporting
+Net::XMPP2::Error - Error class hierarchy for error reporting
 
 =head1 SYNOPSIS
 

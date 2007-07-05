@@ -7,7 +7,7 @@ use Net::XMPP2::Namespaces qw/xmpp_ns/;
 
 =head1 NAME
 
-Net::XMPP2::Writer - A "XML" writer for XMPP
+Net::XMPP2::Writer - "XML" writer for XMPP
 
 =head1 SYNOPSIS
 

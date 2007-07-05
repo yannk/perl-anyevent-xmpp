@@ -15,7 +15,7 @@ our @ISA = qw/Net::XMPP2::SimpleConnection Net::XMPP2::Event/;
 
 =head1 NAME
 
-Net::XMPP2::Connection - A XML stream that implements the XMPP RFC 3920.
+Net::XMPP2::Connection - XML stream that implements the XMPP RFC 3920.
 
 =head1 SYNOPSIS
 

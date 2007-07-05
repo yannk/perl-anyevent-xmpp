@@ -14,7 +14,7 @@ use constant {
 
 =head1 NAME
 
-Net::XMPP2::Node - A XML node tree helper for the parser.
+Net::XMPP2::Node - XML node tree helper for the parser.
 
 =head1 SYNOPSIS
 

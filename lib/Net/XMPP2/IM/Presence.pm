@@ -5,7 +5,7 @@ use Net::XMPP2::IM::Message;
 
 =head1 NAME
 
-Net::XMPP2::IM::Presence - A XMPP presence
+Net::XMPP2::IM::Presence - XMPP presence
 
 =head1 SYNOPSIS
 

@@ -44,7 +44,7 @@ L<Net::XMPP2::Client> is a multi account client class. It manages connections
 to multiple XMPP accounts and tries to offer a nice highlevel interface
 to XMPP communication.
 
-For a list of L</Supportet extensions> see below.
+For a list of L</Supported extensions> see below.
 
 There are also other modules in this distribution, for example:
 L<Net::XMPP2::Util>, L<Net::XMPP2::Writer>, L<Net::XMPP2::Parser> and those I
@@ -135,7 +135,7 @@ in the distribution of Net::XMPP2).
 
 =head1 Why (yet) another XMPP module?
 
-The main outstanding feature of this module in comparsion to the other XMPP
+The main outstanding feature of this module in comparison to the other XMPP
 (aka Jabber) modules out there is the support for L<AnyEvent>. L<AnyEvent>
 permits you to use this module together with other I/O event based programs and
 libraries (ie. L<Gtk2> or L<Event>).
@@ -172,7 +172,7 @@ I mainly expect problems where aviable data isn't properly read from the socket
 or written to it. You might want to take a look at the C<debug_send> and C<debug_recv>
 events in L<Net::XMPP2::Connection>.
 
-=head1 Supportet extensions
+=head1 Supported extensions
 
 See L<Net::XMPP2::Ext> for a list.
 
@@ -251,6 +251,16 @@ Thanks to the XSF for the development of an open instant messaging protocol (eve
 And thanks to all people who had to listen to my desperate curses about the
 brokeness/braindeadness of XMPP, without you I would've never brought this
 module to a usable state.
+
+Thanks to:
+
+=over 4
+
+=item lynx
+
+For pointing out some typos.
+
+=back
 
 =head1 COPYRIGHT & LICENSE
 

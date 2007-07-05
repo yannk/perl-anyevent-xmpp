@@ -7,7 +7,7 @@ use XML::Parser::Expat;
 
 =head1 NAME
 
-Net::XMPP2::Parser - A parser for XML streams (helper for Net::XMPP2)
+Net::XMPP2::Parser - Parser for XML streams (helper for Net::XMPP2)
 
 =head1 SYNOPSIS
 

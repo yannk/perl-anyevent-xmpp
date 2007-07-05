@@ -7,7 +7,7 @@ use strict;
 
 =head1 NAME
 
-Net::XMPP2::IM::Roster - A instant messaging roster for XMPP
+Net::XMPP2::IM::Roster - Instant messaging roster for XMPP
 
 =head1 SYNOPSIS
 

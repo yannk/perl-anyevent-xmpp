@@ -5,7 +5,7 @@ use Net::XMPP2::Ext::Disco::Info;
 
 =head1 NAME
 
-Net::XMPP2::Ext::Disco - A service discovery manager class for XEP-0030
+Net::XMPP2::Ext::Disco - Service discovery manager class for XEP-0030
 
 =head1 SYNOPSIS
 

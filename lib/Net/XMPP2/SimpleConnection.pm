@@ -16,7 +16,7 @@ BEGIN {
 
 =head1 NAME
 
-Net::XMPP2::SimpleConnection - A low level TCP/TLS connection
+Net::XMPP2::SimpleConnection - Low level TCP/TLS connection
 
 =head1 SYNOPSIS
 

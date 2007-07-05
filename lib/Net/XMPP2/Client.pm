@@ -25,7 +25,7 @@ our @ISA = qw/Net::XMPP2::Event/;
 
 =head1 NAME
 
-Net::XMPP2::Client - A XMPP Client abstraction
+Net::XMPP2::Client - XMPP Client abstraction
 
 =head1 SYNOPSIS
 

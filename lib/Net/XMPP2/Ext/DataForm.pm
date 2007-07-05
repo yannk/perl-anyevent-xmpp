@@ -3,7 +3,7 @@ use Net::XMPP2::Namespaces qw/xmpp_ns/;
 
 =head1 NAME
 
-Net::XMPP2::DataForm - A XEP-0004 DataForm
+Net::XMPP2::DataForm - XEP-0004 DataForm
 
 =head1 SYNOPSIS
 

@@ -5,7 +5,7 @@ use Net::XMPP2::Namespaces qw/xmpp_ns/;
 
 =head1 NAME
 
-Net::XMPP2::RegisterForm - A handle for in band registration
+Net::XMPP2::RegisterForm - Handle for in band registration
 
 =head1 SYNOPSIS
 

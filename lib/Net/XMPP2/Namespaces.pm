@@ -25,7 +25,7 @@ our %NAMESPACES = (
 
 =head1 NAME
 
-Net::XMPP2::Namespaces - A XMPP namespace collection and aliasing class
+Net::XMPP2::Namespaces - XMPP namespace collection and aliasing class
 
 =head1 SYNOPSIS
 

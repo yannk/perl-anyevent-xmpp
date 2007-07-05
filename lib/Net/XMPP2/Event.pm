@@ -2,7 +2,7 @@ package Net::XMPP2::Event;
 
 =head1 NAME
 
-Net::XMPP2::Event - A event handler class
+Net::XMPP2::Event - Event handler class
 
 =head1 SYNOPSIS
 
@@ -100,7 +100,7 @@ sub event {
 =item B<add_forward ($obj, $forward_cb)>
 
 This method allows to forward or copy all events to a object.
-C<$forward_cb> will be called everytime a event is generated in C<$self>.
+C<$forward_cb> will be called everytime an event is generated in C<$self>.
 The first argument to the callback C<$forward_cb> will be <$self>, the second
 will be C<$obj>, the third will be the event name and the rest will be
 the event arguments. (For third and rest of argument also see description

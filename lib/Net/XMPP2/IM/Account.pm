@@ -5,7 +5,7 @@ use Net::XMPP2::IM::Connection;
 
 =head1 NAME
 
-Net::XMPP2::IM::Account - An instant messaging account
+Net::XMPP2::IM::Account - Instant messaging account
 
 =head1 SYNOPSIS
 

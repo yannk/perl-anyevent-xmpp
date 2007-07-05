@@ -7,7 +7,7 @@ use Net::XMPP2::IM::Message;
 
 =head1 NAME
 
-Net::XMPP2::IM::Contact - A instant messaging roster contact
+Net::XMPP2::IM::Contact - Instant messaging roster contact
 
 =head1 SYNOPSIS
 

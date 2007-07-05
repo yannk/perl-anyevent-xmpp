@@ -1,5 +1,8 @@
 Revision history for Net-XMPP2
 
+0.02
+         - fixed some typos (thanks to lynx aka carlo)
+
 0.01 Thu Jul  5 19:34:30 CEST 2007
          - fixed first bugs and tested in daily usage.
          - implemented XEP-0086
