@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.02
+         - added samples/simple_example_1
          - fixed some typos (thanks to lynx aka carlo)
 
 0.01 Thu Jul  5 19:34:30 CEST 2007

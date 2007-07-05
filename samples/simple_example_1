@@ -1,0 +1,27 @@
+#!/opt/perl/bin/perl
+use strict;
+use utf8;
+use Event;
+use AnyEvent;
+use Net::XMPP2::Client;
+
+my $j = AnyEvent->condvar;
+my $cl = Net::XMPP2::Client->new;
+$cl->add_account ('net_xmpp2@jabber.org', 'test');
+$cl->reg_cb (
+   connected => sub {
+      $cl->send_message (
+         "Hi! I'm too stupid to adjust examples!" => 'elmex@jabber.org'
+      );
+      0
+   },
+   message => sub {
+      my ($cl, $acc, $msg) = @_;
+      print "message from: " . $msg->from . ": " . $msg->any_body . "\n";
+      1
+   }
+);
+
+$cl->start;
+$j->wait;
+
