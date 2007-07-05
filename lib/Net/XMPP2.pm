@@ -227,7 +227,11 @@ L<http://search.cpan.org/dist/Net-XMPP2>
 
 =head1 ACKNOWLEDGEMENTS
 
-Thanks to the XSF for the effords of messing around with the broken Jabber protocol.
+Thanks to the XSF for the effords of messing around with XMPP.
+
+And thanks to all people who had to listen to my desperate curses about the
+brokeness/braindeadness of XMPP, without you I would've never brought this
+module to a usable state.
 
 =head1 COPYRIGHT & LICENSE
 
