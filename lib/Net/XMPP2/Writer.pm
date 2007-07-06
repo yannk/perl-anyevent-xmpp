@@ -4,6 +4,7 @@ use XML::Writer;
 use Authen::SASL;
 use MIME::Base64;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Util qw/simxml/;
 
 =head1 NAME
 
@@ -262,6 +263,9 @@ C<$id> is the id to give this IQ stanza and is mandatory in this API.
 
 sub send_iq {
    my ($self, $id, $type, $create_cb, %attrs) = @_;
+
+   $create_cb = _trans_create_cb ($create_cb);
+
    my $w = $self->{writer};
    $w->addPrefix (xmpp_ns ('bind'), '');
    my (@from) = ($self->{jid} ? (from => $self->{jid}) : ());
@@ -290,6 +294,7 @@ C<$type> is the type of the presence, which may be one of:
 
    unavailable, subscribe, subscribed, unsubscribe, unsubscribed, probe, error
 
+Or undef, in case you want to send a 'normal' presence.
 Or something completly different if you don't like the RFC 3921 :-)
 
 C<%attrs> contains further attributes for the presence tag or may contain one of the
@@ -334,8 +339,23 @@ sub _generate_key_xmls {
    }
 }
 
+sub _trans_create_cb {
+   my ($cb) = @_;
+   return unless defined $cb;
+   if (ref ($cb) eq 'HASH') {
+      my $args = $cb;
+      $cb = sub {
+         my ($w) = @_;
+         simxml ($w, %$args);
+      }
+   }
+   $cb
+}
+
 sub send_presence {
    my ($self, $id, $type, $create_cb, %attrs) = @_;
+
+   $create_cb = _trans_create_cb ($create_cb);
 
    my $w = $self->{writer};
    $w->addPrefix (xmpp_ns ('client'), '');
@@ -404,6 +424,8 @@ and the value will be the character content.
 
 sub send_message {
    my ($self, $id, $to, $type, $create_cb, %attrs) = @_;
+
+   $create_cb = _trans_create_cb ($create_cb);
 
    my $w = $self->{writer};
    $w->addPrefix (xmpp_ns ('client'), '');

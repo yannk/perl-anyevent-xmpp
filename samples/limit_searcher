@@ -19,7 +19,7 @@ my $last_ok_size  = 0;
 my $delta         = 10;
 
 $cl->reg_cb (
-   connected => sub {
+   session_ready => sub {
       my ($cl, $acc) = @_;
       my $con = $acc->connection;
 

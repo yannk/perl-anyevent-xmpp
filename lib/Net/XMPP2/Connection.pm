@@ -452,7 +452,10 @@ sub handle_iq {
 
    if ($type eq 'result') {
       if (my $cb = delete $self->{iqs}->{$id}) {
-         $cb->($node);
+         eval {
+            $cb->($node);
+         };
+         if ($@) { $self->event (iq_result_cb_exception => $@) }
       }
 
    } elsif ($type eq 'error') {
@@ -801,6 +804,11 @@ If C<$$handled_ref> is true an event handler should not handle this message anym
 If one of the event handlers handled this message the scalar pointed at by
 the reference in C<$handled_ref> should be set to 1 true value. If C<$$handled_ref>
 is still false after all event handlers were executed an error iq will be generated.
+
+=item iq_result_cb_exception => $exception
+
+If the C<$result_cb> of a C<send_iq> operation somehow threw a exception
+or failed this event will be generated.
 
 =back
 

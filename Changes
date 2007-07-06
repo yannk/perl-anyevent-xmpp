@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.02
+         - implemented XEP-0004
          - added samples/limit_searcher
          - added simxml()
          - splitting up large packets when writing

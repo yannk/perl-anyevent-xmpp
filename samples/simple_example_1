@@ -9,7 +9,7 @@ my $j = AnyEvent->condvar;
 my $cl = Net::XMPP2::Client->new;
 $cl->add_account ('net_xmpp2@jabber.org', 'test');
 $cl->reg_cb (
-   connected => sub {
+   session_ready => sub {
       $cl->send_message (
          "Hi! I'm too stupid to adjust examples!" => 'elmex@jabber.org'
       );

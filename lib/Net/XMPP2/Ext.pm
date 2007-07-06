@@ -16,6 +16,13 @@ This is the list of supported XMPP extensions:
 
 =over 4
 
+=item XEP-0004 - Data Forms
+
+This extension handles data forms as described in XEP-0004.
+L<Net::XMPP2::Ext::DataForm> allows you to construct, receive and
+answer data forms. This is neccessary for all sorts of things in XMPP.
+For example XEP-0055 (Jabber Search) or also In-band registration.
+
 =item XEP-0086 - Error Condition Mappings
 
    "A mapping to enable legacy entities to correctly handle errors from XMPP-aware entities."

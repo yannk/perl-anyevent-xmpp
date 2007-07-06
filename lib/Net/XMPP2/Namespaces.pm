@@ -2,7 +2,7 @@ package Net::XMPP2::Namespaces;
 use warnings;
 use strict;
 require Exporter;
-our @EXPORT_OK = qw/xmpp_ns set_xmpp_ns_alias/;
+our @EXPORT_OK = qw/xmpp_ns set_xmpp_ns_alias xmpp_ns_maybe/;
 our @ISA = qw/Exporter/;
 
 our %NAMESPACES = (
@@ -21,6 +21,11 @@ our %NAMESPACES = (
    disco_items => 'http://jabber.org/protocol/disco#items',
    register    => 'http://jabber.org/features/iq-register',
    iqauth      => 'http://jabber.org/features/iq-auth',
+   data_form   => 'jabber:x:data',
+   muc         => 'http://jabber.org/protocol/muc',
+   muc_user    => 'http://jabber.org/protocol/muc#user',
+   muc_owner   => 'http://jabber.org/protocol/muc#owner',
+   search      => 'jabber:iq:search',
 );
 
 =head1 NAME
@@ -62,8 +67,9 @@ which make handling of namepsaces a bit easier:
    disco_info  => http://jabber.org/protocol/disco#info
    disco_items => http://jabber.org/protocol/disco#items
 
-   register => http://jabber.org/features/iq-register
-   iqauth   => http://jabber.org/features/iq-auth
+   register    => http://jabber.org/features/iq-register
+   iqauth      => http://jabber.org/features/iq-auth
+   data_form   => jabber:x:data
 
 =head1 FUNCTIONS
 
@@ -76,6 +82,21 @@ Returns am uri for the registered C<$alias> or undef if none exists.
 =cut
 
 sub xmpp_ns { return $NAMESPACES{$_[0]} }
+
+
+=item B<xmpp_ns_maybe ($alias_or_namespace_uri)>
+
+This method tries to find whether there is a alias C<$alias_or_namespace_uri>
+registered and if not it returns C<$alias_or_namespace_uri>.
+
+=cut
+
+sub xmpp_ns_maybe {
+   my ($alias) = @_;
+   return unless defined $alias;
+   my $n = xmpp_ns ($alias);
+   $n ? $n : $alias
+}
 
 =item B<set_xmpp_ns_alias ($alias, $namespace_uri)>
 

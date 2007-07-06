@@ -199,11 +199,11 @@ sub remove_account {
    delete $self->{accounts}->{$acc};
 }
 
-=head2 send_message ($msg, $dest_jid, $src)
+=head2 send_message ($msg, $dest_jid, $src, $type)
 
 Sends a message to the destination C<$dest_jid>.
 C<$msg> can either be a string or a L<Net::XMPP2::IM::Message> object.
-If C<$msg> is such an object C<$dest_jid> is optional, and will, when
+If C<$msg> is such an object C<$dest_jid> is optional, but will, when
 passed, override the destination of the message.
 
 C<$src> is optional. It specifies which account to use
@@ -215,10 +215,17 @@ are connected.
 C<$src> can either be a JID or a L<Net::XMPP2::IM::Account> object as returned
 by C<add_account> and C<get_account>.
 
+C<$type> is optional but overrides the type of the message object in C<$msg>
+if C<$msg> is such an object.
+
+C<$type> should be 'chat' for normal chatter. If no C<$type> is specified
+the type of the message defaults to the value documented in L<Net::XMPP2::IM::Message>
+(should be 'normal').
+
 =cut
 
 sub send_message {
-   my ($self, $msg, $dest_jid, $src) = @_;
+   my ($self, $msg, $dest_jid, $src, $type) = @_;
 
    unless (ref $msg) {
       $msg = Net::XMPP2::IM::Message->new (body => $msg);
@@ -229,6 +236,8 @@ sub send_message {
          or die "send_message: \$dest_jid is not a proper JID";
       $msg->to ($jid);
    }
+
+   $msg->type ($type) if defined $type;
 
    my $srcacc;
    if (ref $src) {
