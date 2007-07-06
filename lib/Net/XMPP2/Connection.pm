@@ -127,8 +127,7 @@ If C<$bool> is true no SSL will be used.
 sub new {
    my $this = shift;
    my $class = ref($this) || $this;
-   my $self = {  language => 'en', @_ };
-   bless $self, $class;
+   my $self = $class->SUPER::new (language => 'en', @_);
 
    $self->{parser} = new Net::XMPP2::Parser;
    $self->{writer} = Net::XMPP2::Writer->new (

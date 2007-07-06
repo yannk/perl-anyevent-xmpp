@@ -69,8 +69,6 @@ sub set_noblock {
 sub connect {
    my ($self, $host, $port) = @_;
 
-   $self->{max_write_length} ||= 4000;
-
    $self->{socket}
       and return 1;
 

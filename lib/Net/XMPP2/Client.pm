@@ -400,7 +400,7 @@ Aside fom those, these events can be registered on with C<reg_cb>:
 
 This event is sent when the C<$account> was successfully connected.
 
-=item connect_error => $account
+=item connect_error => $account, $reason
 
 This event is emitted when an error occured in the connection process for the
 account C<$account>.
