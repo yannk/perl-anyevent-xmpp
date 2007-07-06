@@ -37,7 +37,11 @@ It is used by L<Net::XMPP2::Connection> and you shouldn't mess with it :-)
 sub new {
    my $this = shift;
    my $class = ref($this) || $this;
-   my $self = { disconnect_cb => sub {}, @_ };
+   my $self = {
+      disconnect_cb => sub {},
+      max_write_length => 4096,
+      @_
+   };
    bless $self, $class;
    return $self;
 }
@@ -64,6 +68,8 @@ sub set_noblock {
 
 sub connect {
    my ($self, $host, $port) = @_;
+
+   $self->{max_write_length} ||= 4000;
 
    $self->{socket}
       and return 1;
@@ -124,7 +130,8 @@ sub end_sockets {
 sub try_ssl_write {
    my ($self) = @_;
 
-   my $l = Net::SSLeay::write ($self->{ssl}, $self->{write_buffer});
+   my $data = substr $self->{write_buffer}, 0, $self->{max_write_length};
+   my $l = Net::SSLeay::write ($self->{ssl}, $data);
 
    if ($l <= 0) {
       if ($l == 0) {
@@ -216,6 +223,7 @@ sub write_data {
          AnyEvent->io (poll => 'w', fh => $cl, cb => sub {
             if (not $self->{ssl_enabled}) {
                if (my $data = $self->{write_buffer}) {
+                  $data = substr $data, 0, $self->{max_write_length};
                   my $len = syswrite $cl, $data;
                   unless ($len) {
                      return if $! == Errno::EAGAIN;

@@ -6,6 +6,7 @@ use Net::XMPP2::Error::SASL;
 use Net::XMPP2::Error::IQ;
 use Net::XMPP2::Error::Register;
 use Net::XMPP2::Error::Stanza;
+use Net::XMPP2::Error::Stream;
 use Net::XMPP2::Error::Presence;
 use Net::XMPP2::Error::Message;
 

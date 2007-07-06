@@ -5,7 +5,7 @@ use Net::LibIDN qw/idn_prep_name idn_prep_resource idn_prep_node/;
 require Exporter;
 our @EXPORT_OK = qw/resourceprep nodeprep prep_join_jid join_jid
                     split_jid stringprep_jid prep_bare_jid bare_jid
-                    is_bare_jid/;
+                    is_bare_jid simxml/;
 our @ISA = qw/Exporter/;
 
 =head1 NAME
@@ -171,7 +171,80 @@ sub is_bare_jid {
    defined $res
 }
 
+=item B<simxml ($w, %xmlstruct)>
+
+This method takes a L<XML::Writer> as first argument (C<$w>) and the
+rest key value pairs:
+
+   simxml ($w,
+      defns => '<xmlnamespace>',
+      node => <node>,
+      prefixes => { prefix => namespace },
+   );
+
+Where node is:
+
+   <node> := {
+                ns => '<xmlnamespace>',
+                name => 'tagname',
+                attrs => [ ['name', 'value'], ... ],
+                childs => [ <node>, ... ]
+             }
+           | {
+                dns => '<xmlnamespace>',  # dns will set that namespace to the default namespace before using it.
+                name => 'tagname',
+                attrs => [ ['name', 'value'], ... ],
+                childs => [ <node>, ... ]
+             }
+           | "textnode"
+
 =back
+
+=cut
+
+sub simxml {
+   my ($w, %desc) = @_;
+
+   if (my $n = $desc{defns}) {
+      $w->addPrefix ($n, '');
+   }
+
+   if (my $p = $desc{prefixes}) {
+      for (keys %{$p || {}}) {
+         $w->addPrefix ($_, $p->{$_});
+      }
+   }
+
+   my $node = $desc{node};
+
+   if (not defined $node) {
+      return;
+
+   } elsif (ref ($node)) {
+      my $ns  = $node->{dns} ? $node->{dns}         : $node->{ns};
+      my $tag = $ns          ? [$ns, $node->{name}] : $node->{name};
+
+      if (@{$node->{childs} || []}) {
+
+         $w->startTag ($tag, @{$node->{attrs} || []});
+
+            my (@args);
+            if ($node->{defns}) { @args = (defns => $node->{defns}) }
+
+            for (@{$node->{childs}}) {
+               if (ref ($_) && $_->{dns}) { push @args, (defns => $_->{dns}) }
+               simxml ($w, node => $_, @args)
+            }
+
+         $w->endTag;
+
+      } else {
+         $w->emptyTag ($tag, @{$node->{attrs} || []});
+      }
+   } else {
+      $w->characters ($node);
+   }
+}
 
 =head1 AUTHOR
 
