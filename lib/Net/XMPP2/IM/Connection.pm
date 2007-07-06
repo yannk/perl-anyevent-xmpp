@@ -307,7 +307,8 @@ This event is generated when C<$contact> unsubscribes from your presence.
 Setting the in C<$rdoit> referenced scalar to 1 will also let you unsubscribe
 from his presence.
 
-If you want to unsubscribe later from him call L<Net::XMPP2::IM::Contact::send_unsubscribed> on C<$contact>.
+If you want to unsubscribe later from him call the C<send_unsubscribed> method
+of L<Net::XMPP2::IM::Contact> on C<$contact>.
 
 =item contact_unsubscribed => $roster, $contact
 

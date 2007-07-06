@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.02
+         - fixed bad link in documentation of Net::XMPP2::IM::Connection
          - added samples/simple_example_1
          - fixed some typos (thanks to lynx aka carlo)
 
