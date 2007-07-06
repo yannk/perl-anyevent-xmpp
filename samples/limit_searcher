@@ -1,0 +1,96 @@
+#!/opt/perl/bin/perl
+use strict;
+use utf8;
+use Event;
+use AnyEvent;
+use Net::XMPP2::Client;
+use Net::XMPP2::Util qw/simxml/;
+use Net::XMPP2::Ext::Disco;
+
+my $j = AnyEvent->condvar;
+my $cl = Net::XMPP2::Client->new;
+
+#$cl->add_account ('net_xmpp2@jabber.org', 'test');
+#$cl->add_account ('elmex@localhost', 'xxxxxxxx');
+$cl->add_account ('elmex@igniterealtime.org', 'xxxxxxx');
+
+my $max_size      = 100000;
+my $first_size    = $max_size;
+my $last_nok_size = $max_size;
+my $last_ok_size  = 0;
+my $delta         = 2;
+
+$cl->reg_cb (
+   connected => sub {
+      my ($cl, $acc) = @_;
+      my $con = $acc->connection;
+      if (($last_nok_size - $last_ok_size) < $delta) {
+         print "Found limit in delta range: $last_ok_size for ".$acc->jid."\n";
+         $con->disconnect ("found limit");
+         return 0;
+      }
+      $con->send_iq (set => sub {
+         my ($w) = @_;
+         simxml ($w,
+            defns => 'jabber:iq:private',
+            node  => {
+               name   => 'query',
+               ns     => 'jabber:iq:private',
+               childs => [
+                  { name => "test", dns => "test:fe", childs => [ "A" x $first_size ] },
+               ]
+            }
+         )
+      }, sub {
+         my ($n, $e) = @_;
+         if ($e) {
+            die "iq private error: " . $e->string . "\n";
+         } else {
+            $con->send_iq (get => sub {
+               my ($w) = @_;
+               simxml ($w,
+                  defns => 'jabber:iq:private',
+                  node => {
+                     name => 'query',
+                     ns => 'jabber:iq:private',
+                     childs => [ { name => 'test', dns => 'test:fe' } ] 
+                  }
+               );
+            }, sub {
+               print "$first_size seems to be ok!\n";
+               $last_ok_size = $first_size;
+               $first_size = $last_ok_size + ($last_nok_size - $last_ok_size) / 2;
+               $first_size = int ($first_size);
+               $con->disconnect ("retry");
+            });
+         }
+      }, timeout => 1000000);
+
+      1
+   },
+   stream_error => sub {
+      my ($cl, $acc, $err) = @_;
+      print "STREAM ERROR: [" . $err->string . "] at $first_size, retry...\n";
+      $last_nok_size = $first_size;
+      $first_size = $last_ok_size + ($last_nok_size - $last_ok_size) / 2;
+      $first_size = int ($first_size);
+      1
+   },
+ #  debug_recv => sub { print "@_\n" },
+   disconnect => sub {
+      my ($cl, $acc, $host, $port, $msg) = @_;
+      if ($msg eq 'found limit') { $j->broadcast }
+      print "Disconnect $msg\n";
+      $cl->update_connections; # reconnect !
+      1
+   },
+   message => sub {
+      my ($cl, $acc, $msg) = @_;
+      print "message from: " . $msg->from . ": " . $msg->any_body . "\n";
+      1
+   }
+);
+
+$cl->start;
+$j->wait;
+
