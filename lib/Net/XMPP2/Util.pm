@@ -200,6 +200,8 @@ Where node is:
              }
            | "textnode"
 
+Please note: C<childs> stands for C<child sequence> :-)
+
 =back
 
 =cut

@@ -113,6 +113,18 @@ sub add_forward {
    $self->{event_forwards}->{$obj} = [$obj, $forward_cb];
 }
 
+=item B<remove_forward ($obj)>
+
+This method removes a forward. C<$obj> must be the same
+object that was given C<add_forward> as the C<$obj> argument.
+
+=cut
+
+sub remove_forward {
+   my ($self, $obj) = @_;
+   delete $self->{event_forwards}->{$obj};
+}
+
 =back
 
 =head1 AUTHOR

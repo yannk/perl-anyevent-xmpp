@@ -1,6 +1,9 @@
 Revision history for Net-XMPP2
 
 0.02
+         - redesigned disco mechanism a bit
+         - added error collection event for nicer error reporting capabilities
+         - added samples/disco_test
          - implemented XEP-0004
          - added samples/limit_searcher
          - added simxml()

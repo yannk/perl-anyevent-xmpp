@@ -8,10 +8,11 @@ use Net::XMPP2::Util qw/split_jid/;
 use Net::XMPP2::Event;
 use Net::XMPP2::SimpleConnection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Extendable;
 use Net::XMPP2::Error;
 use Net::DNS;
 
-our @ISA = qw/Net::XMPP2::SimpleConnection Net::XMPP2::Event/;
+our @ISA = qw/Net::XMPP2::SimpleConnection Net::XMPP2::Event Net::XMPP2::Extendable/;
 
 =head1 NAME
 
@@ -62,15 +63,6 @@ Please look in RFC 3066 how C<$tag> should look like.
 
 This can be used to set the settings C<username>, C<domain>
 (and optionally C<resource>) from a C<$jid>.
-
-=item register => $mode
-
-If this settings is given this connection will attempt to register
-an account in band on the server if C<$mode> is 'auto'.
-
-If C<$mode> is 'manual' the event C<in_band_register_form> will be
-emitted (see also EVENTS documentation about the arguments of that
-event, and how to continue the login procedure).
 
 =item resource => $resource
 
@@ -138,7 +130,8 @@ sub new {
       $self->handle_stanza (@_);
    });
    $self->{parser}->set_error_cb (sub {
-      $self->event (xml_parser_error => $_[0], $_[1]);
+      my $pe = Net::XMPP2::Error::Parser (exception => $_[0], data => $_[1]);
+      $self->event (xml_parser_error => $pe);
       $self->disconnect ("xml error: $_[0], $_[1]");
    });
 
@@ -163,6 +156,26 @@ sub new {
       die "No '$_' argument given to new, but '$_' is required\n"
          unless $self->{$_};
    }
+
+   my $proxy_cb = sub {
+      my ($self, $er) = @_;
+      $self->event (error => $er);
+      1
+   };
+
+   $self->reg_cb (
+      xml_parser_error => $proxy_cb,
+      sasl_error       => $proxy_cb,
+      stream_error     => $proxy_cb,
+      bind_error       => $proxy_cb,
+      tls_error => sub {
+         my ($self) = @_;
+         $self->event (error =>
+            Net::XMPP2::Error->new (text => 'tls_error: tls negotiation failed')
+         );
+         1
+      },
+   );
 
    return $self;
 }
@@ -277,8 +290,8 @@ sub handle_stanza {
 
    if ($node->eq (stream => 'features')) {
       $self->event (stream_features => $node);
-      $self->handle_stream_features ($node);
       $self->{features} = $node;
+      $self->handle_stream_features ($node);
 
    } elsif ($node->eq (tls => 'proceed')) {
       $self->enable_ssl;
@@ -299,6 +312,7 @@ sub handle_stanza {
    } elsif ($node->eq (sasl => 'failure')) {
       my $error = Net::XMPP2::Error::SASL->new (node => $node);
       $self->event (sasl_error => $error);
+      $self->disconnect ('SASL authentication failure: ' . $error->string);
 
    } elsif ($node->eq (client => 'iq')) {
       $self->handle_iq ($node);
@@ -486,80 +500,10 @@ sub send_sasl_auth {
    );
 }
 
-=item B<request_inband_register_form ($finish_cb)>
-
-This method starts a in-band-registration attempt.  When finished C<$finish_cb>
-will be called with the first argument being a L<Net::XMPP2::Ext::RegisterForm>
-object (will be undef if an error occured) and the second an optional error
-object of type L<Net::XMPP2::Error::Register> if an error occured.
-
-=cut
-
-sub request_inband_register_form {
-   my ($self, $finish_cb) = @_;
-
-   $self->send_iq (
-      get =>
-         sub {
-            my ($w) = @_;
-            $w->addPrefix (xmpp_ns ('register'), '');
-            $w->emptyTag ([xmpp_ns ('register'), 'query']);
-         },
-         sub {
-            my ($node, $error) = @_;
-            my $form;
-            $form = Net::XMPP2::Ext::RegisterForm (node => $node, connection => $self)
-               unless $error;
-            $finish_cb->($form, $error);
-         }
-   );
-}
-
-sub do_auto_register {
-   my ($self, $mechs) = @_;
-
-   $self->request_inband_register_form (sub {
-      my ($form, $error) = @_;
-
-      if ($error) {
-         $self->event (in_band_register_error => $error);
-
-      } else {
-         if ($self->{register} ne 'manual') {
-            # of course this blows up if the form was more complicated
-            # any ideas?
-            $form->auto_submit (
-               username => $self->{username},
-               password => $self->{password},
-               cb => sub {
-                  my ($form, $error) = @_;
-                  if ($error) {
-                     $self->event (auto_in_band_register_error => $error);
-                  } else {
-                     $self->event ('auto_in_band_register_ok');
-                     $self->send_sasl_auth (@$mechs) if @$mechs;
-                  }
-               }
-            );
-
-         } else {
-            $self->event (
-               in_band_register_form =>
-                  $form,
-                  sub { $self->send_sasl_auth (@$mechs) if @$mechs }
-            )
-         }
-      }
-   });
-
-}
-
 sub handle_stream_features {
    my ($self, $node) = @_;
-   my @mechs = $node->find_all ([qw/sasl mechanisms/], [qw/sasl mechanism/]);
    my @bind  = $node->find_all ([qw/bind bind/]);
    my @tls   = $node->find_all ([qw/tls starttls/]);
-   my @iqa   = $node->find_all ([qw/iqauth auth/]);
 
    # and yet another weird thingie: in XEP-0077 it's said that
    # the register feature MAY be advertised by the server. That means:
@@ -571,16 +515,38 @@ sub handle_stream_features {
       $self->{writer}->send_starttls;
 
    } elsif (not $self->{authenticated}) {
-      if ($self->{register}) {
-         $self->do_auto_register (\@mechs);
-      } elsif (@mechs) {
-         $self->send_sasl_auth (@mechs)
-      } elsif (@iqa) {
-         $self->do_iq_auth;
+      my $continue = 1;
+      $self->event (stream_pre_authentication => \$continue);
+      if ($continue) {
+         $self->authenticate;
       }
 
    } elsif (@bind) {
       $self->do_rebind ($self->{resource});
+   }
+}
+
+=item B<authenticate>
+
+This method should be called after the C<stream_pre_authentication> event
+was emitted to continue authentication of the stream.
+
+Usually this method only has to be called when you want to register before
+you authenticate. See also the documentation of the C<stream_pre_authentication>
+event below.
+
+=cut
+
+sub authenticate {
+   my ($self) = @_;
+   my $node = $self->{features};
+   my @mechs = $node->find_all ([qw/sasl mechanisms/], [qw/sasl mechanism/]);
+   my @iqa   = $node->find_all ([qw/iqauth auth/]);
+
+   if (@mechs) {
+      $self->send_sasl_auth (@mechs)
+   } elsif (@iqa) {
+      $self->do_iq_auth;
    }
 }
 
@@ -681,6 +647,7 @@ sub do_rebind {
 
             if ($error) {
                my ($res) = $error->xml_node ()->find_all ([qw/bind bind/], [qw/bind resource/]);
+               # TODO: make bind error into a seperate error class?
                $self->event (bind_error => $error, ($res ? $res : $self->{resource}));
 
             } else {
@@ -725,6 +692,18 @@ These events can be registered on with C<reg_cb>:
 This event is sent when a stream feature (<features>) tag is received. C<$node> is the
 L<Net::XMPP2::Node> object that represents the <features> tag.
 
+=item stream_pre_authentication => $rcontinue
+
+This event is emitted after TLS/SSL was initiated (if enabled) and before any
+authentication happened. C<$rcontinue> is a reference to a scalar that per default
+holds a true value. If that scalar is true the authentication will continue
+after handling this event. If you set C<$$rcontinue> to a false value
+the authentication will stop and you have to call the C<authenticate>
+method later.
+
+This event is usually used when you want to do in-band registration,
+see also L<Net::XMPP2::Ext::Registration>.
+
 =item stream_ready => $jid
 
 This event is sent if the XML stream has been established (and
@@ -732,10 +711,25 @@ resources have been bound) and is ready for transmitting regular stanzas.
 
 C<$jid> is the bound jabber id.
 
+=item error => $error
+
+This event is generated whenever some error occured.
+C<$error> is an instance of L<Net::XMPP2::Error>.
+Trivial error reporting may look like this:
+
+   $con->reg_cb (error => sub { warn "xmpp error: " . $_[1]->string . "\n"; 1 });
+
+Basically this event is a collect event for all other error events.
+
 =item stream_error => $error
 
 This event is sent if a XML stream error occured. C<$error>
 is a L<Net::XMPP2::Error::Stream> object.
+
+=item xml_parser_error => $error
+
+This event is generated whenever the parser trips over XML that it can't
+read. C<$error> is a L<Net::XMPP2::Error::Parser> object.
 
 =item tls_error
 

@@ -9,6 +9,7 @@ use Net::XMPP2::Error::Stanza;
 use Net::XMPP2::Error::Stream;
 use Net::XMPP2::Error::Presence;
 use Net::XMPP2::Error::Message;
+use Net::XMPP2::Error::Parser;
 
 =head1 NAME
 

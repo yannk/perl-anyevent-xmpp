@@ -77,6 +77,20 @@ sub new {
          $self->init_connection;
       }
    });
+
+   my $proxy_cb = sub {
+      my ($self, $er) = @_;
+      $self->event (error => $er);
+      1
+   };
+
+   $self->reg_cb (
+      session_error  => $proxy_cb,
+      roster_error   => $proxy_cb,
+      presence_error => $proxy_cb,
+      message_error  => $proxy_cb,
+   );
+
    $self
 }
 

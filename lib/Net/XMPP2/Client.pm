@@ -2,9 +2,10 @@ package Net::XMPP2::Client;
 use strict;
 use AnyEvent;
 use Net::XMPP2::IM::Connection;
-use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid/;
+use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid dump_twig_xml/;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Event;
+use Net::XMPP2::Extendable;
 use Net::XMPP2::IM::Account;
 
 #use XML::Twig;
@@ -21,7 +22,7 @@ use Net::XMPP2::IM::Account;
 #   }
 #}
 
-our @ISA = qw/Net::XMPP2::Event/;
+our @ISA = qw/Net::XMPP2::Event Net::XMPP2::Extendable/;
 
 =head1 NAME
 
@@ -66,7 +67,27 @@ sub new {
    my $class = ref($this) || $this;
    my $self = { @_ };
    bless $self, $class;
+   if ($self->{debug}) {
+      $self->reg_cb (
+         debug_recv => sub {
+            my ($self, $acc, $data) = @_;
+            printf "recv>> %s\n%s", $acc->jid, dump_twig_xml ($data)
+         },
+         debug_send => sub {
+            my ($self, $acc, $data) = @_;
+            printf "send<< %s\n%s", $acc->jid, dump_twig_xml ($data)
+         },
+      )
+   }
    return $self;
+}
+
+sub add_extension {
+   my ($self, $ext) = @_;
+   $self->add_forward ($ext, sub {
+      my ($self, $ext, $ev, $acc, @args) = @_;
+      $ext->event ($ev, $acc->connection (), @args);
+   });
 }
 
 =head2 add_account ($jid, $password, $host, $port)

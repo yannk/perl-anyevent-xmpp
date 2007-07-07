@@ -2,6 +2,9 @@ package Net::XMPP2::Ext::Disco;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Ext::Disco::Items;
 use Net::XMPP2::Ext::Disco::Info;
+use Net::XMPP2::Ext;
+
+our @ISA = qw/Net::XMPP2::Ext/;
 
 =head1 NAME
 
@@ -36,22 +39,17 @@ discovery requests like described in XEP-0030.
 It also allows you to setup a disco-info/items tree
 that others can walk and also lets you publish disco information.
 
+This class is derived from L<Net::XMPP2::Ext> and can be added as extension to
+objects that implement the L<Net::XMPP2::Extendable> interface or derive from
+it.
+
 =head1 METHODS
 
 =over 4
 
 =item B<new (%args)>
 
-Creates a new disco handle. Possible keys for the C<%args> hash are:
-
-=over 4
-
-=item connection => $connection
-
-The connection this handle will send the requests with and
-answer requests.
-
-=back
+Creates a new disco handle.
 
 =cut
 
@@ -65,23 +63,21 @@ sub new {
 
 sub init {
    my ($self) = @_;
-   my $con = $self->{connection};
 
    $self->set_identity (client => console => 'Net::XMPP2');
 
-   $self->{cb_id} =
-      $con->reg_cb (
-         iq_get_request_xml => sub {
-            my ($con, $node, $handled_ref) = @_;
-            return 1 if $$handled_ref;
+   $self->reg_cb (
+      iq_get_request_xml => sub {
+         my ($self, $con, $node, $handled_ref) = @_;
+         return 1 if $$handled_ref;
 
-            if ($self->handle_disco_query ($node)) {
-               $$handled_ref = 1;
-            }
-
-            1
+         if ($self->handle_disco_query ($con, $node)) {
+            $$handled_ref = 1;
          }
-      );
+
+         1
+      }
+   );
 }
 
 =item B<set_identity ($category, $type, $name)>
@@ -170,11 +166,10 @@ sub write_identity {
 }
 
 sub handle_disco_query {
-   my ($self, $node) = @_;
-   warn "HANDL\n";
+   my ($self, $con, $node) = @_;
 
    if ($node->find_all ([qw/disco_info query/])) {
-      $self->{connection}->reply_iq_result (
+      $con->reply_iq_result (
          $node, sub {
             my ($w) = @_;
 
@@ -194,13 +189,14 @@ sub handle_disco_query {
                   $self->write_feature ($w, 'http://jabber.org/protocol/disco#items');
                $w->endTag;
             }
-         }
+         },
+         to => $node->attr ('from')
       );
 
       return 1
 
    } elsif ($node->find_all ([qw/disco_items query/])) {
-      $self->{connection}->reply_iq_result (
+      $con->reply_iq_result (
          $node, sub {
             my ($w) = @_;
 
@@ -212,7 +208,8 @@ sub handle_disco_query {
                $w->addPrefix (xmpp_ns ('disco_items'), '');
                $w->emptyTag ([xmpp_ns ('disco_items'), 'query']);
             }
-         }
+         },
+         to => $node->attr ('from')
       );
 
       return 1
@@ -227,17 +224,18 @@ sub DESTROY {
 }
 
 
-=item B<request_items ($dest, $node, $cb)>
+=item B<request_items ($con, $dest, $node, $cb)>
 
 This method does send a items request to the JID entity C<$from>.
 C<$node> is the optional node to send the request to, which can be
 undef.
+C<$con> must be an instance of L<Net::XMPP2::Connection> or a subclass of it.
 The callback C<$cb> will be called when the request returns with 3 arguments:
 the disco handle, an L<Net::XMPP2::Ext::Disco::Items> object (or undef)
 and an L<Net::XMPP2::Error::IQ> object when an error occured and no items
 were received.
 
-   $disco->request_items ('a@b.com', undef, sub {
+   $disco->request_items ($con, 'a@b.com', undef, sub {
       my ($disco, $items, $error) = @_;
       die $error->string if $error;
 
@@ -247,9 +245,9 @@ were received.
 =cut
 
 sub request_items {
-   my ($self, $dest, $node, $cb) = @_;
+   my ($self, $con, $dest, $node, $cb) = @_;
 
-   $self->{connection}->send_iq (
+   $con->send_iq (
       get => sub {
          my ($w) = @_;
          $w->addPrefix (xmpp_ns ('disco_items'), '');
@@ -276,11 +274,12 @@ sub request_items {
    );
 }
 
-=item B<request_info ($dest, $node, $cb)>
+=item B<request_info ($con, $dest, $node, $cb)>
 
 This method does send a info request to the JID entity C<$from>.
 C<$node> is the optional node to send the request to, which can be
 undef.
+C<$con> must be an instance of L<Net::XMPP2::Connection> or a subclass of it.
 The callback C<$cb> will be called when the request returns with 3 arguments:
 the disco handle, an L<Net::XMPP2::Ext::Disco::Info> object (or undef)
 and an L<Net::XMPP2::Error::IQ> object when an error occured and no items
@@ -296,9 +295,9 @@ were received.
 =cut
 
 sub request_info {
-   my ($self, $dest, $node, $cb) = @_;
+   my ($self, $con, $dest, $node, $cb) = @_;
 
-   $self->{connection}->send_iq (
+   $con->send_iq (
       get => sub {
          my ($w) = @_;
          $w->addPrefix (xmpp_ns ('disco_info'), '');

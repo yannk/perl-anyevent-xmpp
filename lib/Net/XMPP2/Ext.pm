@@ -1,14 +1,24 @@
 package Net::XMPP2::Ext;
 use warnings;
 use strict;
+use Net::XMPP2::Event;
+
+our @ISA = qw/Net::XMPP2::Event/;
 
 =head1 NAME
 
-Net::XMPP2::Ext - The set of extensions for Net::XMPP2
+Net::XMPP2::Ext - Extension baseclass and documentation
 
 =head1 DESCRIPTION
 
-This module only has documentation about the supported extensions.
+This module has documentation about the supported extensions
+and also is a base class for all extensions that can be added
+via the C<add_extension> method of the classes that derive from
+L<Net::XMPP2::Extendable>. (That are: L<Net::XMPP2::Client>,
+L<Net::XMPP2::Connection> and L<Net::XMPP2::IM::Connection>)
+
+Basically C<add_extension> makes the extension an event receiver
+for all events that the extended object receives.
 
 =head1 Supportet extensions
 

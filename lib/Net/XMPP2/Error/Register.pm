@@ -6,11 +6,17 @@ our @ISA = qw/Net::XMPP2::Error::IQ/;
 
 Net::XMPP2::Error::Register - In-band registration error
 
-Subclass of L<Net::XMPP2::Error>
+Subclass of L<Net::XMPP2::Error::IQ>
 
 =cut
 
-=head2 METHODS
+=head1 DESCRIPTION
+
+This is a In-band registration error. For a mapping
+of IQ error values to their meaning please consult
+XEP-0077 for now.
+
+=head1 METHODS
 
 =over 4
 
@@ -18,8 +24,8 @@ Subclass of L<Net::XMPP2::Error>
 
 Returns the state of registration, one of:
 
-   form-request
-   form-submitted
+   register-form-request
+   register-form-submitted
 
 =cut
 
