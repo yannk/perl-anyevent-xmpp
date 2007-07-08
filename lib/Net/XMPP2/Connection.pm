@@ -130,9 +130,18 @@ sub new {
       $self->handle_stanza (@_);
    });
    $self->{parser}->set_error_cb (sub {
-      my $pe = Net::XMPP2::Error::Parser (exception => $_[0], data => $_[1]);
-      $self->event (xml_parser_error => $pe);
-      $self->disconnect ("xml error: $_[0], $_[1]");
+      my ($ex, $data, $type) = @_;
+      if ($type eq 'xml') {
+         my $pe = Net::XMPP2::Error::Parser->new (exception => $_[0], data => $_[1]);
+         $self->event (xml_parser_error => $pe);
+         $self->disconnect ("xml error: $_[0], $_[1]");
+      } else {
+         my $pe = Net::XMPP2::Error->new (
+            text => "uncaught exception in stanza handling: $ex"
+         );
+         $self->event (uncaught_exception_error => $pe);
+         $self->disconnect ($pe->string);
+      }
    });
 
    $self->{iq_id}              = 1;

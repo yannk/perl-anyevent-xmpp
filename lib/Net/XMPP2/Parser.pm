@@ -127,7 +127,7 @@ sub feed {
       $self->{parser}->parse_more ($data);
    };
    if ($@) {
-      $self->{error_cb}->($@, $data);
+      $self->{error_cb}->($@, $data, 'xml');
    }
 }
 
@@ -166,10 +166,15 @@ sub cb_end_tag {
       $self->{nodestack}->[-1]->add_node ($node);
    }
 
-   if (@{$self->{nodestack}} == 1) {
-      $self->{stanza_cb}->($self, $node);
-   } elsif (@{$self->{nodestack}} == 0) {
-      $self->{stanza_cb}->($self, undef);
+   eval {
+      if (@{$self->{nodestack}} == 1) {
+         $self->{stanza_cb}->($self, $node);
+      } elsif (@{$self->{nodestack}} == 0) {
+         $self->{stanza_cb}->($self, undef);
+      }
+   };
+   if ($@) {
+      $self->{error_cb}->($@, undef, 'exception');
    }
 }
 
