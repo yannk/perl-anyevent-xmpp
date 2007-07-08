@@ -1,0 +1,115 @@
+#!/opt/perl/bin/perl
+use strict;
+use utf8;
+use Event;
+use AnyEvent;
+use Net::XMPP2::Client;
+use Net::XMPP2::Ext::Disco;
+use Net::XMPP2::Ext::DataForm;
+use Storable;
+use XML::DOM::XPath;
+
+our $J = AnyEvent->condvar;
+our $datafile = "conferences.stor";
+our $data = {};
+
+require "rl.pl";
+
+# MAIN START
+my @servers = load_servers ();
+my $cl = Net::XMPP2::Client->new ();
+my $d  = Net::XMPP2::Ext::Disco->new;
+$cl->add_extension ($d);
+$cl->add_account ('net_xmpp2@jabber.org/test', 'test');
+
+sub disco_info {
+   my ($con, $jid, $cb) = @_;
+
+   my $ID = addreq ("di_$jid");
+   $d->request_info ($con, $jid, undef, sub {
+      my ($d, $i, $e) = @_;
+      if ($e) {
+         print "error on disco info on $jid: " . $e->string . "\n";
+      } else {
+         $cb->($i);
+      }
+      finreq ($ID)
+   });
+}
+
+sub disco_items {
+   my ($con, $jid, $cb) = @_;
+
+   my $ID = addreq ("dit_$jid");
+   $d->request_items ($con, $jid, undef, sub {
+      my ($d, $i, $e) = @_;
+      if ($e) {
+         print "error on disco items on $jid: " . $e->string . "\n";
+      } else {
+         $cb->($i);
+      }
+      finreq ($ID)
+   });
+}
+
+my %req_timers;
+
+$cl->reg_cb (
+   error => sub {
+      my ($cl, $acc, $err) = @_;
+      print "ERROR: " . $err->string . "\n";
+      1
+   },
+   iq_result_cb_exception => sub {
+      my ($cl, $acc, $ex) = @_;
+      print "EXCEPTION: $ex\n";
+      1
+   },
+   session_ready => sub {
+      my ($cl, $acc) = @_;
+      print "session ready, requesting items for $ARGV[0]\n";
+      my $c = $acc->connection ();
+      $c->set_default_iq_timeout (30);
+
+      my $timer_step = 3;
+      my $timer_cnt = 0;
+
+      for my $SERVER (@servers) {
+         next if $data->{$SERVER};
+         my $t = $timer_cnt;
+
+         my $ID = addreq ("timer_$t");
+         $req_timers{$t} = AnyEvent->timer (after => $t,
+            cb => sub {
+               disco_items ($c, $SERVER, sub {
+                  my ($i) = @_;
+                  for ($i->items) {
+                     disco_info ($c, $_->{jid}, sub {
+                        my ($i) = @_;
+                        if (grep { $_->{category} eq 'conference' && $_->{type} eq 'text' } $i->identities ()) {
+                           $data->{$SERVER} = $i->jid;
+                           print "\t*** found conference " . $i->jid . "\n";
+                           sync_data ();
+                        }
+                     });
+                  }
+               });
+               delete $req_timers{$t};
+               finreq ($ID);
+            }
+         );
+
+         $timer_cnt += $timer_step;
+      }
+      0
+   },
+   message => sub {
+      my ($cl, $acc, $msg) = @_;
+      print "message from: " . $msg->from . ": " . $msg->any_body . "\n";
+      1
+   }
+);
+
+$cl->start;
+
+$J->wait

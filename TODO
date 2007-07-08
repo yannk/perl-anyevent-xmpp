@@ -3,6 +3,9 @@
 
 - implement iq-auth!!!!
 
+- fix problem that xml::writer writes after <stream/> ahs been written
+  - reproduce by conflicting resources!
+
 - test the xml parse error object somehow!
 
 - add context field to IQ error for all the places origin from IQ errors

@@ -5,49 +5,19 @@ use Event;
 use AnyEvent;
 use Net::XMPP2::Client;
 use Net::XMPP2::Ext::Disco;
+use Net::XMPP2::Ext::DataForm;
 use Storable;
 use XML::DOM::XPath;
+use EVQ;
 
-sub load_servers {
-   my $parser = XML::DOM::Parser->new;
-   my $doc = $parser->parsefile ("servers.xml");
+our $datafile = "room_data.stor";
+our $data = {};
 
-   my @servers;
-   for ($doc->findnodes ('/query/item')) {
-      my $n = $_->getAttributeNode ('jid');
-      push @servers, $n->getValue;
-   }
-   @servers
-}
-
-# locking mechanism for requests
-my $J = AnyEvent->condvar;
-my %req;
-my $id = 0;
-sub addreq { my $k = $id . "_" . $_[0]; print ">> $k\n"; $req{$k} = 1; $id++; $k }
-sub finreq { print "<< $_[0]\n"; delete $req{$_[0]}; my @k = keys %req; $J->broadcast if @k == 0 }
-
-# timer for status output
-my $t;
-sub mktimer {
-   $t = AnyEvent->timer (after => 1, cb => sub {
-      my @keys = keys %req;
-      my @ok = grep { $_ !~ /_timer_/ } @keys;
-      my $timers = scalar (grep { $_ =~ /_timer_/ } @keys);
-      print "\t*** pending requests $timers timers, and : " . join (',', @ok) . "\n";
-      mktimer ();
-   });
-}
-mktimer;
-
-# server data cache
-my $server_data = {};
-eval { $server_data = retrieve 'serverdata.stor' };
-print "finished servers: " . join (',', keys %$server_data) . "\n";
-sub sync_server_data { store $server_data, 'serverdata.stor' }
+eval { $data = retrieve $datafile };
+sub sync_data { store $data, $datafile }
 
 # MAIN START
-my @servers = load_servers;
+my $conferences = retrieve 'conferences.stor';
 my $cl = Net::XMPP2::Client->new ();
 my $d  = Net::XMPP2::Ext::Disco->new;
 $cl->add_extension ($d);
@@ -56,71 +26,91 @@ $cl->add_account ('net_xmpp2@jabber.org/test', 'test');
 sub disco_info {
    my ($con, $jid, $cb) = @_;
 
-   my $ID = addreq ("di_$jid");
-   $d->request_info ($con, $jid, undef, sub {
-      my ($d, $i, $e) = @_;
-      if ($e) {
-         print "error on disco info on $jid: " . $e->string . "\n";
-      } else {
-         $cb->($i);
-      }
-      finreq ($ID)
+   EVQ::push_request ("di_$jid", sub {
+      my $ID = shift;
+      $d->request_info ($con, $jid, undef, sub {
+         my ($d, $i, $e) = @_;
+         if ($e) {
+            print "error on disco info on $jid: " . $e->string . "\n";
+         } else {
+            $cb->($i);
+         }
+         EVQ::finreq ($ID)
+      });
    });
 }
 
 sub disco_items {
    my ($con, $jid, $cb) = @_;
 
-   my $ID = addreq ("dit_$jid");
-   $d->request_items ($con, $jid, undef, sub {
-      my ($d, $i, $e) = @_;
-      if ($e) {
-         print "error on disco items on $jid: " . $e->string . "\n";
-      } else {
-         $cb->($i);
-      }
-      finreq ($ID)
+   EVQ::push_request ("dit_$jid", sub {
+      my $ID = shift;
+      $d->request_items ($con, $jid, undef, sub {
+         my ($d, $i, $e) = @_;
+         if ($e) {
+            print "error on disco items on $jid: " . $e->string . "\n";
+         } else {
+            $cb->($i);
+         }
+         EVQ::finreq ($ID)
+      });
+   });
+}
+
+sub fetch_room_occupants {
+   my ($con, $jid, $cb) = @_;
+
+   EVQ::push_request ("fro_$jid", sub {
+      my $ID = shift;
+      $d->request_info ($con, $jid, undef, sub {
+         my ($d, $i, $e) = @_;
+         if ($e) {
+            print "error on disco info to $jid for room occupants: " . $e->string . "\n";
+         } else {
+            my (@q) = $i->xml_node ()->find_all ([qw/data_form x/]);
+            if (@q) {
+               my $df = Net::XMPP2::Ext::DataForm->new;
+               $df->from_node (@q);
+               if (my $f = $df->get_field ('muc#roominfo_occupants')) {
+                  $cb->($jid, $f->{values}->[0]);
+                  EVQ::finreq ($ID);
+                  return;
+               }
+            }
+            $cb->($jid);
+         }
+         EVQ::finreq ($ID);
+      });
    });
 }
 
 sub disco_conference {
    my ($con, $jid, $cb) = @_;
 
-   my $ID = addreq ("dc_$jid");
-   $d->request_items ($con, $jid, undef, sub {
-      my ($d, $items, $error) = @_;
-
-      if ($error) {
-         print "Error on disco conference $jid: " . $error->string . "\n";
-      } else {
-         my %rooms;
-         my %non_emptyr;
-         my $all = 0;
-         my $non_empty = 0;
-         my $users = 0;
+   EVQ::push_request ("dc_$jid", sub {
+      my $ID = shift;
+      disco_items ($con, $jid, sub {
+         my ($items) = @_;
          for my $i ($items->items) {
-            $rooms{$i->{jid}} = [$i->{jid}, $i->{name}];
-            $all++;
-            if ($i->{name} =~ /\((\d+)\)\s*$/) {
-               if ($1 > 0) {
-                  $users += $1;
-                  $non_empty++;
-                  $non_emptyr{$i->{jid}} = [[$i->{jid}, $i->{name}], $1];
+            next if $data->{$jid}->{$i->{jid}};
+
+            fetch_room_occupants ($con, $i->{jid}, sub {
+               my ($room_jid, $cnt) = @_;
+               unless (defined $cnt) {
+                  if ($i->{name} =~ /\((\d+)\)\s*$/) {
+                     $cnt = $1;
+                  }
                }
-            }
+               $cb->($jid, $i->{jid}, $i->{name}, $cnt);
+            });
          }
-         print "\t### $jid: $all rooms, $non_empty non empty rooms => $users users\n";
-         my @rooms =
-            reverse
-               sort { $non_emptyr{$a}->[1] <=> $non_emptyr{$b}->[1] }
-                  keys %non_emptyr;
-         $cb->($jid, \%rooms, \%non_emptyr, $all, $non_empty, $users, \@rooms);
-      }
-      finreq ($ID)
+         EVQ::finreq ($ID);
+      });
    });
 }
 
-my %req_timers;
+my $con;
+my $A = AnyEvent->condvar;
 
 $cl->reg_cb (
    error => sub {
@@ -138,42 +128,8 @@ $cl->reg_cb (
       print "session ready, requesting items for $ARGV[0]\n";
       my $c = $acc->connection ();
       $c->set_default_iq_timeout (30);
-
-      my $timer_step = 3;
-      my $timer_cnt = 0;
-
-      for my $SERVER (@servers) {
-         next if $server_data->{$SERVER};
-         my $t = $timer_cnt;
-
-         my $ID = addreq ("timer_$t");
-         $req_timers{$t} = AnyEvent->timer (after => $t,
-            cb => sub {
-               disco_items ($c, $SERVER, sub {
-                  my ($i) = @_;
-                  for ($i->items) {
-                     disco_info ($c, $_->{jid}, sub {
-                        my ($i) = @_;
-                        if (grep { $_->{category} eq 'conference' && $_->{type} eq 'text' } $i->identities ()) {
-                           disco_conference ($c, $i->jid, sub {
-                              #my ($jid, $rooms, $non_emptyrooms, $room_cnt,
-                              #    $non_empty_cnt,
-                              #    $user_cnt, $sorted_room_non_empty) = @_;
-                              $server_data->{$SERVER} = [@_];
-                              sync_server_data;
-                              print "\t*** got data for conference room on $SERVER: " . $_[0] . "\n";
-                           });
-                        }
-                     });
-                  }
-               });
-               delete $req_timers{$t};
-               finreq ($ID);
-            }
-         );
-
-         $timer_cnt += $timer_step;
-      }
+      $con = $c;
+      $A->broadcast;
       0
    },
    message => sub {
@@ -185,4 +141,33 @@ $cl->reg_cb (
 
 $cl->start;
 
-$J->wait
+$A->wait;
+
+print "EVQ start\n";
+EVQ::start ();
+
+for my $SERVER (keys %{$conferences}) {
+   my $conf = $conferences->{$SERVER};
+   disco_items ($con, $SERVER, sub {
+      my ($i) = @_;
+      for ($i->items) {
+         disco_info ($con, $_->{jid}, sub {
+            my ($i) = @_;
+            if (grep { $_->{category} eq 'conference'
+                       && $_->{type} eq 'text' } $i->identities ())
+            {
+               disco_conference ($con, $i->jid, sub {
+                  my ($cjid, $rjid, $rname, $rocc) = @_;
+                  $data->{$cjid}->{$rjid} = [$cjid, $rjid, $rname, $rocc];
+                  sync_data ();
+                  printf "\t*** %-30s: %-50s: %3d\n",
+                      $cjid, $rjid, $rocc;
+               });
+            }
+         });
+      }
+   });
+}
+
+
+EVQ::wait ();

@@ -5,6 +5,7 @@ use Event;
 use AnyEvent;
 use Net::XMPP2::Client;
 use Net::XMPP2::Ext::Disco;
+use Net::XMPP2::Ext::DataForm;
 
 my $j  = AnyEvent->condvar;
 my $cl = Net::XMPP2::Client->new (debug => 1);
@@ -25,6 +26,14 @@ $cl->reg_cb (
    },
    session_ready => sub {
       my ($cl, $acc) = @_;
+      $d->request_info ($acc->connection (), 'ukaetec@conference.jabber.org', undef, sub {
+         my ($d, $i, $e) = @_;
+         my (@q) = $i->xml_node ()->find_all ([qw/data_form x/]);
+         return unless @q;
+         my $df = Net::XMPP2::Ext::DataForm->new;
+         $df->from_node (@q);
+         print "occupants: " . $df->get_field ('muc#roominfo_occupants')->{values}->[0] . "\n";
+      });
       print "session ready\n";
       0
    },
