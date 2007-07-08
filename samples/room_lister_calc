@@ -1,0 +1,22 @@
+#!/opt/perl/bin/perl
+use Storable;
+my $sd = retrieve 'serverdata.stor';
+
+my %non_empty_all;
+my %printed;
+
+for (sort { $sd->{$b}->[5] <=> $sd->{$a}->[5] } keys %$sd) {
+   my ($jid, $rooms, $non_emptyr, $all, $non_empty, $users, $rooms) = @{$sd->{$_}};
+   next unless $non_empty > 0;
+   printf "%-30s: %-30s: non_empty: %d user sum: %d, top 10 rooms: \n", $_, $jid, $non_empty, $users;
+   next if $printed{$jid};
+   $printed{$jid} = 1;
+   for (0..9) {
+      my $r = $rooms->[$_];
+      last unless defined $r;
+      my $n = $non_emptyr->{$r}->[0]->[1];
+      my $j = $non_emptyr->{$r}->[0]->[0];
+      $n =~ /^(.*?)\((\d+)\)\s*$/;
+      printf "%-30s    * users: %3d, jid: %s\n", "", $2, $j;
+   }
+}
