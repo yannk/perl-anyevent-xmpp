@@ -13,7 +13,41 @@ our $J = AnyEvent->condvar;
 our $datafile = "conferences.stor";
 our $data = {};
 
-require "rl.pl";
+sub load_servers {
+   my $parser = XML::DOM::Parser->new;
+   my $doc = $parser->parsefile ("servers.xml");
+
+   my %servers;
+   for ($doc->findnodes ('/query/item')) {
+      my $n = $_->getAttributeNode ('jid');
+      $servers{$n->getValue} = 1;
+   }
+   keys %servers
+}
+
+# locking mechanism for requests
+our %req;
+our $id = 0;
+sub addreq { my $k = $id . "_" . $_[0]; $req{$k} = 1; $id++; $k }
+sub finreq { delete $req{$_[0]}; my @k = keys %req; $J->broadcast if @k == 0 }
+
+# timer for status output
+our $t;
+sub mktimer {
+   $t = AnyEvent->timer (after => 1, cb => sub {
+      my @keys = keys %req;
+      my @ok = grep { $_ !~ /_timer_/ } @keys;
+      my $timers = scalar (grep { $_ =~ /_timer_/ } @keys);
+      print "\t*** pending requests $timers timers, and : " . join (',', @ok) . "\n";
+      mktimer ();
+   });
+}
+mktimer;
+
+# server data cache
+eval { $data = retrieve $datafile };
+print "finished data: " . join (',', keys %$data) . "\n";
+sub sync_data { store $data, $datafile }
 
 # MAIN START
 my @servers = load_servers ();

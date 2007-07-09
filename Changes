@@ -2,7 +2,7 @@ Revision history for Net-XMPP2
 
 0.02
          - fixed error in binding-handling in case the bind iq gets a timeout
-         - added samples/room_lister*
+         - added samples/room_lister* and samples/conference_lister
          - redesigned disco mechanism a bit
          - added error collection event for nicer error reporting capabilities
          - added samples/disco_test
