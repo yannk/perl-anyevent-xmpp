@@ -655,9 +655,13 @@ sub do_rebind {
             my ($ret_iq, $error) = @_;
 
             if ($error) {
-               my ($res) = $error->xml_node ()->find_all ([qw/bind bind/], [qw/bind resource/]);
                # TODO: make bind error into a seperate error class?
-               $self->event (bind_error => $error, ($res ? $res : $self->{resource}));
+               if ($error->xml_node ()) {
+                  my ($res) = $error->xml_node ()->find_all ([qw/bind bind/], [qw/bind resource/]);
+                  $self->event (bind_error => $error, ($res ? $res : $self->{resource}));
+               } else {
+                  $self->event (bind_error => $error);
+               }
 
             } else {
                my @jid = $ret_iq->find_all ([qw/bind bind/], [qw/bind jid/]);
