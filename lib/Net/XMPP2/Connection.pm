@@ -335,6 +335,7 @@ sub handle_stanza {
       $self->disconnect ('SASL authentication failure: ' . $error->string);
 
    } elsif ($node->eq (client => 'iq')) {
+      $self->event (iq_xml => $node);
       $self->handle_iq ($node);
 
    } elsif ($node->eq (client => 'message')) {
@@ -843,6 +844,11 @@ L<Net::XMPP2::Node> object that represents the <presence> tag.
 
 This event is sent when a message stanza is received. C<$node> is the
 L<Net::XMPP2::Node> object that represents the <message> tag.
+
+=item iq_xml => $node
+
+This event is emitted when a iq stanza arrives. C<$node> is the
+L<Net::XMPP2::Node> object that represents the <iq> tag.
 
 =item iq_set_request_xml => $node, $handled_ref
 

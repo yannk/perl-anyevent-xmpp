@@ -22,13 +22,13 @@ sub start {
    $vb->pack_start (my $menu = Gtk2::MenuBar->new, 0, 1, 0);
       $self->_populate_menu ($menu);
    $vb->pack_start (my $vp = Gtk2::VPaned->new, 1, 1, 0);
-      $vp->add1 (my $sw = $self->{log_recv_sb} = Gtk2::ScrolledWindow->new);
+      $vp->add1 (my $sw = $self->{log_send_sb} = Gtk2::ScrolledWindow->new);
          $sw->set_policy ('automatic', 'automatic');
-         $sw->add (my $log = $self->{log_recv} = Gtk2::TextView->new);
+         $sw->add (my $log = $self->{log_send} = Gtk2::TextView->new);
             $log->set_wrap_mode ('word');
-      $vp->add2 (my $sw2 = $self->{log_send_sb} = Gtk2::ScrolledWindow->new);
+      $vp->add2 (my $sw2 = $self->{log_recv_sb} = Gtk2::ScrolledWindow->new);
          $sw2->set_policy ('automatic', 'automatic');
-         $sw2->add (my $log2 = $self->{log_send} = Gtk2::TextView->new);
+         $sw2->add (my $log2 = $self->{log_recv} = Gtk2::TextView->new);
             $log2->set_wrap_mode ('word');
    $vb->pack_start (my $sb = $self->{sb} = Gtk2::Statusbar->new, 0, 1, 0);
 
@@ -73,13 +73,13 @@ sub attach {
    $::CLIENT->reg_cb (
       debug_recv => sub {
          my ($cl, $acc, $data) = @_;
-         _append_text_view ($self->{log_recv}, _ts . ":\n");
+         _append_text_view ($self->{log_recv}, _ts . " recv:\n");
          _append_text_view ($self->{log_recv}, dump_twig_xml ($data));
          1
       },
       debug_send => sub {
          my ($cl, $acc, $data) = @_;
-         _append_text_view ($self->{log_send}, _ts . ":\n");
+         _append_text_view ($self->{log_send}, _ts . " send:\n");
          _append_text_view ($self->{log_send}, dump_twig_xml ($data));
          1
       },
