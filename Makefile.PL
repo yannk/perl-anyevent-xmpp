@@ -5,6 +5,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME                => 'Net::XMPP2',
     AUTHOR              => 'Robin Redeker <elmex@ta-sa.org>',
+    LICENSE             => 'perl',
     VERSION_FROM        => 'lib/Net/XMPP2.pm',
     ABSTRACT_FROM       => 'lib/Net/XMPP2.pm',
     PL_FILES            => {},

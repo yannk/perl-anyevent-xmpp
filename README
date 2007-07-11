@@ -2,7 +2,7 @@ NAME
     Net::XMPP2 - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.01
+    Version 0.02
 
 SYNOPSIS
        use Net::XMPP2::Connection;
@@ -20,20 +20,20 @@ DESCRIPTION
     described in RFC 3920 and RFC 3921) framework.
 
     Net::XMPP2::Connection is a RFC 3920 conformant "XML" stream
-    implementation for clients, which handles tcp connect up to the resource
-    binding. And provides low-level access to the XML nodes on the XML
+    implementation for clients, which handles TCP connect up to the resource
+    binding. And provides low level access to the XML nodes on the XML
     stream along with some high level methods to send the predefined XML
     stanzas.
 
-    Net::XMPP2::IM::Connection is a more highlevel module, which is derived
+    Net::XMPP2::IM::Connection is a more high level module, which is derived
     from Net::XMPP2::Connection. It handles all the instant messaging client
     functionality described in RFC 3921.
 
     Net::XMPP2::Client is a multi account client class. It manages
-    connections to multiple XMPP accounts and tries to offer a nice
-    highlevel interface to XMPP communication.
+    connections to multiple XMPP accounts and tries to offer a nice high
+    level interface to XMPP communication.
 
-    For a list of "Supportet extensions" see below.
+    For a list of "Supported extensions" see below.
 
     There are also other modules in this distribution, for example:
     Net::XMPP2::Util, Net::XMPP2::Writer, Net::XMPP2::Parser and those I
@@ -73,17 +73,30 @@ REQUIREMENTS
     Net::DNS
         For SRV RR lookups.
 
-    And yes, all these are essential for XMPP communication. Even thought
+    And yes, all these are essential for XMPP communication. Even though
     'instant messaging' and 'presence' is a quite simple problem XMPP
-    somehow was successful at complicating the task enough to keep me busy
-    for a long time. But all that time wasn't only for the technology
-    required to get it started, mostly it was for all the quirks, hacks and
-    badly applied "XML" in the protocol which complicated the matter.
+    somehow was successful at making the task complicated enough to keep me
+    busy for a long time. But all of that time wasn't only for the
+    technology required to get it started, mostly it was for all the quirks,
+    hacks and badly applied "XML" in the protocol which complicated the
+    matter.
 
 RELEASE NOTES
     Here are some notes to the releases (release of this version is at top):
 
   Version
+    * 0.02
+        This release adds lots of small improvements on the API (mostly new
+        events), and also some bugfixes here and there. The release also
+        comes with some new examples, you might want to take a look at the
+        "EXAMPLES" section.
+
+        As a highlight I also present the implementation of XEP-0004 (Data
+        Forms), see also Net::XMPP2::Ext for a description.
+
+        I also added some convenience functions to Net::XMPP2::Util, for
+        example "simxml" which simplifies the generation of XMPP-like "XML".
+
     * 0.01
         This release has beta status. The code is already used daily in my
         client and I keep looking out for bugs. If you find undocumented,
@@ -91,7 +104,7 @@ RELEASE NOTES
         "BUGS" below.
 
         Potential edges when using this module: sparely documented methods,
-        missing functionality and generally bugs bugs and bugs. Even thought
+        missing functionality and generally bugs bugs and bugs. Even though
         this module is in daily usage there are still lots of cases I might
         have missed.
 
@@ -103,14 +116,20 @@ RELEASE NOTES
     There are still lots of items on the TODO list (see also the TODO file
     in the distribution of Net::XMPP2).
 
+    Sadly this module still misses some decent DOM implementation. Do you
+    know some decent DOM Level 2 implementation for Perl? (I considered
+    switchting to XML::LibXML but I somehow have more trust in the "expat"
+    XML parser, maybe someone wants to implement XML::LibXML based parsing
+    for me (and of course a DOM interface for Net::XMPP2::Node?)
+
 Why (yet) another XMPP module?
-    The main outstanding feature of this module in comparsion to the other
+    The main outstanding feature of this module in comparison to the other
     XMPP (aka Jabber) modules out there is the support for AnyEvent.
     AnyEvent permits you to use this module together with other I/O event
     based programs and libraries (ie. Gtk2 or Event).
 
     The other modules could often only be integrated in those applications
-    or librarys by using threads. I decided to write this module because I
+    or libraries by using threads. I decided to write this module because I
     think CPAN lacks an event based XMPP module. Threads are unfortunately
     not an alternative in Perl at the moment due the limited threading
     functionality they provide and the global speed hit. I also think that a
@@ -128,7 +147,7 @@ A note about TLS
     This module also supports TLS, as the specification of XMPP requires an
     implementation to support TLS.
 
-    There are maybe still some bugs in the handling of TLS in
+    Maybe there are still some bugs in the handling of TLS in
     Net::XMPP2::Connection. So keep an eye on TLS with this module. If you
     encounter any problems it would be very helpful if you could debug them
     or at least send me a detailed report on how to reproduce the problem.
@@ -138,18 +157,64 @@ A note about TLS
     circumstances might be a different load of data pumped through the TLS
     connection.)
 
-    I mainly expect problems where aviable data isn't properly read from the
-    socket or written to it. You might want to take a look at the
+    I mainly expect problems where available data isn't properly read from
+    the socket or written to it. You might want to take a look at the
     "debug_send" and "debug_recv" events in Net::XMPP2::Connection.
 
-Supportet extensions
+Supported extensions
     See Net::XMPP2::Ext for a list.
 
 EXAMPLES
-    See "samples/test_client" for a first pointer. More examples will be
-    included in later releases, please feel free to ask the "AUTHOR" if you
-    have any questions about the API. There is also an IRC channel, see
-    "SUPPORT".
+    Following examples are included in this distribution:
+
+    samples/simple_example_1
+        This example script just connects to a server and sends a message
+        and also displays incoming messages on stdout.
+
+    samples/devcl/devcl
+        This is a more advanced 'example'. It requires you to have Gtk2
+        installed. It's mostly used by the author to implement
+        proof-of-concepts. Currently you start the client like this:
+
+           ../Net-XMPP2/samples/devcl/# perl ./devcl <jid> <password>
+
+        The client's main window displays a protocol dump and there is
+        currently a service discovery browser implemented.
+
+        This might be a valuable source if you look for more real-world
+        applications of Net::XMPP2.
+
+    samples/conference_lister
+        See below.
+
+    samples/room_lister
+        See below.
+
+    samples/room_lister_stat
+        These three scripts implements a global room scan.
+        "conference_lister" takes a list of servers (the file is called
+        "servers.xml" which has the same format as the xml file at
+        <http://www.jabber.org/servers.xml>). It then scans all servers for
+        chat room services and lists them into a file "conferences.stor",
+        which is a Storable dump.
+
+        "room_lister" then reads that file and queries all services for
+        rooms, and then all rooms for their occupants. The output file is
+        "room_data.stor", also a Storable dump, which in turn can be read
+        with "room_lister_stat", which transform the data structures into
+        something human readable.
+
+        These scripts are a bit hacky and quite complicated, but maybe it's
+        of any value for someone. You might note "EVQ.pm" in samples which
+        is a module that handles request-throttling (You don't want to flood
+        the server and risk getting the admins attention :).
+
+    For others, which the author might forgot or didn't want to list here
+    see the "samples/" directory.
+
+    More examples will be included in later releases, please feel free to
+    ask the "AUTHOR" if you have any questions about the API. There is also
+    an IRC channel, see "SUPPORT".
 
 AUTHOR
     Robin Redeker, "<elmex at ta-sa.org>", JID: "<elmex at jabber.org>"
@@ -157,19 +222,19 @@ AUTHOR
 BUGS
     Please note that I'm currently (July 2007) the only developer on this
     project and I'm very busy with my studies in Computer Science in Summer
-    2007. If you want to ease my workload or want timely releases please
-    send me patches instead only bug reports or feature requests. I won't
-    forget the reports or requests if you can't or didn't send patches but
+    2007. If you want to ease my workload or want timely releases, please
+    send me patches instead of bug reports or feature requests. I won't
+    forget the reports or requests if you can't or didn't send patches, but
     it can take a long time until I get enough time to fix/implement them.
 
-    Also try to be as precise as possible with bugreports and best, if you
-    can't send a patch, would be if you find out which code doesn't work and
-    tell me why.
+    Also try to be as precise as possible with bug reports, if you can't
+    send a patch, it would be best if you find out which code doesn't work
+    and tell me why.
 
     Please report any bugs or feature requests to "bug-net-xmpp2 at
     rt.cpan.org", or through the web interface at
     <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-XMPP2>. I will be
-    notified, and then you'll automatically be notified of progress on your
+    notified and then you'll automatically be notified of progress on your
     bug as I make changes.
 
 SUPPORT
@@ -203,11 +268,16 @@ SUPPORT
 
 ACKNOWLEDGEMENTS
     Thanks to the XSF for the development of an open instant messaging
-    protocol (even thought it uses "XML").
+    protocol (even though it uses "XML").
 
     And thanks to all people who had to listen to my desperate curses about
-    the brokeness/braindeadness of XMPP, without you I would've never
+    the brokenness/braindeadness of XMPP. Without you I would've never
     brought this module to a usable state.
+
+    Thanks to:
+
+    * Carlo von Loesch (aka lynX) <http://www.psyced.org/>
+        For pointing out some typos.
 
 COPYRIGHT & LICENSE
     Copyright 2007 Robin Redeker, all rights reserved.

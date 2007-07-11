@@ -8,11 +8,11 @@ Net::XMPP2 - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -112,6 +112,18 @@ Here are some notes to the releases (release of this version is at top):
 
 =over 4
 
+=item * 0.02
+
+This release adds lots of small improvements on the API (mostly new events),
+and also some bugfixes here and there. The release also comes with some
+new examples, you might want to take a look at the L</EXAMPLES> section.
+
+As a highlight I also present the implementation of XEP-0004 (Data Forms), see also
+L<Net::XMPP2::Ext> for a description.
+
+I also added some convenience functions to L<Net::XMPP2::Util>, for example
+C<simxml> which simplifies the generation of XMPP-like "XML".
+
 =item * 0.01
 
 This release has beta status. The code is already used daily in my client
@@ -132,6 +144,12 @@ todo items killed from the TODO file.
 
 There are still lots of items on the TODO list (see also the TODO file
 in the distribution of Net::XMPP2).
+
+Sadly this module still misses some decent DOM implementation. Do you know some
+decent DOM Level 2 implementation for Perl? (I considered switchting to
+L<XML::LibXML> but I somehow have more trust in the C<expat> XML parser, maybe
+someone wants to implement L<XML::LibXML> based parsing for me (and of course a
+DOM interface for L<Net::XMPP2::Node>?)
 
 =head1 Why (yet) another XMPP module?
 

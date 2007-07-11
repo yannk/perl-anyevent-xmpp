@@ -16,6 +16,8 @@ sub init {
 
 =head2 METHODS
 
+=over 4
+
 =item B<exception ()>
 
 Returns the XML parser exception.

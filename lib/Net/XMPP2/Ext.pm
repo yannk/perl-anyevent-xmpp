@@ -53,8 +53,6 @@ method of L<Net::XMPP2::Connection>.
 
 =back
 
-=cut
-
 =head1 AUTHOR
 
 Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>

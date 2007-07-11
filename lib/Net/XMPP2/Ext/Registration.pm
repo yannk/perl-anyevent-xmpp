@@ -44,7 +44,7 @@ Net::XMPP2::Ext::Registration - Handles all tasks of in band registration
 =head1 DESCRIPTION
 
 This module handles all tasks of in band registration that are
-possible and specified by XEP-0077.
+possible and specified by XEP-0077. (NOT IMPLEMENTED YET!)
 
 =cut
 
@@ -104,6 +104,8 @@ sub send_registration_request {
 
 
 }
+
+=back
 
 =head1 AUTHOR
 
