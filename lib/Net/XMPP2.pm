@@ -178,9 +178,63 @@ See L<Net::XMPP2::Ext> for a list.
 
 =head1 EXAMPLES
 
-See C<samples/test_client> for a first pointer. More examples will be included
-in later releases, please feel free to ask the L</AUTHOR> if you have any questions
-about the API. There is also an IRC channel, see L</SUPPORT>.
+Following examples are included in this distribution:
+
+=over 4
+
+=item B<samples/simple_example_1>
+
+This example script just connects to a server and sends a message and
+also displays incoming messages on stdout.
+
+=item B<samples/devcl/devcl>
+
+This is a more advanced 'example'. It requires you to have L<Gtk2>
+installed. It's mostly used by the author to implement proof-of-concepts.
+Currently you start the client like this:
+
+   ../Net-XMPP2/samples/devcl/# perl ./devcl <jid> <password>
+
+The client's main window displays a protocol dump and there is currently
+a service discovery browser implemented.
+
+This might be a valuable source if you look for more real-world
+applications of L<Net::XMPP2>.
+
+=item B<samples/conference_lister>
+
+See below.
+
+=item B<samples/room_lister>
+
+See below.
+
+=item B<samples/room_lister_stat>
+
+These three scripts implements a global room scan.  C<conference_lister> takes
+a list of servers (the file is called C<servers.xml> which has the same format as
+the xml file at L<http://www.jabber.org/servers.xml>). It then scans all
+servers for chat room services and lists them into a file C<conferences.stor>,
+which is a L<Storable> dump.
+
+C<room_lister> then reads that file and queries all services for rooms, and then
+all rooms for their occupants. The output file is C<room_data.stor>, also a L<Storable>
+dump, which in turn can be read with C<room_lister_stat>, which transform
+the data structures into something human readable.
+
+These scripts are a bit hacky and quite complicated, but maybe it's of any
+value for someone. You might note L<samples/EVQ.pm> which is a module that
+handles request-throttling (You don't want to flood the server and risk
+getting the admins attention :).
+
+=back
+
+For others, which the author might forgot or didn't want to
+list here see the C<samples/> directory.
+
+More examples will be included in later releases, please feel free to ask the
+L</AUTHOR> if you have any questions about the API. There is also an IRC
+channel, see L</SUPPORT>.
 
 =head1 AUTHOR
 
