@@ -1,5 +1,6 @@
 - see also: grep 'XXX\|FIXME\|TODO' * -r
-  - lib/Net/XMPP2/Writer.pm: # XXX: removed authname, because it ensures maximum connectivitiy
+  - lib/Net/XMPP2/Writer.pm: # XXX: removed authname, because it
+                                    ensures maximum connectivitiy
 
 - implement iq-auth!!!!
 
@@ -16,20 +17,17 @@
     are in multiple account's roster.
 
 - Net::XMPP2 missing functionality to be RFC 3920 conform:
-   - add timeouts to IQs! (mostly done)
    - improve error handling for SASL to 
      support retries as specified in RFC 3920.
      (eg. by supporting a method sasl_retry() which takes
       the changed credentials)
    - SRV record lookup
       - weight handling!
-   - test Net::XMPP2::Error: bind_error and stream_error (mostly done).
    - in band registration and un-registration!!!
       - finish in-band-registration XEP
       - document events
    later:
       - make dns resolution async!
-      - make extensions more optional and reentrant
 
 - Net::XMPP2::IM missing functionality to be RFC 3921 conform:
    - 7.2.  Business Rules
