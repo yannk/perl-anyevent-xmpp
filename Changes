@@ -1,5 +1,10 @@
 Revision history for Net-XMPP2
 
+0.03
+         - added send_*_hook event hooks for future extensions
+           like the entity capabilities to be able to add payload
+           to outgoing stanzas
+
 0.02 Wed Jul 11 22:55:56 CEST 2007
          - added iq_xml event
          - added development client example in samples/devcl/

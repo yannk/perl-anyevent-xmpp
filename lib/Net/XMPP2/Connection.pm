@@ -123,7 +123,10 @@ sub new {
 
    $self->{parser} = new Net::XMPP2::Parser;
    $self->{writer} = Net::XMPP2::Writer->new (
-      write_cb => sub { $self->write_data ($_[0]) }
+      write_cb     => sub { $self->write_data ($_[0]) },
+      send_iq_cb   => sub { $self->event (send_iq_hook => @_) },
+      send_msg_cb  => sub { $self->event (send_message_hook => @_) },
+      send_pres_cb => sub { $self->event (send_presence_hook => @_) },
    );
 
    $self->{parser}->set_stanza_cb (sub {
@@ -868,6 +871,38 @@ is still false after all event handlers were executed an error iq will be genera
 
 If the C<$result_cb> of a C<send_iq> operation somehow threw a exception
 or failed this event will be generated.
+
+=item send_iq_hook => $id, $type, $attrs, $rcreate_cbs
+
+This event lets you add any desired number of additional create callbacks
+to a IQ stanza that is about to be sent.
+
+C<$id>, C<$type> are described in the documentation of C<send_iq> of L<Net::XMPP2::Writer>.
+C<$attrs> is the hashref to the C<%attrs> hash that can be passed to C<send_iq> and also has
+the exact same semantics as described in the documentation of C<send_iq>.
+
+C<$rcreate_cbs> is a array reference where you should push further callbacks on
+that have the same semantic as C<$create_cb> in the documentation of C<send_iq>.
+
+=item send_message_hook => $id, $to, $type, $attrs, $rcreate_cbs
+
+This event lets you add any desired number of additional create callbacks
+to a message stanza that is about to be sent.
+
+C<$id>, C<$to>, C<$type> and the hashref C<$attrs> are described in the documentation
+for C<send_message> of L<Net::XMPP2::Writer> (C<$attrs> is C<%attrs> there).
+
+For semantics of C<$rcreate_cbs> see also the documentation of the C<send_iq_hook> event above.
+
+=item send_presence_hook => $id, $type, $attrs, $rcreate_cbs
+
+This event lets you add any desired number of additional create callbacks
+to a presence stanza that is about to be sent.
+
+C<$id>, C<$type> and the hashref C<$attrs> are described in the documentation
+for C<send_presence> of L<Net::XMPP2::Writer> (C<$attrs> is C<%attrs> there).
+
+For semantics of C<$rcreate_cbs> see also the documentation of the C<send_iq_hook> event above.
 
 =back
 
