@@ -16,9 +16,7 @@ Net::XMPP2::Ext::Disco - Service discovery manager class for XEP-0030
    use Net::XMPP2::Ext::Disco;
 
    my $con = Net::XMPP2::IM::Connection->new (...);
-   ...
-   my $disco = Net::XMPP2::Ext::Disco->new (connection => $con);
-
+   $con->add_extension (my $disco = Net::XMPP2::Ext::Disco->new);
    $disco->request_items ('romeo@montague.net',
       node => 'http://jabber.org/protocol/tune',
       cb   => sub {

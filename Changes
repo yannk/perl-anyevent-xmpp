@@ -1,6 +1,12 @@
 Revision history for Net-XMPP2
 
 0.02
+         - added development client example in samples/devcl/
+         - added some debugging events: debug_recv, debug_send, send_stanza_data,
+           and recv_stanza_xml.
+         - the error event now also provides error reporting
+           about exceptions (eq. in IQ callbacks, which is certainly
+           useful for development!)
          - fixed error in binding-handling in case the bind iq gets a timeout
          - added samples/room_lister* and samples/conference_lister
          - redesigned disco mechanism a bit

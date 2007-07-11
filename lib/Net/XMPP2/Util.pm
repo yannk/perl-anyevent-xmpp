@@ -266,7 +266,7 @@ sub dump_twig_xml {
       $t->set_pretty_print ('indented');
       return ($t->sprint . "\n");
    } else {
-      return "[$data]\n";
+      return "$data\n";
    }
 }
 

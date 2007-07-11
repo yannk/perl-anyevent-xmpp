@@ -177,6 +177,15 @@ sub new {
       sasl_error       => $proxy_cb,
       stream_error     => $proxy_cb,
       bind_error       => $proxy_cb,
+      iq_result_cb_exception => sub {
+         my ($self, $ex) = @_;
+         $self->event (error =>
+            Net::XMPP2::Error::Exception->new (
+               exception => $ex, context => 'iq result callback execution'
+            )
+         );
+         1
+      },
       tls_error => sub {
          my ($self) = @_;
          $self->event (error =>
@@ -296,6 +305,8 @@ sub handle_stanza {
       $self->disconnect ("end of 'XML' stream encountered");
       return;
    }
+
+   $self->event (recv_stanza_xml => $node);
 
    if ($node->eq (stream => 'features')) {
       $self->event (stream_features => $node);
@@ -787,6 +798,41 @@ C<$host> and C<$port> were the host and port we were connected to.
 
 Note: C<$host> and C<$port> might be different from the domain you passed to
 C<new> if C<connect> performed a SRV RR lookup.
+
+=item recv_stanza_xml => $node
+
+This event is generated before any processing of a "XML" stanza happens.
+C<$node> is the node of the stanza that is being processed, it's of
+type L<Net::XMPP2::Node>.
+
+This method might not be as handy for debuggin purposes as C<debug_recv>.
+
+=item send_stanza_data => $data
+
+This event is generated shortly before data is sent to the socket.
+C<$data> contains a complete "XML" stanza or the end of stream closing
+tag. This method is useful for debugging purposes and I recommend
+using XML::Twig or something like that to display it nicely.
+
+See also the event C<debug_send>.
+
+=item debug_send => $data
+
+This method is invoked whenever data is written out. This event
+is mostly the same as C<send_stanza_data>.
+
+=item debug_recv => $data
+
+This method is incoked whenever a chunk of data was received.
+
+It works to filter C<$data> through L<XML::Twig> for debugging
+display purposes sometimes, but as C<$data> is some arbitrary chunk
+of bytes you might get a XML parse error (did I already mention that XMPP's
+application of "XML" sucks?).
+
+So you might want to use C<recv_stanza_xml> to detect
+complete stanzas. Unfortunately C<recv_stanza_xml> doesn't have the
+bytes anymore and just a datastructure (L<Net::XMPP2::Node>).
 
 =item presence_xml => $node
 

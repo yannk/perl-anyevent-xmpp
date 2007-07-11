@@ -1,0 +1,67 @@
+#!/opt/perl/bin/perl
+use strict;
+use utf8;
+use Gtk2 -init;
+use AnyEvent;
+use Net::XMPP2::Client;
+use Net::XMPP2::Ext::Disco;
+use DevCL::Main;
+
+=head1 NAME
+
+devcl - A development helper client
+
+=head1 SYNOPSIS
+
+   ./devcl <jid> <password>
+
+=head1 DESCRIPTION
+
+=cut
+
+our $CLIENT = Net::XMPP2::Client->new;
+our $DISCO  = Net::XMPP2::Ext::Disco->new;
+our $MAIN   = DevCL::Main->new;
+
+sub end {
+   Gtk2->main_quit;
+}
+
+sub get_con {
+   my @a = $::CLIENT->get_connected_accounts;
+   my @c = map { $_->connection } @a;
+   unless (@c) {
+      warn "*** FATAL: No connection found!\n";
+      ::end
+   }
+   shift @c
+}
+
+$CLIENT->add_account ($ARGV[0], $ARGV[1]);
+
+$CLIENT->add_extension ($DISCO);
+
+$CLIENT->reg_cb (
+   session_ready => sub {
+      my ($CLIENT, $acc) = @_;
+      print "*** session ready\n";
+      $MAIN->start;
+      0
+   },
+   disconnect => sub {
+      my ($CLIENT, $acc, $h, $p, $reas) = @_;
+      print "*** disconnect ($h:$p): $reas\n";
+      Gtk2->main_quit;
+      1
+   },
+   error => sub {
+      my ($CLIENT, $acc, $err) = @_;
+      print "*** ERROR: " . $err->string . "\n";
+      1
+   }
+);
+
+$CLIENT->start;
+print "please wait while connecting to $ARGV[0]...\n";
+
+Gtk2->main;

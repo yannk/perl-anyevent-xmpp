@@ -299,7 +299,7 @@ sub get_accounts {
    values %{$self->{accounts}}
 }
 
-=head2 get_accounts ()
+=head2 get_connected_accounts ()
 
 Returns a list of connected L<Net::XMPP2::IM::Account>s.
 
