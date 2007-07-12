@@ -12,18 +12,16 @@ Net::XMPP2::Ext::Disco - Service discovery manager class for XEP-0030
 
 =head1 SYNOPSIS
 
-   package foo;
    use Net::XMPP2::Ext::Disco;
 
    my $con = Net::XMPP2::IM::Connection->new (...);
    $con->add_extension (my $disco = Net::XMPP2::Ext::Disco->new);
    $disco->request_items ('romeo@montague.net',
-      node => 'http://jabber.org/protocol/tune',
-      cb   => sub {
-         my ($disco, $response, $error) = @_;
+      sub {
+         my ($disco, $items, $error) = @_;
          if ($error) { print "ERROR".$error->string."\n" }
          else {
-            ... do something with the $response ...
+            ... do something with the $items ...
          }
       }
    );

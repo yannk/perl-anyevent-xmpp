@@ -114,7 +114,7 @@ Here are some notes to the releases (release of this version is at top):
 
 =item * 0.02
 
-This release adds lots of small improvements on the API (mostly new events),
+This release adds lots of small improvements to the API (mostly new events),
 and also some bugfixes here and there. The release also comes with some
 new examples, you might want to take a look at the L</EXAMPLES> section.
 

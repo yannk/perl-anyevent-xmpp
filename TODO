@@ -2,6 +2,8 @@
   - lib/Net/XMPP2/Writer.pm: # XXX: removed authname, because it
                                     ensures maximum connectivitiy
 
+- put some serious stuff in the synopsises
+
 - implement iq-auth!!!!
 
 - fix problem that xml::writer writes after <stream/> ahs been written

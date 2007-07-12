@@ -7,7 +7,6 @@ Net::XMPP2::Ext::Disco::Items - Service discovery items
 
 =head1 SYNOPSIS
 
-
 =head1 DESCRIPTION
 
 This class represents the result of a disco items request

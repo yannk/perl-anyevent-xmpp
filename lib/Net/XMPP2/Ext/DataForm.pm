@@ -8,8 +8,6 @@ Net::XMPP2::Ext::DataForm - XEP-0004 DataForm
 
 =head1 SYNOPSIS
 
-   package foo;
-
 =head1 DESCRIPTION
 
 This module represents a Data Form as specified in XEP-0004.
