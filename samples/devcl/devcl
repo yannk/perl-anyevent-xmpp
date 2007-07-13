@@ -1,4 +1,5 @@
 #!/opt/perl/bin/perl
+use Authen::SASL::Perl;
 use strict;
 use utf8;
 use Gtk2 -init;

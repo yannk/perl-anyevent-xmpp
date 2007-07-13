@@ -1,0 +1,57 @@
+#!/opt/perl/bin/perl
+use strict;
+use utf8;
+use Event;
+use AnyEvent;
+use Net::XMPP2::Client;
+
+sub version_req {
+   my ($con, $dest) = @_;
+
+   $con->send_iq (
+      get => { 
+         defns => 'version',
+         node => { name => 'query', ns => 'version' }
+      },
+      sub {
+         my ($node, $error) = @_;
+         if ($error) {
+            warn "*** DISCO VERSION ERROR $dest: " . $error->string . "\n";
+         } else {
+            my (@name) = $node->find_all ([qw/version query/], [qw/version name/]);
+            my (@ver)  = $node->find_all ([qw/version query/], [qw/version version/]);
+            print "$dest: ".$node->attr ('from').": name: " . $name[0]->text . " version: " . $ver[0]->text . "\n" if @name and @ver;
+            print "$dest: no version\n" unless @name and @ver;
+         }
+      },
+      to => $dest
+   );
+}
+
+my $j = AnyEvent->condvar;
+my $cl = Net::XMPP2::Client->new;
+$cl->add_account ('net_xmpp2@jabber.org', 'test');
+$cl->reg_cb (
+   session_ready => sub {
+      my ($cl, $acc) = @_;
+      version_req ($acc->connection, $ARGV[0]);
+      0
+   },
+   disconnect => sub {
+      my ($cl, $acc, $h, $p, $reas) = @_;
+      print "disconnect ($h:$p): $reas\n";
+      1
+   },
+   error => sub {
+      my ($cl, $acc, $err) = @_;
+      print "ERROR: " . $err->string . "\n";
+      1
+   },
+   message => sub {
+      my ($cl, $acc, $msg) = @_;
+      print "message from: " . $msg->from . ": " . $msg->any_body . "\n";
+      1
+   }
+);
+$cl->start;
+$j->wait;
