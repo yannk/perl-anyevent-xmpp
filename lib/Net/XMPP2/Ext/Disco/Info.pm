@@ -56,6 +56,7 @@ sub node { $_[0]->{node} }
 sub init {
    my ($self) = @_;
    my $node = $self->{xmlnode};
+   return unless $node;
 
    my (@ids) = $node->find_all ([qw/disco_info identity/]);
    for (@ids) {

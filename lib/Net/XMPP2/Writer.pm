@@ -1,7 +1,7 @@
 package Net::XMPP2::Writer;
 use strict;
 use XML::Writer;
-use Authen::SASL;
+use Authen::SASL qw/Perl/;
 use MIME::Base64;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Util qw/simxml/;

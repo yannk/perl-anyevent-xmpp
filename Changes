@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.03
+         - fixed some minor issue with handling invalid disco results
          - added send_*_hook event hooks for future extensions
            like the entity capabilities to be able to add payload
            to outgoing stanzas
