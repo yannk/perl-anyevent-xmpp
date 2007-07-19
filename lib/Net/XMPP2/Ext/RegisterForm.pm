@@ -60,15 +60,105 @@ sub new {
    my $this = shift;
    my $class = ref($this) || $this;
    my $self = bless { @_ }, $class;
-   $self->init;
    $self
 }
 
-sub init {
-   my ($self) = @_;
-   my $node = $self->{node};
+sub get_old_form {
+   my ($self, $node) = @_;
 
-   # TODO
+   my $form = {};
+
+   for ($node->nodes) {
+      if ($_->eq_ns ('register')) {
+         $form->{$_->name} = $_->text;
+      }
+   }
+
+   $form
+}
+
+sub try_fillout_registration {
+   my ($self, $username, $password) = @_;
+
+   my $form;
+   my $nform;
+   if (my $df = $self->get_data_form) {
+      my $af = Net::XMPP2::Ext::DataForm->new;
+      $af->make_answer_form ($df);
+      $af->set_field_value (username => $username);
+      $af->set_field_value (password => $password);
+      $nform = $af;
+
+   } else {
+      my $frm = $self->get_standard_form_fields;
+      $form = {
+         username => $username,
+         password => $password
+      };
+   }
+
+   return
+      Net::XMPP2::Ext::RegisterForm->new (
+         type => $self->{type},
+         form     => $nform,
+         old_form => $form,
+         answered => 1
+      );
+}
+
+sub type {
+   my ($self) = @_;
+   $self->{type}
+}
+
+sub is_answer_form {
+   my ($self) = @_;
+   $self->{answered}
+}
+
+sub is_already_registered {
+   my ($self) = @_;
+   exists $self->{old_form}->{registered}
+}
+
+sub init_new_form {
+   my ($self, $node) = @_;
+
+   my (@x) = $node->find_all ([qw/data_form x/]);
+
+   if (@x) {
+      my $df = Net::XMPP2::Ext::DataForm->new;
+      $df->from_node (@x);
+      $self->{form} = $df;
+
+   } else {
+      die "TODO!";
+   }
+}
+
+sub get_standard_form_fields {
+   my ($self) = @_;
+   $self->{old_form};
+}
+
+sub get_data_form {
+   my ($self) = @_;
+   if ($self->{type} eq 'form') {
+      return $self->{form};
+   }
+}
+
+sub init_from_node {
+   my ($self, $node) = @_;
+
+   if ($node->find_all ([qw/data_form x/])) {
+      $self->init_new_form ($node);
+      $self->{type} = 'form';
+   } else {
+      $self->{type} = 'standard';
+   }
+   my $form = $self->get_old_form ($node);
+   $self->{old_form} = $form;
 }
 
 =head1 AUTHOR

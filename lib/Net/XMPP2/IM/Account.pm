@@ -37,13 +37,14 @@ sub remove_connection {
 }
 
 sub spawn_connection {
-   my ($self) = @_;
+   my ($self, %args) = @_;
 
    $self->{con} = Net::XMPP2::IM::Connection->new (
       jid      => $self->jid,
       password => $self->{password},
       ($self->{host} ? (override_host => $self->{host}) : ()),
       ($self->{port} ? (override_port => $self->{port}) : ()),
+      %args
    )
 }
 

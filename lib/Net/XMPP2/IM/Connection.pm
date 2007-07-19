@@ -49,6 +49,15 @@ even presences will be stored in there, except that the C<get_contacts>
 method on the roster object won't return anything as there are
 no roster items.
 
+=item initial_presence => $priority
+
+This sets whether the initial presence should be sent. C<$priority>
+should be the priority of the initial presence. The default value
+for the initial presence C<$priority> is 10.
+
+If you pass a undefined value as C<$priority> no initial presence will
+be sent!
+
 =back
 
 =cut
@@ -56,7 +65,14 @@ no roster items.
 sub new {
    my $this = shift;
    my $class = ref($this) || $this;
-   my $self = $class->SUPER::new (@_);
+
+   my %args = @_;
+
+   unless (exists $args{initial_presence}) {
+      $args{initial_presence} = 10;
+   }
+
+   my $self = $class->SUPER::new (%args);
 
    $self->{roster} = Net::XMPP2::IM::Roster->new (connection => $self);
 
@@ -114,13 +130,26 @@ sub send_session_iq {
 
 sub init_connection {
    my ($self) = @_;
-   $self->{session_active} = 1;
    if ($self->{dont_retrieve_roster}) {
-      $self->send_presence;
+      $self->initial_presence;
+      $self->{session_active} = 1;
+      $self->event ('session_ready');
+
    } else {
-      $self->retrieve_roster (sub { $self->send_presence });
+      $self->retrieve_roster (sub {
+         $self->initial_presence;
+         $self->{session_active} = 1;
+         $self->event ('session_ready');
+      });
    }
-   $self->event ('session_ready');
+}
+
+sub initial_presence {
+   my ($self) = @_;
+   if (defined $self->{initial_presence}) {
+      $self->send_presence (undef, undef, priority => $self->{initial_presence});
+   }
+   # else do nothing
 }
 
 =item B<retrieve_roster ($cb)>

@@ -1,6 +1,11 @@
 Revision history for Net-XMPP2
 
 0.03
+         - reordered events a bit so that session_ready comes after
+           roster retrieval (when it is retrieved)
+         - added possibility to set the initial presence priority
+           or prevent sending of initial presence
+           (see Net::XMPP2::IM::Connection).
          - fixed some minor issue with handling invalid disco results
          - added send_*_hook event hooks for future extensions
            like the entity capabilities to be able to add payload

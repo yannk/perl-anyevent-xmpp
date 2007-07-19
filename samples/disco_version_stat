@@ -1,0 +1,13 @@
+#!/opt/perl/bin/perl
+
+my %versions;
+
+while (<STDIN>) {
+   chomp;
+   my ($from, $name, $version) = split /\t/, $_;
+   $versions{$name .": " . $version}++;
+}
+
+for (sort { $versions{$a} <=> $versions{$b} } keys %versions) {
+   printf "%3d: %s\n", $versions{$_}, $_;
+}

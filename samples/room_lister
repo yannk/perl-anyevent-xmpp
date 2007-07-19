@@ -18,6 +18,16 @@ sub sync_data { store $data, $datafile }
 
 # MAIN START
 my $conferences = retrieve 'conferences.stor';
+if ($ARGV[0] eq 'stat') {
+   my @srv = keys %$conferences;
+   my %conf;
+   for (map { my $s = pop @$_; my $a = $_; map { $s . ":" . $_ } @$a } map { [$_, keys %{$conferences->{$_}}] } keys %$conferences) {
+      $conf{$_} = 1;
+   }
+   print "servers with conferences: " . scalar (@srv) . "\n";
+   print "conferences             : " . scalar (join ",\n", keys %conf) . "\n";
+   exit;
+}
 my $cl = Net::XMPP2::Client->new ();
 my $d  = Net::XMPP2::Ext::Disco->new;
 $cl->add_extension ($d);
@@ -146,27 +156,35 @@ $A->wait;
 print "EVQ start\n";
 EVQ::start ();
 
+my $t;
+sub mkti { $t = AnyEvent->timer (after => 10, cb => sub { sync_data (); mkti (); }) }
+mkti;
+
 for my $SERVER (keys %{$conferences}) {
    my $conf = $conferences->{$SERVER};
-   disco_items ($con, $SERVER, sub {
-      my ($i) = @_;
-      for ($i->items) {
-         disco_info ($con, $_->{jid}, sub {
-            my ($i) = @_;
-            if (grep { $_->{category} eq 'conference'
-                       && $_->{type} eq 'text' } $i->identities ())
-            {
-               disco_conference ($con, $i->jid, sub {
-                  my ($cjid, $rjid, $rname, $rocc) = @_;
-                  $data->{$cjid}->{$rjid} = [$cjid, $rjid, $rname, $rocc];
-                  sync_data ();
-                  printf "\t*** %-30s: %-50s: %3d\n",
-                      $cjid, $rjid, $rocc;
-               });
-            }
-         });
-      }
-   });
+   for my $cj (keys %$conf) {
+      disco_conference ($con, $cj, sub {
+         my ($cjid, $rjid, $rname, $rocc) = @_;
+         $data->{$cjid}->{$rjid} = [$cjid, $rjid, $rname, $rocc];
+         printf "\t*** %-30s: %-50s: %3d\n",
+             $cjid, $rjid, $rocc;
+      });
+
+#     disco_items ($con, $cj, sub {
+#        my ($i) = @_;
+#        for ($i->items) {
+#           disco_info ($con, $_->{jid}, sub {
+#              my ($i) = @_;
+#              print "\t\tdisco info from room ".$i->jid.":".(join ", ", map { "$_->{category}/$_->{type}" } $i->identities)."\n";
+#              if (grep { $_->{category} eq 'conference'
+#                         && $_->{type} eq 'text' } $i->identities ())
+#              {
+#              # XXX
+#              }
+#           });
+#        }
+#     });
+   }
 }
 
 

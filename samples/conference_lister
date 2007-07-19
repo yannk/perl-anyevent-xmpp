@@ -13,18 +13,6 @@ our $J = AnyEvent->condvar;
 our $datafile = "conferences.stor";
 our $data = {};
 
-sub load_servers {
-   my $parser = XML::DOM::Parser->new;
-   my $doc = $parser->parsefile ("servers.xml");
-
-   my %servers;
-   for ($doc->findnodes ('/query/item')) {
-      my $n = $_->getAttributeNode ('jid');
-      $servers{$n->getValue} = 1;
-   }
-   keys %servers
-}
-
 # locking mechanism for requests
 our %req;
 our $id = 0;
@@ -50,7 +38,7 @@ print "finished data: " . join (',', keys %$data) . "\n";
 sub sync_data { store $data, $datafile }
 
 # MAIN START
-my @servers = load_servers ();
+my @servers = map { s/^\s*(\S+)\s*$/\1/; $_ } <STDIN>;
 my $cl = Net::XMPP2::Client->new ();
 my $d  = Net::XMPP2::Ext::Disco->new;
 $cl->add_extension ($d);
@@ -105,7 +93,7 @@ $cl->reg_cb (
       my $c = $acc->connection ();
       $c->set_default_iq_timeout (30);
 
-      my $timer_step = 3;
+      my $timer_step = 0.1;
       my $timer_cnt = 0;
 
       for my $SERVER (@servers) {
@@ -117,11 +105,14 @@ $cl->reg_cb (
             cb => sub {
                disco_items ($c, $SERVER, sub {
                   my ($i) = @_;
-                  for ($i->items) {
-                     disco_info ($c, $_->{jid}, sub {
+                  print "got items for $SERVER\n";
+                  for my $it ($i->items) {
+                     disco_info ($c, $it->{jid}, sub {
                         my ($i) = @_;
-                        if (grep { $_->{category} eq 'conference' && $_->{type} eq 'text' } $i->identities ()) {
-                           $data->{$SERVER} = $i->jid;
+                        my @f = grep { $_ =~ /^muc/ } keys %{$i->features || {}};
+                        my @c = grep { $_->{category} eq 'conference' && $_->{type} eq 'text' } $i->identities ();
+                        if (@c && !@f) {
+                           $data->{$SERVER}->{$i->jid} = 1;
                            print "\t*** found conference " . $i->jid . "\n";
                            sync_data ();
                         }

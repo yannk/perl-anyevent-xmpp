@@ -83,7 +83,7 @@ sub init {
    my ($self) = @_;
 }
 
-=item B<send_registration_request ($cb)>
+=item B<send_registration_request ($con, $cb)>
 
 This method sends a register form request.
 C<$cb> will be called when either the form arrived or
@@ -99,11 +99,25 @@ object.
 =cut
 
 sub send_registration_request {
-   my ($self, $cb) = @_;
+   my ($self, $con, $cb) = @_;
 
+   $con->send_iq (get => {
+      defns => 'register',
+      node => { ns => 'register', name => 'query' }
+   }, sub {
+      my ($node, $error) = @_;
 
+      my $form;
+      if ($node) {
+         $form = Net::XMPP2::Ext::RegisterForm->new;
+         $form->init_from_node ($node);
+      }
 
+      $cb->($self, $con, $form, $error);
+   });
 }
+
+=item B<submit_form ($con, $form, $cb)>
 
 =back
 
