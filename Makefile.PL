@@ -18,6 +18,7 @@ WriteMakefile(
         'Authen::SASL'       => 0,
         'Net::SSLeay'        => 0,
         'Net::DNS'           => 0,
+        'Digest::SHA1'       => 0,
     },
     dist                => {
        COMPRESS => 'gzip -9f',

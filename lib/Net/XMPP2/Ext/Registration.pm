@@ -2,6 +2,7 @@ package Net::XMPP2::Ext::Registration;
 use strict;
 use Net::XMPP2::Util;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Ext::RegisterForm;
 
 =head1 NAME
 

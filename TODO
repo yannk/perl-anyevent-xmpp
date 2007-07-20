@@ -52,3 +52,5 @@
 - Implement XEP-0030: Service Discovery
    - see also: XEP-0128: Service Discovery Extensions
    - missing feature: building up a item tree for discovery
+   - defining multiple 'personalities' in the Disco module
+     for eg. handling discos to components and such.

@@ -119,7 +119,12 @@ If C<$bool> is true no SSL will be used.
 sub new {
    my $this = shift;
    my $class = ref($this) || $this;
-   my $self = $class->SUPER::new (language => 'en', @_);
+   my $self =
+      $class->SUPER::new (
+         language         => 'en',
+         stream_namespace => 'client',
+         @_
+      );
 
    $self->{parser} = new Net::XMPP2::Parser;
    $self->{writer} = Net::XMPP2::Writer->new (
@@ -162,11 +167,6 @@ sub new {
       $self->{username} = $user;
       $self->{domain}   = $host;
       $self->{resource} = $res if defined $res;
-   }
-
-   for (qw/username password domain/) {
-      die "No '$_' argument given to new, but '$_' is required\n"
-         unless $self->{$_};
    }
 
    my $proxy_cb = sub {
@@ -231,7 +231,8 @@ sub connect {
 
    my ($host, $port) = ($self->{domain}, $self->{port} || 5222);
    if ($self->{override_host}) {
-      ($host, $port) = ($self->{override_host}, $self->{override_port} || 5222);
+      $host = $self->{override_host};
+      $port = $self->{override_port} if defined $self->{override_port};
 
    } else {
       unless ($no_srv_rr) {
@@ -320,7 +321,9 @@ sub handle_stanza {
       $self->enable_ssl;
       $self->{parser}->init;
       $self->{writer}->init;
-      $self->{writer}->send_init_stream ($self->{language}, $self->{domain});
+      $self->{writer}->send_init_stream (
+         $self->{language}, $self->{domain}, $self->{stream_namespace}
+      );
 
    } elsif ($node->eq (tls => 'failure')) {
       $self->event ('tls_error');
@@ -349,9 +352,6 @@ sub handle_stanza {
 
    } elsif ($node->eq (stream => 'error')) {
       $self->handle_error ($node);
-
-   } else {
-      warn "Didn't understood stanza: '" . $node->name . "'";
    }
 }
 
@@ -363,7 +363,7 @@ Initiate the XML stream.
 
 sub init {
    my ($self) = @_;
-   $self->{writer}->send_init_stream ($self->{language}, $self->{domain});
+   $self->{writer}->send_init_stream ($self->{language}, $self->{domain}, $self->{stream_namespace});
 }
 
 =item B<is_connected ()>
@@ -518,6 +518,12 @@ sub handle_iq {
 
 sub send_sasl_auth {
    my ($self, @mechs) = @_;
+
+   for (qw/username password domain/) {
+      die "No '$_' argument given to new, but '$_' is required\n"
+         unless $self->{$_};
+   }
+
    $self->{writer}->send_sasl_auth (
       (join ' ', map { $_->text } @mechs),
       $self->{username}, $self->{domain}, $self->{password}
@@ -584,7 +590,7 @@ sub handle_sasl_success {
    $self->{authenticated} = 1;
    $self->{parser}->init;
    $self->{writer}->init;
-   $self->{writer}->send_init_stream ($self->{language}, $self->{domain});
+   $self->{writer}->send_init_stream ($self->{language}, $self->{domain}, $self->{stream_namespace});
 }
 
 sub handle_error {

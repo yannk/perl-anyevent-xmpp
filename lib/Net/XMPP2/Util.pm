@@ -6,7 +6,7 @@ use Net::XMPP2::Namespaces qw/xmpp_ns_maybe/;
 require Exporter;
 our @EXPORT_OK = qw/resourceprep nodeprep prep_join_jid join_jid
                     split_jid stringprep_jid prep_bare_jid bare_jid
-                    is_bare_jid simxml dump_twig_xml/;
+                    is_bare_jid simxml dump_twig_xml install_default_debug_dump/;
 our @ISA = qw/Exporter/;
 
 =head1 NAME
@@ -268,6 +268,20 @@ sub dump_twig_xml {
    } else {
       return "$data\n";
    }
+}
+
+sub install_default_debug_dump {
+   my ($con) = @_;
+   $con->reg_cb (
+      debug_recv => sub {
+         my ($con, $data) = @_;
+         printf "recv>> %s:%d\n%s", $con->{host}, $con->{port}, dump_twig_xml ($data)
+      },
+      debug_send => sub {
+         my ($con, $data) = @_;
+         printf "send<< %s:%d\n%s", $con->{host}, $con->{port}, dump_twig_xml ($data)
+      },
+   )
 }
 
 =head1 AUTHOR

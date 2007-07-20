@@ -1,6 +1,10 @@
 Revision history for Net-XMPP2
 
 0.03
+         - added the possibility to completly restore the original
+           XML data from a Net::XMPP2::Node.
+         - implemented the component protocol to establish a component
+           stream with a server.
          - reordered events a bit so that session_ready comes after
            roster retrieval (when it is retrieved)
          - added possibility to set the initial presence priority

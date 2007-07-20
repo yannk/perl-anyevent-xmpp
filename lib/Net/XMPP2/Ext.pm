@@ -51,6 +51,14 @@ This extension lets you register new accounts "in-band".
 To use this look at the description of the C<register> option to the C<new>
 method of L<Net::XMPP2::Connection>.
 
+=item XEP-0114 - Jabber Component Protocol
+
+This extension allows you to connect to a server as a component
+and makes it possible to implement services like pubsub, muc, or
+whatever you can imagine (even gateways).
+See documentation of L<Net::XMPP2::Component> and the example
+C<samples/simple_component>.
+
 =back
 
 =head1 AUTHOR

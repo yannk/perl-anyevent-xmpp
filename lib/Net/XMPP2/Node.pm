@@ -1,5 +1,4 @@
 package Net::XMPP2::Node;
-use warnings;
 use strict;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 
@@ -10,6 +9,13 @@ use constant {
    TEXT   => 3,
    NODES  => 4,
    PARSER => 5,
+   RAW    => 6
+};
+
+use constant {
+   NNODE   => 0,
+   NTEXT   => 1,
+   NRAW    => 2,
 };
 
 =head1 NAME
@@ -53,6 +59,7 @@ sub new {
    $self->[1] = $_[1];
    $self->[2] = $_[2];
    $self->[5] = $_[3];
+   $self->[6] = '';
    bless $self, $class;
    return $self
 }
@@ -140,7 +147,7 @@ Adds a sub-node to the current node.
 
 sub add_node {
    my ($self, $node) = @_;
-   push @{$self->[NODES]}, $node;
+   push @{$self->[NODES]}, [NNODE, $node];
 }
 
 =item B<nodes>
@@ -150,7 +157,9 @@ Returns a list of sub nodes.
 =cut
 
 sub nodes {
-   @{$_[0]->[NODES] || []};
+   map { $_->[1] }
+      grep { $_->[0] == NNODE }
+         @{$_[0]->[NODES] || []};
 }
 
 =item B<add_text ($string)>
@@ -161,7 +170,7 @@ Adds character data to the current node.
 
 sub add_text {
    my ($self, $text) = @_;
-   $self->[TEXT] .= $text;
+   push @{$self->[NODES]}, [NTEXT, $text];
 }
 
 =item B<text>
@@ -171,7 +180,7 @@ Returns the text for this node.
 =cut
 
 sub text {
-   $_[0]->[TEXT];
+   join '', map $_->[1], grep { $_->[0] == NTEXT } @{$_[0]->[NODES] || []}
 }
 
 =item B<find_all (@path)>
@@ -222,6 +231,33 @@ sub write_on {
 }
 
 =back
+
+=item B<as_string ()>
+
+This method returns the original character representation of this XML element
+(and it's children nodes). Please note that the string is UTF-8 encoded (that
+means to get a unicode string you need to decode ('UTF-8', ...) it)!
+
+=cut
+
+sub as_string {
+   my ($self) = @_;
+   join '',
+      map { $_->[0] == NRAW ? $_->[1] : $_->[1]->as_string }
+         grep { $_->[0] != NTEXT }
+            @{$self->[NODES] || []};
+}
+
+=item B<append_raw ($string)>
+
+This method is called by the parser to store original strings of this element.
+
+=cut
+
+sub append_raw {
+   my ($self, $str) = @_;
+   push @{$self->[NODES]}, [NRAW, $str];
+}
 
 =head1 AUTHOR
 

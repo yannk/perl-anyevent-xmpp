@@ -7,6 +7,7 @@ our @ISA = qw/Exporter/;
 
 our %NAMESPACES = (
    client      => 'jabber:client',
+   component   => 'jabber:component:accept',
    stream      => 'http://etherx.jabber.org/streams',
    streams     => 'urn:ietf:params:xml:ns:xmpp-streams',
    stanzas     => 'urn:ietf:params:xml:ns:xmpp-stanzas',

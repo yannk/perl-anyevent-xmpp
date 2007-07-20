@@ -1,0 +1,49 @@
+#!/opt/perl/bin/perl
+use strict;
+use utf8;
+use Event;
+use AnyEvent;
+use Net::XMPP2::Component;
+use Net::XMPP2::Util qw/install_default_debug_dump/;
+
+my $j = AnyEvent->condvar;
+my $c = Net::XMPP2::Component-> new (
+           domain => 'test.jabber.ta-sa.org',
+           server => 'sprawl',
+           port   => 5347,
+           secret => 'lolfe',
+        );
+
+install_default_debug_dump ($c);
+
+if ($c->connect) {
+   $c->init;
+   $c->reg_cb (
+      error => sub {
+         my ($c, $e) = @_;
+         warn "ERROR: " . $e->string . "\n";
+         1
+      },
+      disconnect => sub {
+         my ($c, $h, $p, $r) = @_;
+         warn "DISCON @_\n";
+         1
+      },
+      session_ready => sub {
+         my ($c) = @_;
+
+         print "component ready!\n";
+
+         $c->send_message (
+            '*dev@ve.symlynx.com', 'chat', undef,
+            body => "Hi!",
+            from => 'test@test.jabber.ta-sa.org'
+         );
+      }
+   );
+} else {
+   print "connect error: $!\n";
+   $j->broadcast;
+}
+
+$j->wait;

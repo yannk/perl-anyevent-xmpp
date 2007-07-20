@@ -20,7 +20,7 @@ devcl - A development helper client
 
 =cut
 
-our $CLIENT = Net::XMPP2::Client->new;
+our $CLIENT = Net::XMPP2::Client->new (debug => 1);
 our $DISCO  = Net::XMPP2::Ext::Disco->new;
 our $MAIN   = DevCL::Main->new;
 

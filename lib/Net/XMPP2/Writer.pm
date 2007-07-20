@@ -5,6 +5,8 @@ use Authen::SASL qw/Perl/;
 use MIME::Base64;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Util qw/simxml/;
+use Digest::SHA1 qw/sha1_hex/;
+use Encode;
 
 =head1 NAME
 
@@ -143,27 +145,52 @@ sub flush {
    $self->{write_cb}->(substr $self->{write_buf}, 0, (length $self->{write_buf}), '');
 }
 
-=item B<send_init_stream ($domain)>
+=item B<send_init_stream ($language, $domain, $namespace)>
 
 This method will generate a XMPP stream header. C<$domain> has to be the
 domain of the server (or endpoint) we want to connect to.
 
+C<$namespace> is the namespace uri or the tag (from L<Net::XMPP2::Namespaces>)
+for the stream namespace. (This is used by L<Net::XMPP2::Component> to connect
+as component to a server). C<$namespace> can also be undefined, in this case
+the C<client> namespace will be used.
+
 =cut
 
 sub send_init_stream {
-   my ($self, $language, $domain) = @_;
+   my ($self, $language, $domain, $ns) = @_;
+
+   $ns ||= 'client';
 
    my $w = $self->{writer};
    $w->xmlDecl ('UTF-8');
    $w->addPrefix (xmpp_ns ('stream'), 'stream');
-   $w->addPrefix (xmpp_ns ('client'), '');
-   $w->forceNSDecl (xmpp_ns ('client'));
+   $w->addPrefix (xmpp_ns ($ns), '');
+   $w->forceNSDecl (xmpp_ns ($ns));
    $w->startTag (
       [xmpp_ns ('stream'), 'stream'],
       to => $domain,
       version => '1.0',
       [xmpp_ns ('xml'), 'lang'] => $language
    );
+   $self->flush;
+}
+
+=item B<send_handshake ($streamid, $secret)>
+
+This method sends a component handshake. Please note that C<$secret>
+must be XML escaped!
+
+=cut
+
+sub send_handshake {
+   my ($self, $id, $secret) = @_;
+   my $out_secret = encode ("UTF-8", $secret);
+   warn "A[$id][$out_secret]\n";
+   my $out = lc sha1_hex ($id . $out_secret);
+   simxml ($self->{writer}, defns => 'component', node => {
+      ns => 'component', name => 'handshake', childs => [ $out ]
+   });
    $self->flush;
 }
 

@@ -67,6 +67,7 @@ sub new {
    my $class = ref($this) || $this;
    my $self = { @_ };
    bless $self, $class;
+
    if ($self->{debug}) {
       $self->reg_cb (
          debug_recv => sub {

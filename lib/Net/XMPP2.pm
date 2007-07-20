@@ -95,6 +95,10 @@ For SSL connections.
 
 For SRV RR lookups.
 
+=item L<Digest::SHA1>
+
+For component authentication.
+
 =back
 
 And yes, all these are essential for XMPP communication. Even though 'instant
@@ -244,6 +248,10 @@ These scripts are a bit hacky and quite complicated, but maybe it's of any
 value for someone. You might note L<samples/EVQ.pm> which is a module that
 handles request-throttling (You don't want to flood the server and risk
 getting the admins attention :).
+
+=item B<samples/simple_component>
+
+This is a (basic) skeleton for a jabber component.
 
 =back
 

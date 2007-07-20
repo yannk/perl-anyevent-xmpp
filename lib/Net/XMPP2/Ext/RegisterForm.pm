@@ -1,11 +1,12 @@
-package Net::XMPP2::RegisterForm;
+package Net::XMPP2::Ext::RegisterForm;
 use strict;
 use Net::XMPP2::Util;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Ext::DataForm;
 
 =head1 NAME
 
-Net::XMPP2::RegisterForm - Handle for in band registration
+Net::XMPP2::Ext::RegisterForm - Handle for in band registration
 
 =head1 SYNOPSIS
 
@@ -124,7 +125,7 @@ sub is_already_registered {
 sub init_new_form {
    my ($self, $node) = @_;
 
-   my (@x) = $node->find_all ([qw/data_form x/]);
+   my (@x) = $node->find_all ([qw/register query/], [qw/data_form x/]);
 
    if (@x) {
       my $df = Net::XMPP2::Ext::DataForm->new;
@@ -151,7 +152,7 @@ sub get_data_form {
 sub init_from_node {
    my ($self, $node) = @_;
 
-   if ($node->find_all ([qw/data_form x/])) {
+   if ($node->find_all ([qw/register query/], [qw/data_form x/])) {
       $self->init_new_form ($node);
       $self->{type} = 'form';
    } else {

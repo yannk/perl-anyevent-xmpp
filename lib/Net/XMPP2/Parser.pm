@@ -36,6 +36,7 @@ sub new {
    my $self = {
       stanza_cb => sub { die "No stanza callback provided!" },
       error_cb  => sub { warn "No error callback provided: $_[0]: $_[1]!" },
+      stream_cb => sub { },
       @_
    };
    bless $self, $class;
@@ -71,6 +72,20 @@ is the exception and the second is the data which caused the error.
 sub set_error_cb {
    my ($self, $cb) = @_;
    $self->{error_cb} = $cb;
+}
+
+=item B<set_stream_cb ($cb)>
+
+This method sets the stream tag callback. It is called
+when the <stream> tag from the server has been encountered.
+The first argument to the callback is the L<Net::XMPP2::Node>
+of the opening stream tag.
+
+=cut
+
+sub set_stream_cb {
+   my ($self, $cb) = @_;
+   $self->{stream_cb} = $cb;
 }
 
 =item B<init>
@@ -131,10 +146,26 @@ sub feed {
    }
 }
 
+#=item B<stream_id>
+#
+#This method retrieves the streams ID attribute.
+#
+#=cut
+#
+#sub stream_id {
+#   my ($self) = @_;
+#   return undef unless $self->{nodestack}->[0];
+#   $self->{nodestack}->[0]->attr ('id')
+#}
 
 sub cb_start_tag {
    my ($self, $p, $el, %attrs) = @_;
-   push @{$self->{nodestack}}, Net::XMPP2::Node->new ($p->namespace ($el), $el, \%attrs, $self);
+   my $node = Net::XMPP2::Node->new ($p->namespace ($el), $el, \%attrs, $self);
+   $node->append_raw ($p->original_string);
+   if (not @{$self->{nodestack}}) {
+      $self->{stream_cb}->($node);
+   }
+   push @{$self->{nodestack}}, $node;
 }
 
 sub cb_char_data {
@@ -143,7 +174,9 @@ sub cb_char_data {
       warn "characters outside of tag: [$str]!\n";
       return;
    }
-   $self->{nodestack}->[-1]->add_text ($str);
+   my $node = $self->{nodestack}->[-1];
+   $node->add_text ($str);
+   $node->append_raw ($p->original_string);
 }
 
 sub cb_end_tag {
@@ -160,6 +193,7 @@ sub cb_end_tag {
    }
 
    my $node = pop @{$self->{nodestack}};
+   $node->append_raw ($p->original_string);
 
    # > 1 because we don't want the stream tag to save all our children...
    if (@{$self->{nodestack}} > 1) {
