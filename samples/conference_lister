@@ -80,12 +80,10 @@ $cl->reg_cb (
    error => sub {
       my ($cl, $acc, $err) = @_;
       print "ERROR: " . $err->string . "\n";
-      1
    },
    iq_result_cb_exception => sub {
       my ($cl, $acc, $ex) = @_;
       print "EXCEPTION: $ex\n";
-      1
    },
    session_ready => sub {
       my ($cl, $acc) = @_;
@@ -126,12 +124,11 @@ $cl->reg_cb (
 
          $timer_cnt += $timer_step;
       }
-      0
+      $cl->unreg_me;
    },
    message => sub {
       my ($cl, $acc, $msg) = @_;
       print "message from: " . $msg->from . ": " . $msg->any_body . "\n";
-      1
    }
 );
 

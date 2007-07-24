@@ -72,22 +72,19 @@ $cl->reg_cb (
       } else {
          mkti ($acc->connection);
       }
-      0
+      $cl->unreg_me
    },
    disconnect => sub {
       my ($cl, $acc, $h, $p, $reas) = @_;
       print "disconnect ($h:$p): $reas\n";
-      1
    },
    error => sub {
       my ($cl, $acc, $err) = @_;
       print "ERROR: " . $err->string . "\n";
-      1
    },
    message => sub {
       my ($cl, $acc, $msg) = @_;
       print "message from: " . $msg->from . ": " . $msg->any_body . "\n";
-      1
    }
 );
 $cl->start;

@@ -171,13 +171,11 @@ sub update_connections {
                if (defined $self->{presence}) {
                   $con->send_presence (undef, undef, %{$self->{presence} || {}});
                }
-               0 # do once
+               $con->unreg_me
             },
-            # debug_recv      => sub { print "RRRRRRRRECVVVVVV:\n"; _dumpxml ($_[1]); 1 },
-            # debug_send      => sub { print "SSSSSSSSENDDDDDD:\n"; _dumpxml ($_[1]); 1 },
             disconnect => sub {
                delete $self->{accounts}->{$acc};
-               0
+               $_[0]->unreg_me
             }
          );
 

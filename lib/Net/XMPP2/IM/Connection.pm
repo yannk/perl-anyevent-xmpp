@@ -77,13 +77,13 @@ sub new {
    $self->{roster} = Net::XMPP2::IM::Roster->new (connection => $self);
 
    $self->reg_cb (message_xml =>
-      sub { shift @_; $self->handle_message (@_);    1 });
+      sub { shift @_; $self->handle_message (@_);  });
    $self->reg_cb (presence_xml =>
-      sub { shift @_; $self->handle_presence (@_);   1 });
+      sub { shift @_; $self->handle_presence (@_); });
    $self->reg_cb (iq_set_request_xml =>
-      sub { shift @_; $self->handle_iq_set (@_);     1 });
+      sub { shift @_; $self->handle_iq_set (@_);   });
    $self->reg_cb (disconnect =>
-      sub { shift @_; $self->handle_disconnect (@_); 1 });
+      sub { shift @_; $self->handle_disconnect (@_); });
 
    $self->reg_cb (stream_ready => sub {
       my ($jid) = @_;
@@ -97,7 +97,6 @@ sub new {
    my $proxy_cb = sub {
       my ($self, $er) = @_;
       $self->event (error => $er);
-      1
    };
 
    $self->reg_cb (

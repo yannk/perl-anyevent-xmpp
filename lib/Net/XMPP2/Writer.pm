@@ -186,7 +186,6 @@ must be XML escaped!
 sub send_handshake {
    my ($self, $id, $secret) = @_;
    my $out_secret = encode ("UTF-8", $secret);
-   warn "A[$id][$out_secret]\n";
    my $out = lc sha1_hex ($id . $out_secret);
    simxml ($self->{writer}, defns => 'component', node => {
       ns => 'component', name => 'handshake', childs => [ $out ]
@@ -281,10 +280,25 @@ sub send_starttls {
 =item B<send_iq ($id, $type, $create_cb, %attrs)>
 
 This method sends an IQ stanza of type C<$type> (to be compliant
-only use: 'get', 'set', 'result' and 'error'). C<$create_cb>
-will be called with an XML::Writer instance as first argument.
-C<$create_cb> should be used to fill the IQ xml stanza.
+only use: 'get', 'set', 'result' and 'error').
+
+If C<$create_cb> is a code reference it will be called with an XML::Writer
+instance as first argument, which must be used to fill the IQ stanza.  If
+
+C<$create_cb> is a hash reference the hash will be used as key=>value arguments
+for the C<simxml> function defined in L<Net::XMPP2::Util>. C<simxml> will then
+be used to generate the contents of the IQ stanza. (This is very convenient
+when you want to write the contents of stanzas in the code and don't want to
+build a DOM tree yourself...).
+
 If C<$create_cb> is undefined an empty tag will be generated.
+
+Example:
+
+   $writer->send_iq ('newid', 'get', {
+      defns => 'version',
+      node  => { name => 'query', ns => 'version' }
+   }, to => 'jabber.org')
 
 C<%attrs> should have further attributes for the IQ stanza tag.
 For example 'to' or 'from'. If the C<%attrs> contain a 'lang' attribute

@@ -17,12 +17,10 @@ $cl->reg_cb (
       my ($xmpp, $acc, $roster, $contact, $rdoit) = @_;
       $$rdoit = 1;
       $contact->send_subscribe;
-      1
    },
    error => sub {
       my ($cl, $acc, $err) = @_;
       print "ERROR: " . $err->string . "\n";
-      1
    },
    session_ready => sub {
       my ($cl, $acc) = @_;
@@ -35,7 +33,7 @@ $cl->reg_cb (
          print "occupants: " . $df->get_field ('muc#roominfo_occupants')->{values}->[0] . "\n";
       });
       print "session ready\n";
-      0
+      $cl->unreg_me
    },
    message => sub {
       my ($cl, $acc, $msg) = @_;
@@ -45,7 +43,6 @@ $cl->reg_cb (
       } elsif ($msg->any_body =~ /add/) {
          $cl->add_extension ($d);
       }
-      1
    }
 );
 

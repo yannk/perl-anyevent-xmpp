@@ -1,4 +1,5 @@
 package Net::XMPP2::Event;
+use strict;
 
 =head1 NAME
 
@@ -77,24 +78,59 @@ sub unreg_cb {
 =item B<event ($eventname, @args)>
 
 Emits the event C<$eventname> and passes the arguments C<@args>.
+The return value is a list of defined return values from the event callbacks.
 
 =cut
 
 sub event {
    my ($self, $ev, @arg) = @_;
 
-   my $nxt = [];
+   my $old_cb_state = $self->{cb_state};
+   my @res;
+   eval {
+      my $nxt = [];
 
-   my $handled;
-   for (@{$self->{events}->{lc $ev}}) {
-      $_->[1]->($self, @arg) and push @$nxt, $_;
+      for my $rev (@{$self->{events}->{lc $ev}}) {
+         my $state = $self->{cb_state} = {};
+
+         my $r = $rev->[1]->($self, @arg);
+
+         push @$nxt, $rev unless $state->{remove};
+         push @res, $r if defined $r;
+      }
+      $self->{events}->{lc $ev} = $nxt;
+
+      for my $ev_frwd (keys %{$self->{event_forwards}}) {
+         my $rev = $self->{event_forwards}->{$ev_frwd};
+         my $state = $self->{cb_state} = {};
+
+         my $r = $rev->[1]->($self, $rev->[0], $ev, @arg);
+
+         if ($state->{remove}) {
+            delete $self->{event_forwards}->{$ev_frwd};
+         }
+
+         push @res, $r if defined $r;
+      }
+   };
+   if ($@) {
+      warn "Uncaught exception: $@";
    }
+   $self->{cb_state} = $old_cb_state;
 
-   for (values %{$self->{event_forwards}}) {
-      $_->[1]->($self, $_->[0], $ev, @arg);
-   }
+   @res
+}
 
-   $self->{events}->{lc $ev} = $nxt;
+=item B<unreg_me>
+
+If this method is called from a callback on the first argument to the
+callback (thats C<$self>) the callback will be deleted after it is finished.
+
+=cut
+
+sub unreg_me {
+   my ($self) = @_;
+   $self->{cb_state}->{remove} = 1;
 }
 
 =item B<add_forward ($obj, $forward_cb)>

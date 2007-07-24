@@ -18,6 +18,8 @@ samples/room_lister_stat
 samples/limit_searcher
 samples/test_client
 samples/room_lister
+samples/find_servers
+samples/disco_version
 lib/Net/XMPP2/IM/Contact.pm
 lib/Net/XMPP2/IM/Roster.pm
 lib/Net/XMPP2/IM/Connection.pm
@@ -50,6 +52,7 @@ lib/Net/XMPP2/Extendable.pm
 lib/Net/XMPP2/Writer.pm
 lib/Net/XMPP2/Parser.pm
 lib/Net/XMPP2/Connection.pm
+lib/Net/XMPP2/Component.pm
 lib/Net/XMPP2/Error.pm
 lib/Net/XMPP2/Node.pm
 lib/Net/XMPP2.pm

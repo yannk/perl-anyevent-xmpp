@@ -100,12 +100,10 @@ sub new {
          $self->{authenticated} = 1;
          $self->event ('session_ready');
       }
-      1
    },
    stream_pre_authentication => sub {
       my ($self, $rcon) = @_;
       $$rcon = 0;
-      1
    });
 
    $self

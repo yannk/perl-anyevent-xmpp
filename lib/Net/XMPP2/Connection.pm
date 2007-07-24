@@ -172,7 +172,6 @@ sub new {
    my $proxy_cb = sub {
       my ($self, $er) = @_;
       $self->event (error => $er);
-      1
    };
 
    $self->reg_cb (
@@ -187,14 +186,12 @@ sub new {
                exception => $ex, context => 'iq result callback execution'
             )
          );
-         1
       },
       tls_error => sub {
          my ($self) = @_;
          $self->event (error =>
             Net::XMPP2::Error->new (text => 'tls_error: tls negotiation failed')
          );
-         1
       },
    );
 
@@ -751,7 +748,7 @@ This event is generated whenever some error occured.
 C<$error> is an instance of L<Net::XMPP2::Error>.
 Trivial error reporting may look like this:
 
-   $con->reg_cb (error => sub { warn "xmpp error: " . $_[1]->string . "\n"; 1 });
+   $con->reg_cb (error => sub { warn "xmpp error: " . $_[1]->string . "\n" });
 
 Basically this event is a collect event for all other error events.
 
