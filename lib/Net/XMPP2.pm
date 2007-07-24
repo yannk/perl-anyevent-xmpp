@@ -116,6 +116,24 @@ Here are some notes to the releases (release of this version is at top):
 
 =over 4
 
+=item * 0.03
+
+This release adds new events for attaching information to "XML" stanzas that
+are in transmission to the server. See also the events C<send_*_hook> in
+L<Net::XMPP2::Connection>.
+
+The event callbacks als don't have to return a true value anymore. What the
+return values do depends on the event now.
+
+The highlight of this release is the implementation of XEP-0114, the Jabber
+Component Protocol.
+
+You can also set the initial priority of the presence in
+L<Net::XMPP2::IM::Connection> now.
+
+Please consult the Changes file for greater detail about bugfixes and new
+features.
+
 =item * 0.02
 
 This release adds lots of small improvements to the API (mostly new events),

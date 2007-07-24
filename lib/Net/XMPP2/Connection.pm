@@ -543,7 +543,8 @@ sub handle_stream_features {
 
    } elsif (not $self->{authenticated}) {
       my $continue = 1;
-      $self->event (stream_pre_authentication => \$continue);
+      my (@ret) = $self->event (stream_pre_authentication => \$continue);
+      $continue = pop @ret if @ret;
       if ($continue) {
          $self->authenticate;
       }
@@ -693,6 +694,7 @@ sub do_rebind {
    );
 }
 
+
 =item B<jid>
 
 After the stream has been bound to a resource the JID can be retrieved via this
@@ -723,14 +725,15 @@ These events can be registered on with C<reg_cb>:
 This event is sent when a stream feature (<features>) tag is received. C<$node> is the
 L<Net::XMPP2::Node> object that represents the <features> tag.
 
-=item stream_pre_authentication => $rcontinue
+=item stream_pre_authentication
 
 This event is emitted after TLS/SSL was initiated (if enabled) and before any
-authentication happened. C<$rcontinue> is a reference to a scalar that per default
-holds a true value. If that scalar is true the authentication will continue
-after handling this event. If you set C<$$rcontinue> to a false value
-the authentication will stop and you have to call the C<authenticate>
-method later.
+authentication happened.
+
+The return value of the first event callback that is called decides what happens next.
+If it is true value the authentication continues. If it is undef or a false value
+authentication is stopped and you need to call C<authentication> later.
+value
 
 This event is usually used when you want to do in-band registration,
 see also L<Net::XMPP2::Ext::Registration>.
@@ -875,19 +878,35 @@ is still false after all event handlers were executed an error iq will be genera
 If the C<$result_cb> of a C<send_iq> operation somehow threw a exception
 or failed this event will be generated.
 
-=item send_iq_hook => $id, $type, $attrs, $rcreate_cbs
+=item send_iq_hook => $id, $type, $attrs
 
 This event lets you add any desired number of additional create callbacks
 to a IQ stanza that is about to be sent.
 
-C<$id>, C<$type> are described in the documentation of C<send_iq> of L<Net::XMPP2::Writer>.
-C<$attrs> is the hashref to the C<%attrs> hash that can be passed to C<send_iq> and also has
-the exact same semantics as described in the documentation of C<send_iq>.
+C<$id>, C<$type> are described in the documentation of C<send_iq> of
+L<Net::XMPP2::Writer>. C<$attrs> is the hashref to the C<%attrs> hash that can
+be passed to C<send_iq> and also has the exact same semantics as described in
+the documentation of C<send_iq>.
 
-C<$rcreate_cbs> is a array reference where you should push further callbacks on
-that have the same semantic as C<$create_cb> in the documentation of C<send_iq>.
+The return values of the event callbacks are interpreted as C<$create_cb> value as
+documented for C<send_iq>. (That means you can for example return a callback
+that fills the IQ).
 
-=item send_message_hook => $id, $to, $type, $attrs, $rcreate_cbs
+Example:
+
+   # this appends a <test/> element to all outgoing IQs
+   # and also a <test2/> element to all outgoing IQs
+   $con->reg_cb (send_iq_hook => sub {
+      my ($id, $type, $attrs) = @_;
+      (sub {
+         my $w = shift; # $w is a XML::Writer instance
+         $w->emptyTag ('test');
+      }, {
+         node => { name => "test2" } # see also simxml() defined in Net::XMPP2::Util
+      })
+   });
+
+=item send_message_hook => $id, $to, $type, $attrs
 
 This event lets you add any desired number of additional create callbacks
 to a message stanza that is about to be sent.
@@ -895,9 +914,10 @@ to a message stanza that is about to be sent.
 C<$id>, C<$to>, C<$type> and the hashref C<$attrs> are described in the documentation
 for C<send_message> of L<Net::XMPP2::Writer> (C<$attrs> is C<%attrs> there).
 
-For semantics of C<$rcreate_cbs> see also the documentation of the C<send_iq_hook> event above.
+To actually append something you need to return something, what you need to return
+is described in the C<send_iq_hook> event above.
 
-=item send_presence_hook => $id, $type, $attrs, $rcreate_cbs
+=item send_presence_hook => $id, $type, $attrs
 
 This event lets you add any desired number of additional create callbacks
 to a presence stanza that is about to be sent.
@@ -905,7 +925,8 @@ to a presence stanza that is about to be sent.
 C<$id>, C<$type> and the hashref C<$attrs> are described in the documentation
 for C<send_presence> of L<Net::XMPP2::Writer> (C<$attrs> is C<%attrs> there).
 
-For semantics of C<$rcreate_cbs> see also the documentation of the C<send_iq_hook> event above.
+To actually append something you need to return something, what you need to return
+is described in the C<send_iq_hook> event above.
 
 =back
 

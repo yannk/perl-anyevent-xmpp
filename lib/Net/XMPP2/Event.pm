@@ -40,6 +40,11 @@ Call C<unreg_cb> with that ID to remove those callbacks again.
 To see a documentation of emitted events please take a look at the EVENTS section
 in the classes that inherit from this one.
 
+The callbacks will be called in an array context. If a callback doesn't want
+to return any value it should return an empty list.
+All elements of the returned list will be accumulated and the semantic of the
+accumulated return values depends on the events.
+
 =cut
 
 sub reg_cb {
@@ -93,10 +98,10 @@ sub event {
       for my $rev (@{$self->{events}->{lc $ev}}) {
          my $state = $self->{cb_state} = {};
 
-         my $r = $rev->[1]->($self, @arg);
+         my (@r) = $rev->[1]->($self, @arg);
 
          push @$nxt, $rev unless $state->{remove};
-         push @res, $r if defined $r;
+         push @res, @r if @r;
       }
       $self->{events}->{lc $ev} = $nxt;
 
@@ -104,13 +109,13 @@ sub event {
          my $rev = $self->{event_forwards}->{$ev_frwd};
          my $state = $self->{cb_state} = {};
 
-         my $r = $rev->[1]->($self, $rev->[0], $ev, @arg);
+         my (@r) = $rev->[1]->($self, $rev->[0], $ev, @arg);
 
          if ($state->{remove}) {
             delete $self->{event_forwards}->{$ev_frwd};
          }
 
-         push @res, $r if defined $r;
+         push @res, @r if @r;
       }
    };
    if ($@) {
