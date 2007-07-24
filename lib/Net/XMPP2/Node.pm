@@ -235,8 +235,17 @@ sub write_on {
 =item B<as_string ()>
 
 This method returns the original character representation of this XML element
-(and it's children nodes). Please note that the string is UTF-8 encoded (that
-means to get a unicode string you need to decode ('UTF-8', ...) it)!
+(and it's children nodes). Please note that the string is a unicode string,
+meaning: to get octets use:
+
+   my $octets = encode ('UTF-8', $node->as_string);
+
+Now you can roll stunts like this:
+
+   my $libxml = XML::LibXML->new;
+   my $doc    = $libxml->parse_string (encode ('UTF-8', $node->as_string ()));
+
+(You can use your favorite XML parser :)
 
 =cut
 
@@ -257,6 +266,53 @@ This method is called by the parser to store original strings of this element.
 sub append_raw {
    my ($self, $str) = @_;
    push @{$self->[NODES]}, [NRAW, $str];
+}
+
+=item B<to_sax_events ($handler)>
+
+This method takes anything that can receive SAX events.
+See also L<XML::GDOME::SAX::Builder> or L<XML::Handler::BuildDOM>
+or L<XML::LibXML::SAX::Builder>.
+
+With this you can convert this node to any DOM level 2 structure you want:
+
+   my $builder = XML::LibXML::SAX::Builder->new;
+   $node->to_sax_events ($builder);
+   my $dom = $builder->result;
+   print "Canonized: " . $dom->toStringC14N . "\n";
+
+=cut
+
+sub to_sax_events {
+   my ($self, $handler) = @_;
+   my $doc = { Parent => undef };
+   $handler->start_document ($doc);
+   $self->_to_sax_events ($handler);
+   $handler->end_document ($doc);
+}
+
+sub _to_sax_events {
+   my ($self, $handler) = @_;
+   $handler->start_element ({
+      NamespaceURI => $self->namespace,
+      Name         => $self->name,
+      Attributes   => {
+         map {
+            ($_ => { Name => $_, Value => $self->[ATTRS]->{$_} })
+         } keys %{$self->[ATTRS]}
+      }
+   });
+   for (@{$self->[NODES]}) {
+      if ($_->[0] == NTEXT) {
+         $handler->characters ($_->[1]);
+      } elsif ($_->[0] == NNODE) {
+         $_->[1]->_to_sax_events ($handler);
+      }
+   }
+   $handler->end_element ({
+      NamespaceURI => $self->namespace,
+      Name         => $self->name,
+   });
 }
 
 =head1 AUTHOR

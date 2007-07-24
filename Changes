@@ -1,6 +1,8 @@
 Revision history for Net-XMPP2
 
 0.03
+         - implemented SAX event generator for easier integration
+           with other XML libraries and generation of DOM.
          - added the possibility to completly restore the original
            XML data from a Net::XMPP2::Node.
          - implemented the component protocol to establish a component

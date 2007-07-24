@@ -161,7 +161,7 @@ sub feed {
 sub cb_start_tag {
    my ($self, $p, $el, %attrs) = @_;
    my $node = Net::XMPP2::Node->new ($p->namespace ($el), $el, \%attrs, $self);
-   $node->append_raw ($p->original_string);
+   $node->append_raw ($p->recognized_string);
    if (not @{$self->{nodestack}}) {
       $self->{stream_cb}->($node);
    }
@@ -176,7 +176,7 @@ sub cb_char_data {
    }
    my $node = $self->{nodestack}->[-1];
    $node->add_text ($str);
-   $node->append_raw ($p->original_string);
+   $node->append_raw ($p->recognized_string);
 }
 
 sub cb_end_tag {
@@ -193,7 +193,7 @@ sub cb_end_tag {
    }
 
    my $node = pop @{$self->{nodestack}};
-   $node->append_raw ($p->original_string);
+   $node->append_raw ($p->recognized_string);
 
    # > 1 because we don't want the stream tag to save all our children...
    if (@{$self->{nodestack}} > 1) {
