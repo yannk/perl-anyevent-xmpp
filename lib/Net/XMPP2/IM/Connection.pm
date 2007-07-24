@@ -328,12 +328,16 @@ C<$msg> is a L<Net::XMPP2::IM::Message> object.
 This event is emitted when a message stanza error was received.
 C<$error> will be an L<Net::XMPP2::Error::Message> error object.
 
-=item contact_request_subscribe => $roster, $contact, $rdoit
+=item contact_request_subscribe => $roster, $contact
 
 This event is generated when the C<$contact> wants to subscribe
-to your presence. C<$rdoit> is a reference to a scalar. Setting
-the referenced scalar to 1 will accept the subscription request and send
-a subscribed presence.
+to your presence.
+
+If any of the event callbacks for this event return a true value then the
+subscription request is accepted and a subscribed presence is sent.  If all
+callbacks return a false value the subscription request is cancelled.  If none
+of the callbacks return anything (all return an empty list) nothing of the
+former two things are done.
 
 If you want to accept or decline the request later, call
 C<send_subscribed> method of L<Net::XMPP2::IM::Contact> or
@@ -346,8 +350,9 @@ This event is generated when C<$contact> subscribed to your presence successfull
 =item contact_did_unsubscribe => $roster, $contact, $rdoit
 
 This event is generated when C<$contact> unsubscribes from your presence.
-Setting the in C<$rdoit> referenced scalar to 1 will also let you unsubscribe
-from his presence.
+
+Returning a true value from any event callback will also unsubscribe you from
+the presence of the contact.
 
 If you want to unsubscribe later from him call the C<send_unsubscribed> method
 of L<Net::XMPP2::IM::Contact> on C<$contact>.

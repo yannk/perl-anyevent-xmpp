@@ -71,11 +71,11 @@ sub update_presence {
    my $contact = $self->touch_jid ($jid);
 
    if ($type eq 'subscribe') {
-      my $doit;
-      $self->{connection}->event (contact_request_subscribe => $self, $contact, \$doit);
-      return $contact unless defined $doit;
+      my (@doit) =
+         $self->{connection}->event (contact_request_subscribe => $self, $contact);
+      return $contact unless @doit;
 
-      if ($doit) {
+      if (grep { $_ } @doit) {
          $contact->send_subscribed;
       } else {
          $contact->send_unsubscribed;
@@ -85,13 +85,10 @@ sub update_presence {
       $self->{connection}->event (contact_subscribed => $self, $contact);
 
    } elsif ($type eq 'unsubscribe') {
-      my $doit;
-      $self->{connection}->event (contact_did_unsubscribe => $self, $contact, \$doit);
-      return $contact unless defined $doit;
-
-      if ($doit) {
-         $contact->send_unsubscribe;
-      }
+      my (@doit) =
+         $self->{connection}->event (contact_did_unsubscribe => $self, $contact);
+      return $contact unless grep { $_ } @doit;
+      $contact->send_unsubscribe;
 
    } elsif ($type eq 'unsubscribed') {
       $self->{connection}->event (contact_unsubscribed => $self, $contact);
