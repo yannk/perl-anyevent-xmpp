@@ -115,7 +115,8 @@ sub is_answer_form {
 
 sub is_already_registered {
    my ($self) = @_;
-   exists $self->{legacy_form}->{registered}
+   exists $self->{legacy_form}
+   && exists $self->{legacy_form}->{registered}
 }
 
 sub init_new_form {
