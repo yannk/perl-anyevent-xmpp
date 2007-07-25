@@ -1,6 +1,6 @@
 Revision history for Net-XMPP2
 
-0.03
+0.03 Wed Jul 25 12:04:06 CEST 2007
          - fundamentally changed how events work, it's now less
            errorprone for the programmer (you don't have to return
            a true value now all the time and can call $self->unreg_me

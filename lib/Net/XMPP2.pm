@@ -8,11 +8,11 @@ Net::XMPP2 - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
@@ -128,6 +128,11 @@ return values do depends on the event now.
 The highlight of this release is the implementation of XEP-0114, the Jabber
 Component Protocol.
 
+It's possible to get a DOM tree from a L<Net::XMPP2::Node> now and also to
+receive the original parsed "XML" from it, which should enable full access to
+the "XML" data that was received. This also allows easy integration with other
+XML Perl modules.
+
 You can also set the initial priority of the presence in
 L<Net::XMPP2::IM::Connection> now.
 
@@ -166,12 +171,6 @@ todo items killed from the TODO file.
 
 There are still lots of items on the TODO list (see also the TODO file
 in the distribution of Net::XMPP2).
-
-Sadly this module still misses some decent DOM implementation. Do you know some
-decent DOM Level 2 implementation for Perl? (I considered switchting to
-L<XML::LibXML> but I somehow have more trust in the C<expat> XML parser, maybe
-someone wants to implement L<XML::LibXML> based parsing for me (and of course a
-DOM interface for L<Net::XMPP2::Node>?)
 
 =head1 Why (yet) another XMPP module?
 
