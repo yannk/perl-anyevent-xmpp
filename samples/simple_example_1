@@ -7,7 +7,7 @@ use Net::XMPP2::Client;
 
 my $j = AnyEvent->condvar;
 my $cl = Net::XMPP2::Client->new (debug => 1);
-$cl->add_account ('net_xmpp2@jabber.org/ねどだ', 'test');
+$cl->add_account ('net_xmpp2@jabber.org', 'test');
 $cl->reg_cb (
    session_ready => sub {
       my ($cl, $acc) = @_;
@@ -16,11 +16,6 @@ $cl->reg_cb (
          "Hi! I'm too stupid to adjust examples!" => 'elmex@jabber.org', undef, 'chat'
       );
       $cl->unreg_me
-   },
-   recv_stanza_xml => sub {
-      my ($cl, $acc, $node) = @_;
-      print 'STANZA:' . $node->as_string . "\n";
-      $cl->unreg_me;
    },
    disconnect => sub {
       my ($cl, $acc, $h, $p, $reas) = @_;
