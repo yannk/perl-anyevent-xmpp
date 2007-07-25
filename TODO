@@ -30,7 +30,6 @@
       - weight handling!
    - in band registration and un-registration!!!
       - finish in-band-registration XEP
-      - document events
    later:
       - make dns resolution async!
 
