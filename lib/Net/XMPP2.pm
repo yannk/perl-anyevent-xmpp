@@ -289,8 +289,8 @@ Please note that I'm currently (July 2007) the only developer on this project
 and I'm very busy with my studies in Computer Science in Summer 2007. If you
 want to ease my workload or want timely releases, please send me patches instead
 of bug reports or feature requests. I won't forget the reports or requests if
-you can't or didn't send patches, but it can take a long time until I get enough
-time to fix/implement them.
+you can't or didn't send patches, but I can't gurantee immediate response.
+But I will of course try to fix/implement them as soon as possible!
 
 Also try to be as precise as possible with bug reports, if you can't send a
 patch, it would be best if you find out which code doesn't work and tell me
