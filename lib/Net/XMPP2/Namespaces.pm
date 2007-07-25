@@ -24,6 +24,8 @@ our %NAMESPACES = (
    register_f  => 'http://jabber.org/features/iq-register',
    iqauth      => 'http://jabber.org/features/iq-auth',
    data_form   => 'jabber:x:data',
+   iq_oob      => 'jabber:iq:oob',
+   x_oob       => 'jabber:x:oob',
    muc         => 'http://jabber.org/protocol/muc',
    muc_user    => 'http://jabber.org/protocol/muc#user',
    muc_owner   => 'http://jabber.org/protocol/muc#owner',
@@ -39,7 +41,6 @@ Net::XMPP2::Namespaces - XMPP namespace collection and aliasing class
    use Net::XMPP2::Namespaces qw/xmpp_ns set_xmpp_ns_alias/;
 
    set_xmpp_ns_alias (stanzas => 'urn:ietf:params:xml:ns:xmpp-stanzas');
-   $node->find_all ($p, [xmpp_ns ('stanzas'), 'iq']);
 
 =head1 DESCRIPTION
 
@@ -65,6 +66,9 @@ which make handling of namepsaces a bit easier:
    client  => jabber:client
    roster  => jabber:iq:roster
    version => jabber:iq:version
+
+   iq_oob  => jabber:iq:oob
+   x_oob   => jabber:x:oob
 
    disco_info  => http://jabber.org/protocol/disco#info
    disco_items => http://jabber.org/protocol/disco#items

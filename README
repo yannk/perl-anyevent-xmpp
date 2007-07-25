@@ -99,6 +99,11 @@ RELEASE NOTES
         The highlight of this release is the implementation of XEP-0114, the
         Jabber Component Protocol.
 
+        It's possible to get a DOM tree from a Net::XMPP2::Node now and also
+        to receive the original parsed "XML" from it, which should enable
+        full access to the "XML" data that was received. This also allows
+        easy integration with other XML Perl modules.
+
         You can also set the initial priority of the presence in
         Net::XMPP2::IM::Connection now.
 
@@ -135,12 +140,6 @@ RELEASE NOTES
   TODO
     There are still lots of items on the TODO list (see also the TODO file
     in the distribution of Net::XMPP2).
-
-    Sadly this module still misses some decent DOM implementation. Do you
-    know some decent DOM Level 2 implementation for Perl? (I considered
-    switchting to XML::LibXML but I somehow have more trust in the "expat"
-    XML parser, maybe someone wants to implement XML::LibXML based parsing
-    for me (and of course a DOM interface for Net::XMPP2::Node?)
 
 Why (yet) another XMPP module?
     The main outstanding feature of this module in comparison to the other
@@ -248,7 +247,8 @@ BUGS
     2007. If you want to ease my workload or want timely releases, please
     send me patches instead of bug reports or feature requests. I won't
     forget the reports or requests if you can't or didn't send patches, but
-    it can take a long time until I get enough time to fix/implement them.
+    I can't gurantee immediate response. But I will of course try to
+    fix/implement them as soon as possible!
 
     Also try to be as precise as possible with bug reports, if you can't
     send a patch, it would be best if you find out which code doesn't work

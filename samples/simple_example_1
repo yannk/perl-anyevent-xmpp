@@ -15,7 +15,6 @@ $cl->reg_cb (
       $cl->send_message (
          "Hi! I'm too stupid to adjust examples!" => 'elmex@jabber.org', undef, 'chat'
       );
-      $cl->unreg_me
    },
    disconnect => sub {
       my ($cl, $acc, $h, $p, $reas) = @_;

@@ -33,6 +33,7 @@ lib/Net/XMPP2/Ext/Pubsub.pm
 lib/Net/XMPP2/Ext/Registration.pm
 lib/Net/XMPP2/Ext/Disco.pm
 lib/Net/XMPP2/Ext/RegisterForm.pm
+lib/Net/XMPP2/Ext/OOB.pm
 lib/Net/XMPP2/Namespaces.pm
 lib/Net/XMPP2/Util.pm
 lib/Net/XMPP2/Ext.pm

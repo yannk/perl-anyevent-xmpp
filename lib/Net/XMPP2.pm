@@ -116,6 +116,16 @@ Here are some notes to the releases (release of this version is at top):
 
 =over 4
 
+=item * 0.04
+
+After realizing that in band registration in L<Net::XMPP2::Ext> was already
+in in version 0.03 I had to implement it quick.
+
+While implementing in band registration I implemented XEP-0066: Out of Band Data.
+You can now receive and send URLs from and to others. See also L<Net::XMPP2::Ext::OOB>.
+
+I also fixed some bugs in L<Net::XMPP2::Ext::Disco>.
+
 =item * 0.03
 
 This release adds new events for attaching information to "XML" stanzas that
@@ -269,6 +279,12 @@ getting the admins attention :).
 =item B<samples/simple_component>
 
 This is a (basic) skeleton for a jabber component.
+
+=item B<samples/simple_oob_retriever>
+
+This is a simple out of band file transfer receiver bot.  It uses C<curl> to
+fetch the files and also has the sample functionality of sending a file url for
+someone who sends the bot a 'send <filename>' message.
 
 =back
 

@@ -218,16 +218,7 @@ This writes the current node out to the L<Net::XMPP2::Writer> object in C<$write
 
 sub write_on {
    my ($self, $w) = @_;
-
-   my ($ns, $tag) = ($self->namespace, $self->name);
-   $w->addPrefix ($ns => ''); # omg, xmpp is soo broken...
-   if ($self->nodes) {
-      $w->startTag ([$ns, $tag], %{$self->[ATTRS]});
-      $_->write_on ($w) for $self->nodes;
-      $w->endTag;
-   } else {
-      $w->emptyTag ([$ns, $tag], %{$self->[ATTRS]});
-   }
+   $w->raw ($self->as_string);
 }
 
 =back

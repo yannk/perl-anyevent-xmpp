@@ -1,5 +1,6 @@
 package Net::XMPP2::Ext::Disco;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Util qw/simxml/;
 use Net::XMPP2::Ext::Disco::Items;
 use Net::XMPP2::Ext::Disco::Info;
 use Net::XMPP2::Ext;
@@ -61,17 +62,18 @@ sub init {
    my ($self) = @_;
 
    $self->set_identity (client => console => 'Net::XMPP2');
+   $self->enable_feature (xmpp_ns ('disco_info'));
+   $self->enable_feature (xmpp_ns ('disco_items'));
 
    $self->reg_cb (
       iq_get_request_xml => sub {
-         my ($self, $con, $node, $handled_ref) = @_;
-         return 1 if $$handled_ref;
+         my ($self, $con, $node) = @_;
 
          if ($self->handle_disco_query ($con, $node)) {
-            $$handled_ref = 1;
+            return 1;
          }
 
-         1
+         ()
       }
    );
 }
@@ -164,14 +166,16 @@ sub write_identity {
 sub handle_disco_query {
    my ($self, $con, $node) = @_;
 
-   if ($node->find_all ([qw/disco_info query/])) {
+   if (my ($q) = $node->find_all ([qw/disco_info query/])) {
       $con->reply_iq_result (
          $node, sub {
             my ($w) = @_;
 
-            if ($node->attr ('node')) {
-               $w->addPrefix (xmpp_ns ('disco_info'), '');
-               $w->emptyTag ([xmpp_ns ('disco_info'), 'query']);
+            if ($q->attr ('node')) {
+               simxml ($w, defns => 'disco_info', node => {
+                 ns => 'disco_info', name => 'query',
+                 attrs => [ node => $q->attr ('node') ] 
+               });
 
             } else {
                $w->addPrefix (xmpp_ns ('disco_info'), '');
@@ -181,8 +185,9 @@ sub handle_disco_query {
                      $self->{iden}->{type},
                      $self->{iden}->{name},
                   );
-                  $self->write_feature ($w, 'http://jabber.org/protocol/disco#info');
-                  $self->write_feature ($w, 'http://jabber.org/protocol/disco#items');
+                  for (sort grep { $self->{feat}->{$_} } keys %{$self->{feat}}) {
+                     $self->write_feature ($w, $_);
+                  }
                $w->endTag;
             }
          },
@@ -191,18 +196,23 @@ sub handle_disco_query {
 
       return 1
 
-   } elsif ($node->find_all ([qw/disco_items query/])) {
+   } elsif (my ($q) = $node->find_all ([qw/disco_items query/])) {
       $con->reply_iq_result (
          $node, sub {
             my ($w) = @_;
 
-            if ($node->attr ('node')) {
-               $w->addPrefix (xmpp_ns ('disco_items'), '');
-               $w->emptyTag ([xmpp_ns ('disco_items'), 'query']);
+            if ($q->attr ('node')) {
+               simxml ($w, defns => 'disco_items', node => {
+                  ns    => 'disco_items',
+                  name  => 'query',
+                  attrs => [ node => $q->attr ('node') ]
+               });
 
             } else {
-               $w->addPrefix (xmpp_ns ('disco_items'), '');
-               $w->emptyTag ([xmpp_ns ('disco_items'), 'query']);
+               simxml ($w, defns => 'disco_items', node => {
+                  ns   => 'disco_items',
+                  name => 'query'
+               });
             }
          },
          to => $node->attr ('from')

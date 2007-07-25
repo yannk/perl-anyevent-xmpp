@@ -501,13 +501,13 @@ sub handle_iq {
       }
 
    } else {
-      my $handled = 0;
-      $self->event ("iq_${type}_request_xml" => $node, \$handled);
+      my (@r) = $self->event ("iq_${type}_request_xml" => $node);
+      @r = grep { $_ } @r;
 
       my @from;
       push @from, (to => $node->attr ('from')) if $node->attr ('from');
 
-      unless ($handled) {
+      unless (@r) {
          $self->reply_iq_error ($node, undef, 'service-unavailable', @from);
       }
    }
@@ -859,19 +859,17 @@ L<Net::XMPP2::Node> object that represents the <message> tag.
 This event is emitted when a iq stanza arrives. C<$node> is the
 L<Net::XMPP2::Node> object that represents the <iq> tag.
 
-=item iq_set_request_xml => $node, $handled_ref
+=item iq_set_request_xml => $node
 
-=item iq_get_request_xml => $node, $handled_ref
+=item iq_get_request_xml => $node
 
 These events are sent when an iq request stanza of type 'get' or 'set' is received.
 C<$type> will either be 'get' or 'set' and C<$node> will be the L<Net::XMPP2::Node>
 object of the iq tag.
 
-If C<$$handled_ref> is true an event handler should not handle this message anymore.
-
-If one of the event handlers handled this message the scalar pointed at by
-the reference in C<$handled_ref> should be set to 1 true value. If C<$$handled_ref>
-is still false after all event handlers were executed an error iq will be generated.
+If one of the event callbacks returns a true value the IQ request will be
+considered as handled.
+If no callback returned a true value or no value at all an error iq will be generated.
 
 =item iq_result_cb_exception => $exception
 

@@ -130,7 +130,8 @@ sub new {
 sub init {
    my ($self) = @_;
    $self->{write_buf} = "";
-   $self->{writer} = XML::Writer->new (OUTPUT => \$self->{write_buf}, NAMESPACES => 1);
+   $self->{writer} =
+      XML::Writer->new (OUTPUT => \$self->{write_buf}, NAMESPACES => 1, UNSAFE => 1);
 }
 
 =item B<flush ()>
@@ -283,7 +284,8 @@ This method sends an IQ stanza of type C<$type> (to be compliant
 only use: 'get', 'set', 'result' and 'error').
 
 If C<$create_cb> is a code reference it will be called with an XML::Writer
-instance as first argument, which must be used to fill the IQ stanza.  If
+instance as first argument, which must be used to fill the IQ stanza. The
+XML::Writer is in UNSAFE mode, so you can safely use C<raw()> to write out XML.
 
 C<$create_cb> is a hash reference the hash will be used as key=>value arguments
 for the C<simxml> function defined in L<Net::XMPP2::Util>. C<simxml> will then

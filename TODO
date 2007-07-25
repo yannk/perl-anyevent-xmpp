@@ -47,6 +47,8 @@
 
 - Implement XEP-0190: Best Practice for Closing Idle Streams
 
+- Maybe implemente XEP-0146: Remote Controlling Clients
+
 - keep an eye on:
    - TLS: implemented, just do some extensive testing WRT blocking,
           i don't trust the current way the watchers are handled,

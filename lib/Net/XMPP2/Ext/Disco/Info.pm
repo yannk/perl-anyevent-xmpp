@@ -3,7 +3,7 @@ use Net::XMPP2::Namespaces qw/xmpp_ns/;
 
 =head1 NAME
 
-Net::XMPP2::Ext::Disco::Info - Service discovery items
+Net::XMPP2::Ext::Disco::Info - Service discovery info
 
 =head1 SYNOPSIS
 

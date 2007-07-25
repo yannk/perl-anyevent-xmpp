@@ -120,6 +120,12 @@ sub send_registration_request {
 
 =item B<submit_form ($con, $form, $cb)>
 
+=cut
+
+sub submit_form {
+   my ($self, $con, $form, $cb) = @_;
+}
+
 =back
 
 =head1 AUTHOR

@@ -3,6 +3,7 @@ use strict;
 use Net::XMPP2::Util;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Ext::DataForm;
+use Net::XMPP2::Ext::OOB;
 
 =head1 NAME
 
@@ -64,7 +65,7 @@ sub new {
    $self
 }
 
-sub get_old_form {
+sub _get_legacy_form {
    my ($self, $node) = @_;
 
    my $form = {};
@@ -83,6 +84,7 @@ sub try_fillout_registration {
 
    my $form;
    my $nform;
+
    if (my $df = $self->get_data_form) {
       my $af = Net::XMPP2::Ext::DataForm->new;
       $af->make_answer_form ($df);
@@ -100,16 +102,10 @@ sub try_fillout_registration {
 
    return
       Net::XMPP2::Ext::RegisterForm->new (
-         type => $self->{type},
-         form     => $nform,
-         old_form => $form,
-         answered => 1
+         data_form   => $nform,
+         legacy_form => $form,
+         answered    => 1
       );
-}
-
-sub type {
-   my ($self) = @_;
-   $self->{type}
 }
 
 sub is_answer_form {
@@ -119,7 +115,7 @@ sub is_answer_form {
 
 sub is_already_registered {
    my ($self) = @_;
-   exists $self->{old_form}->{registered}
+   exists $self->{legacy_form}->{registered}
 }
 
 sub init_new_form {
@@ -130,23 +126,51 @@ sub init_new_form {
    if (@x) {
       my $df = Net::XMPP2::Ext::DataForm->new;
       $df->from_node (@x);
-      $self->{form} = $df;
+      $self->{data_form} = $df;
 
    } else {
       die "TODO!";
    }
 }
 
-sub get_standard_form_fields {
+
+=item B<get_legacy_form_fields>
+
+This method returns a hash with....
+as specified in the in band registration XEP.
+
+=cut
+
+sub get_legacy_form_fields {
    my ($self) = @_;
-   $self->{old_form};
+   $self->{legacy_form}
 }
+
+=item B<get_data_form>
+
+This method returns the L<Net::XMPP2::Ext::DataForm> that came
+with the registration response. If no data form was provided by the
+server this method returns undef.
+
+=cut
 
 sub get_data_form {
    my ($self) = @_;
-   if ($self->{type} eq 'form') {
-      return $self->{form};
-   }
+   $self->{data_form}
+}
+
+
+=item B<get_oob>
+
+This method returns a hash like the one returned from
+the function C<url_from_node> in L<Net::XMPP2::Ext::OOB>.
+It contains the out of band data for this registration form.
+
+=cut
+
+sub get_oob {
+   my ($self) = @_;
+   $self->{oob}
 }
 
 sub init_from_node {
@@ -154,12 +178,13 @@ sub init_from_node {
 
    if ($node->find_all ([qw/register query/], [qw/data_form x/])) {
       $self->init_new_form ($node);
-      $self->{type} = 'form';
-   } else {
-      $self->{type} = 'standard';
    }
-   my $form = $self->get_old_form ($node);
-   $self->{old_form} = $form;
+   if (my ($xoob) = $node->find_all ([qw/register query/], [qw/oob x/])) {
+      $self->{oob} = Net::XMPP2::Ext::OOB->url_from_node ($xoob);
+   }
+
+   my $form = $self->_get_legacy_form ($node);
+   $self->{legacy_form} = $form;
 }
 
 =head1 AUTHOR
