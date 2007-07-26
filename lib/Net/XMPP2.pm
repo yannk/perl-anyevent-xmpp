@@ -8,11 +8,11 @@ Net::XMPP2 - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
@@ -119,7 +119,7 @@ Here are some notes to the releases (release of this version is at top):
 =item * 0.04
 
 After realizing that in band registration in L<Net::XMPP2::Ext> was already
-in in version 0.03 I had to implement it quick.
+in in version 0.03 I had to finally implement it.
 
 While implementing in band registration I implemented XEP-0066: Out of Band Data.
 You can now receive and send URLs from and to others. See also L<Net::XMPP2::Ext::OOB>.
