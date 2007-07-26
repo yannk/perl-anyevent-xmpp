@@ -59,6 +59,12 @@ whatever you can imagine (even gateways).
 See documentation of L<Net::XMPP2::Component> and the example
 C<samples/simple_component>.
 
+=item XEP-0066 - Out of Band Data
+
+This extension allows to receive and send out of band data URLs
+and provides helperfunctions to handle jabber:x:oob data.
+See also L<Net::XMPP2::Ext::OOB>.
+
 =back
 
 =head1 AUTHOR

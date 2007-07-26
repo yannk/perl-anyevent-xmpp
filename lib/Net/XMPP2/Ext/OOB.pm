@@ -11,6 +11,34 @@ Net::XMPP2::Ext::OOB - XEP-0066 Out of Band Data
 
 =head1 SYNOPSIS
 
+
+   my $con = Net::XMPP2::Connection->new (...);
+   $con->add_extension (my $disco = Net::XMPP2::Ext::Disco->new);
+   $con->add_extension (my $oob = Net::XMPP2::Ext::OOB->new);
+   $disco->enable_feature ($oob->disco_feature);
+
+   $oob->reg_cb (oob_recv => sub {
+      my ($oob, $con, $node, $url) = @_;
+
+      if (got ($url)) {
+         $oob->reply_success ($con, $node);
+      } else {
+         $oob->reply_failure ($con, $node, 'not-found');
+      }
+   });
+
+   $oob->send_url (
+      $con, 'someonewho@wants.an.url.com', "http://nakedgirls.com/marie_021.jpg",
+      "Yaww!!! Hot like SUN!",
+      sub {
+         my ($error) = @_;
+         if ($error) { # then error
+         } else { # everything fine
+         }
+      }
+   )
+
+
 =head1 DESCRIPTION
 
 This module provides a helper abstraction for handling out of band
