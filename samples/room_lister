@@ -31,7 +31,7 @@ if ($ARGV[0] eq 'stat') {
 my $cl = Net::XMPP2::Client->new ();
 my $d  = Net::XMPP2::Ext::Disco->new;
 $cl->add_extension ($d);
-$cl->add_account ('net_xmpp2@jabber.org/test', 'test');
+$cl->add_account ('net_xmpp2@jabber.org/test2', 'test');
 
 sub disco_info {
    my ($con, $jid, $cb) = @_;
@@ -102,8 +102,6 @@ sub disco_conference {
       disco_items ($con, $jid, sub {
          my ($items) = @_;
          for my $i ($items->items) {
-            next if $data->{$jid}->{$i->{jid}};
-
             fetch_room_occupants ($con, $i->{jid}, sub {
                my ($room_jid, $cnt) = @_;
                unless (defined $cnt) {
@@ -165,25 +163,17 @@ for my $SERVER (keys %{$conferences}) {
    for my $cj (keys %$conf) {
       disco_conference ($con, $cj, sub {
          my ($cjid, $rjid, $rname, $rocc) = @_;
-         $data->{$cjid}->{$rjid} = [$cjid, $rjid, $rname, $rocc];
+         my $prev = $data->{$cjid}->{$rjid};
+         if ($prev) {
+            if ($prev->[3] < $rocc) {
+               $data->{$cjid}->{$rjid} = [$cjid, $rjid, $rname, $rocc];
+            }
+         } else {
+            $data->{$cjid}->{$rjid} = [$cjid, $rjid, $rname, $rocc];
+         }
          printf "\t*** %-30s: %-50s: %3d\n",
              $cjid, $rjid, $rocc;
       });
-
-#     disco_items ($con, $cj, sub {
-#        my ($i) = @_;
-#        for ($i->items) {
-#           disco_info ($con, $_->{jid}, sub {
-#              my ($i) = @_;
-#              print "\t\tdisco info from room ".$i->jid.":".(join ", ", map { "$_->{category}/$_->{type}" } $i->identities)."\n";
-#              if (grep { $_->{category} eq 'conference'
-#                         && $_->{type} eq 'text' } $i->identities ())
-#              {
-#              # XXX
-#              }
-#           });
-#        }
-#     });
    }
 }
 
