@@ -102,14 +102,15 @@ sub disco_conference {
       disco_items ($con, $jid, sub {
          my ($items) = @_;
          for my $i ($items->items) {
+            my $room_name = $i->{name};
             fetch_room_occupants ($con, $i->{jid}, sub {
                my ($room_jid, $cnt) = @_;
                unless (defined $cnt) {
-                  if ($i->{name} =~ /\((\d+)\)\s*$/) {
+                  if ($room_name =~ /\((\d+)\)\s*$/) {
                      $cnt = $1;
                   }
                }
-               $cb->($jid, $i->{jid}, $i->{name}, $cnt);
+               $cb->($jid, $room_jid, $room_name, $cnt);
             });
          }
          EVQ::finreq ($ID);
