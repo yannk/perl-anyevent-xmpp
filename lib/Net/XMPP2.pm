@@ -286,6 +286,11 @@ This is a simple out of band file transfer receiver bot.  It uses C<curl> to
 fetch the files and also has the sample functionality of sending a file url for
 someone who sends the bot a 'send <filename>' message.
 
+=item B<samples/simple_register_example>
+
+This is a example script which allows you to register, unregister and change
+your password for accounts. Execute it without arguments for more details.
+
 =back
 
 For others, which the author might forgot or didn't want to
