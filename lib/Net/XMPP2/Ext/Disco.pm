@@ -17,7 +17,7 @@ Net::XMPP2::Ext::Disco - Service discovery manager class for XEP-0030
 
    my $con = Net::XMPP2::IM::Connection->new (...);
    $con->add_extension (my $disco = Net::XMPP2::Ext::Disco->new);
-   $disco->request_items ('romeo@montague.net',
+   $disco->request_items ($con, 'romeo@montague.net', undef,
       sub {
          my ($disco, $items, $error) = @_;
          if ($error) { print "ERROR".$error->string."\n" }
@@ -292,7 +292,7 @@ the disco handle, an L<Net::XMPP2::Ext::Disco::Info> object (or undef)
 and an L<Net::XMPP2::Error::IQ> object when an error occured and no items
 were received.
 
-   $disco->request_info ('a@b.com', undef, sub {
+   $disco->request_info ($con, 'a@b.com', undef, sub {
       my ($disco, $info, $error) = @_;
       die $error->string if $error;
 
