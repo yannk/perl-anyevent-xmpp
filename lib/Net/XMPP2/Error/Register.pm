@@ -24,8 +24,9 @@ XEP-0077 for now.
 
 Returns the state of registration, one of:
 
-   register-form-request
-   register-form-submitted
+   register
+   unregister
+   submit
 
 =cut
 

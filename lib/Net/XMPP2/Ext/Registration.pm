@@ -44,8 +44,9 @@ Net::XMPP2::Ext::Registration - Handles all tasks of in band registration
 
 =head1 DESCRIPTION
 
-This module handles all tasks of in band registration that are
-possible and specified by XEP-0077. (NOT IMPLEMENTED YET!)
+This module handles all tasks of in band registration that are possible and
+specified by XEP-0077. It's mainly a helper class that eases some tasks such
+as submitting and retrieving a form.
 
 =cut
 
@@ -56,9 +57,6 @@ possible and specified by XEP-0077. (NOT IMPLEMENTED YET!)
 =item B<new (%args)>
 
 This is the constructor for a registration object.
-C<%args> is a hash which can have the following keys:
-
-NOTE: the C<connection> argument is required.
 
 =over 4
 
@@ -82,9 +80,10 @@ sub new {
 
 sub init {
    my ($self) = @_;
+   #...
 }
 
-=item B<send_registration_request ($con, $cb)>
+=item B<send_registration_request ($cb)>
 
 This method sends a register form request.
 C<$cb> will be called when either the form arrived or
@@ -97,10 +96,18 @@ If an error occured the second argument will be undef
 and the third argument will be a L<Net::XMPP2::Error::Register>
 object.
 
+For hints how L<Net::XMPP2::Ext::RegisterForm> should be filled
+out look in XEP-0077. Either you have legacy form fields, out of band
+data or a data form.
+
+See also L<try_fillout_registration> in L<Net::XMPP2::Ext::RegisterForm>.
+
 =cut
 
 sub send_registration_request {
-   my ($self, $con, $cb) = @_;
+   my ($self, $cb) = @_;
+
+   my $con = $self->{connection};
 
    $con->send_iq (get => {
       defns => 'register',
@@ -112,18 +119,121 @@ sub send_registration_request {
       if ($node) {
          $form = Net::XMPP2::Ext::RegisterForm->new;
          $form->init_from_node ($node);
+      } else {
+         $error =
+            Net::XMPP2::Error::Register->new (
+               node => $error->xml_node, register_state => 'register'
+            );
       }
 
-      $cb->($self, $con, $form, $error);
+      $cb->($self, $form, $error);
    });
 }
 
-=item B<submit_form ($con, $form, $cb)>
+=item B<send_unregistration_request>
+
+=cut
+
+sub _error_or_form_cb {
+   my ($self, $error, $cb) = @_;
+
+   my $error =
+      Net::XMPP2::Error::Register->new (
+         node => $e->xml_node, register_state => 'submit'
+      );
+
+   if ($e->find_all ([qw/register query/], [qw/data_form x/])) {
+      my $form = Net::XMPP2::Ext::RegisterForm->new;
+      $form->init_from_node ($e);
+
+      $cb->($self, 0, $error, $form)
+   } else {
+      $cb->($self, 0, $error)
+   }
+}
+
+sub send_unregistration_request {
+   my ($self, $cb) = @_;
+
+   my $con = $self->{connection};
+
+   $con->send_iq (set => {
+      defns => 'register',
+      node => { ns => 'register', name => 'query', childs => [
+         { ns => 'register', name => 'remove' }
+      ]}
+   }, sub {
+      my ($node, $error) = @_;
+      if ($node) {
+         $cb->($self, 1)
+      } else {
+         $self->_error_or_form_cb ($error, $cb);
+      }
+   });
+}
+
+sub send_password_change_request {
+   my ($self, $username, $password, $cb) = @_;
+
+   my $con = $self->{connection};
+
+   $con->send_iq (set => {
+      defns => 'register',
+      node => { ns => 'register', name => 'query', childs => [
+         { ns => 'register', name => 'username', childs => [ $username ] },
+         { ns => 'register', name => 'password', childs => [ $password ] },
+      ]}
+   }, sub {
+      my ($node, $error) = @_;
+      if ($node) {
+         $cb->($self, 1)
+      } else {
+         $self->_error_or_form_cb ($error, $cb);
+      }
+   });
+}
+
+=item B<submit_form ($form, $cb)>
+
+This method submits the C<$form> which should be of
+type L<Net::XMPP2::Ext::RegisterForm> and should be an answer
+form.
+
+C<$con> is the connection on which to send this form.
+
+C<$cb> is the callback that will be called once the form has been submitted and
+either an error or success was received.  The first argument to the callback
+will be the L<Net::XMPP2::Ext::Registration> object, the second will be a
+boolean value that is true when the form was successfully transmitted and
+everything is fine.  If the second argument is false then the third argument is
+a L<Net::XMPP2::Error::Register> object.  If the error contained a data form
+which is required to successfully make the request then the fourth argument
+will be a L<Net::XMPP2::Ext::RegisterForm> which you should fill out and send
+again with C<submit_form>.
+
+For the semantics of such an error form see also XEP-0077.
 
 =cut
 
 sub submit_form {
-   my ($self, $con, $form, $cb) = @_;
+   my ($self, $form, $cb) = @_;
+
+   my $con = $self->{connection};
+
+   $con->send_iq (set => {
+      defns => 'register',
+      node => { ns => 'register', name => 'quert', childs => [
+         $form->answer_form_to_simxml
+      ]}
+   }, sub {
+      my ($n, $e) = @_;
+
+      if ($n) {
+         $cb->($self, 1)
+      } else {
+         $self->_error_or_form_cb ($e, $cb);
+      }
+   });
 }
 
 =back
