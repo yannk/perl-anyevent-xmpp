@@ -81,8 +81,6 @@ sub init {
 =item B<set_identity ($category, $type, $name)>
 
 This sets the identity of the top info node.
-The default is: C<$category = "client">, C<$type = "console">
-and C<$name = "Net::XMPP2">.
 
 C<$name> is optional and can be undef.
 
@@ -90,7 +88,7 @@ For a list of valid identites look at:
 
    http://www.xmpp.org/registrar/disco-categories.html
 
-Valid identity types for C<$category = "client"> may be:
+Valid identity C<$type>s for C<$category = "client"> may be:
 
    bot
    console
