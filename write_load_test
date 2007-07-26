@@ -1,1 +1,1 @@
-find -type f -print | perl -ne 's/^\.\///; s/\.pm$//; s/\//::/g; print $_'
+find lib -type f -print | perl -ne 's/^lib\///; s/\.pm$//; s/\//::/g; print $_'
