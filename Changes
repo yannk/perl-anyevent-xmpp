@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.04
+         - actually added event send_stanza_data after documenting it
          - added samples/simple_register_example
          - fixed some bugs in Net::XMPP2::Ext::Disco
          - now really added support for in band registration (XEP-0077)
