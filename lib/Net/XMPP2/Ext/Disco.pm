@@ -166,7 +166,8 @@ sub write_identity {
 sub handle_disco_query {
    my ($self, $con, $node) = @_;
 
-   if (my ($q) = $node->find_all ([qw/disco_info query/])) {
+   my $q;
+   if (($q) = $node->find_all ([qw/disco_info query/])) {
       $con->reply_iq_result (
          $node, sub {
             my ($w) = @_;
@@ -196,7 +197,7 @@ sub handle_disco_query {
 
       return 1
 
-   } elsif (my ($q) = $node->find_all ([qw/disco_items query/])) {
+   } elsif (($q) = $node->find_all ([qw/disco_items query/])) {
       $con->reply_iq_result (
          $node, sub {
             my ($w) = @_;

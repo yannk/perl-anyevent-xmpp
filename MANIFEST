@@ -8,7 +8,6 @@ t/boilerplate.t
 t/pod.t
 samples/devcl/DevCL/Browser.pm
 samples/devcl/DevCL/TreeView.pm
-samples/devcl/DevCL/Roster.pm
 samples/devcl/DevCL/Main.pm
 samples/devcl/devcl
 samples/EVQ.pm
@@ -20,6 +19,9 @@ samples/test_client
 samples/room_lister
 samples/find_servers
 samples/disco_version
+samples/simple_oob_retriever
+samples/simple_register_example
+samples/simple_component
 lib/Net/XMPP2/IM/Contact.pm
 lib/Net/XMPP2/IM/Roster.pm
 lib/Net/XMPP2/IM/Connection.pm

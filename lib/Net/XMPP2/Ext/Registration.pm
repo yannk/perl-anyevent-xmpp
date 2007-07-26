@@ -137,7 +137,7 @@ sub send_registration_request {
 sub _error_or_form_cb {
    my ($self, $e, $cb) = @_;
 
-   my $e = $e->xml_node;
+   $e = $e->xml_node;
 
    my $error =
       Net::XMPP2::Error::Register->new (

@@ -221,7 +221,6 @@ sub write_on {
    $w->raw ($self->as_string);
 }
 
-=back
 
 =item B<as_string ()>
 
@@ -305,6 +304,8 @@ sub _to_sax_events {
       Name         => $self->name,
    });
 }
+
+=back
 
 =head1 AUTHOR
 

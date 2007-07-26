@@ -404,7 +404,6 @@ sub _trans_create_cb {
 
 sub _fetch_cb_additions {
    my ($self, $key, $create_cb, @args) = @_;
-   my @add_cbs;
    my (@add_cbs) = $self->{$key}->(@args);
    @add_cbs = map { _trans_create_cb ($_) } @add_cbs;
 

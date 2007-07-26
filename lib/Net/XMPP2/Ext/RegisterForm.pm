@@ -277,6 +277,8 @@ sub answer_form_to_simxml {
    }
 }
 
+=back
+
 =head1 AUTHOR
 
 Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
