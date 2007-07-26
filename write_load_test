@@ -1,0 +1,1 @@
+find -type f -print | perl -ne 's/^\.\///; s/\.pm$//; s/\//::/g; print $_'
