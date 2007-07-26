@@ -119,7 +119,7 @@ Here are some notes to the releases (release of this version is at top):
 =item * 0.04
 
 After realizing that in band registration in L<Net::XMPP2::Ext> was already
-in in version 0.03 I had to finally implement it.
+in in version 0.03 I finally had to implement it.
 
 While implementing in band registration I implemented XEP-0066: Out of Band Data.
 You can now receive and send URLs from and to others. See also L<Net::XMPP2::Ext::OOB>.
