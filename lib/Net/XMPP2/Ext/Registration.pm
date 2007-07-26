@@ -135,11 +135,13 @@ sub send_registration_request {
 =cut
 
 sub _error_or_form_cb {
-   my ($self, $error, $cb) = @_;
+   my ($self, $e, $cb) = @_;
+
+   my $e = $e->xml_node;
 
    my $error =
       Net::XMPP2::Error::Register->new (
-         node => $e->xml_node, register_state => 'submit'
+         node => $e, register_state => 'submit'
       );
 
    if ($e->find_all ([qw/register query/], [qw/data_form x/])) {

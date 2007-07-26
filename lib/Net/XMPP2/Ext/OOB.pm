@@ -51,15 +51,15 @@ If nothing was found this method returns nothing (undef).
 
 sub url_from_node {
    my ($node) = @_;
-   my ($url)  = $node->find_all ([qw/oob url/]);
-   my ($desc) = $node->find_all ([qw/oob desc/]);
+   my ($url)  = $node->find_all ([qw/x_oob url/]);
+   my ($desc) = $node->find_all ([qw/x_oob desc/]);
    my ($url2)  = $node->find_all ([qw/iq_oob url/]);
    my ($desc2) = $node->find_all ([qw/iq_oob desc/]);
    $url  ||= $url2;
    $desc ||= $desc2;
 
    defined $url
-      ?  { url => $url->text, desc => $desc->text }
+      ?  { url => $url->text, desc => ($desc ? $desc->text : undef) }
       : ()
 }
 

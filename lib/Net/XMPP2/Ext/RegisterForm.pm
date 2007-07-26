@@ -123,7 +123,6 @@ sub try_fillout_registration {
       $nform = $af;
 
    } else {
-      my $frm = $self->get_standard_form_fields;
       $form = {
          username => $username,
          password => $password
@@ -221,7 +220,11 @@ sub _get_legacy_form {
 
    my $form = {};
 
-   for ($node->nodes) {
+   my ($qnode) = $node->find_all ([qw/register query/]);
+
+   return $form unless $qnode;
+
+   for ($qnode->nodes) {
       if ($_->eq_ns ('register')) {
          $form->{$_->name} = $_->text;
       }
@@ -236,12 +239,10 @@ sub init_from_node {
    if (my (@form) = $node->find_all ([qw/register query/], [qw/data_form x/])) {
       $self->init_new_form (@form);
    }
-   if (my ($xoob) = $node->find_all ([qw/register query/], [qw/oob x/])) {
-      $self->{oob} = Net::XMPP2::Ext::OOB->url_from_node ($xoob);
+   if (my ($xoob) = $node->find_all ([qw/register query/], [qw/x_oob x/])) {
+      $self->{oob} = Net::XMPP2::Ext::OOB::url_from_node ($xoob);
    }
-
-   my $form = $self->_get_legacy_form ($node);
-   $self->{legacy_form} = $form;
+   $self->{legacy_form} = $self->_get_legacy_form ($node);
 }
 
 =item B<answer_form_to_simxml>
@@ -254,7 +255,9 @@ sub answer_form_to_simxml {
    my ($self) = @_;
 
    if ($self->{data_form}) {
-      return $self->{data_form}->to_simxml;
+      my $sxl = $self->{data_form}->to_simxml;
+      $sxl->{dns} = $sxl->{ns};
+      return $sxl;
 
    } else {
       my @childs;
@@ -263,8 +266,9 @@ sub answer_form_to_simxml {
 
       for (keys %$lf) {
          push @childs, {
-            ns => 'register',
-            name => $_,
+            ns     => 'register',
+            dns    => 'register',
+            name   => $_,
             childs => [ $lf->{$_} ]
          }
       }
