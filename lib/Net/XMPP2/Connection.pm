@@ -296,6 +296,7 @@ sub debug_wrote_data {
 
 sub write_data {
    my ($self, $data) = @_;
+   $self->event (send_stanza_data => $data);
    $self->SUPER::write_data ($data);
 }
 
