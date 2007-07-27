@@ -240,7 +240,7 @@ sub submit_form {
 
    $con->send_iq (set => {
       defns => 'register',
-      node => { ns => 'register', name => 'quert', childs => [
+      node => { ns => 'register', name => 'query', childs => [
          $form->answer_form_to_simxml
       ]}
    }, sub {
