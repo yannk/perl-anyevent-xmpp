@@ -7,6 +7,8 @@ t/00-load.t
 t/boilerplate.t
 t/pod.t
 t/z_00_register.t
+t/z_01_message.t
+t/z_02_disco.t
 t/z_20_unregister.t
 samples/devcl/DevCL/Browser.pm
 samples/devcl/DevCL/TreeView.pm

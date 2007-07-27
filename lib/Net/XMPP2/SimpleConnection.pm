@@ -1,5 +1,6 @@
 package Net::XMPP2::SimpleConnection;
 use strict;
+no warnings;
 
 use IO::Socket::INET;
 use Errno;

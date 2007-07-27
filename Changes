@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.05
+         - fixed destructor problem in disco
          - disco extension now supports multiple identities
          - added some unit tests!!!11
          - improved error reporting a bit of internal exceptions

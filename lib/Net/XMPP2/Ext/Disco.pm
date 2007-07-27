@@ -65,7 +65,7 @@ sub init {
    $self->enable_feature (xmpp_ns ('disco_info'));
    $self->enable_feature (xmpp_ns ('disco_items'));
 
-   $self->reg_cb (
+   $self->{cb_id} = $self->reg_cb (
       iq_get_request_xml => sub {
          my ($self, $con, $node) = @_;
 
@@ -237,7 +237,7 @@ sub handle_disco_query {
 
 sub DESTROY {
    my ($self) = @_;
-   $self->{connection}->unreg_cb ($self->{cb_id})
+   $self->unreg_cb ($self->{cb_id})
 }
 
 

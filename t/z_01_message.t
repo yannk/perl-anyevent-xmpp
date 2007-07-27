@@ -1,6 +1,7 @@
 #!perl
 
 use strict;
+no warnings;
 use Test::More;
 use Net::XMPP2::TestClient;
 use Net::XMPP2::IM::Message;
@@ -34,14 +35,16 @@ $C->reg_cb (
    message => sub {
       my ($C, $acc, $msg) = @_;
 
-      is ($acc->bare_jid,        $dest,         "arriving destination");
-      is (bare_jid ($msg->from), $src,          "message source");
-      is (bare_jid ($msg->to),   $dest,         "message destination");
-      is ($msg->type,            'headline',    "message type");
-      is ($msg->any_subject,     'Just a test', "message subject");
-      is ($msg->any_body,        'test body',   "message body");
+      if (bare_jid ($msg->from) eq $src) {
+         is ($acc->bare_jid,        $dest,         "arriving destination");
+         is (bare_jid ($msg->from), $src,          "message source");
+         is (bare_jid ($msg->to),   $dest,         "message destination");
+         is ($msg->type,            'headline',    "message type");
+         is ($msg->any_subject,     'Just a test', "message subject");
+         is ($msg->any_body,        'test body',   "message body");
 
-      $cl->finish;
+         $cl->finish;
+      }
    }
 );
 

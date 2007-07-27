@@ -11,7 +11,6 @@ my $cl =
    Net::XMPP2::TestClient->new_or_exit (
       tests        => 2,
       two_accounts => 1,
-      debug        => 0,
       finish_count => 2
    );
 my $C = $cl->client;

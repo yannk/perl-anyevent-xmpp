@@ -9,9 +9,8 @@ use Net::XMPP2::Ext::Registration;
 
 my $cl =
    Net::XMPP2::TestClient->new_or_exit (
-      tests        => 2,
+      tests        => 3,
       two_accounts => 1,
- #     debug        => 1,
       finish_count => 2
    );
 my $C = $cl->client;
@@ -19,6 +18,7 @@ my $C = $cl->client;
 my $already_reg = 0;
 my $reg_error   = "";
 my $registered  = 0;
+my $ready_session = 0;
 
 $C->reg_cb (
    stream_pre_authentication => sub {
@@ -33,7 +33,6 @@ $C->reg_cb (
 
          if ($error) {
             $reg_error = $error->string;
-            $cl->finish;
 
          } else {
             my $af = $form->try_fillout_registration ($username, $cl->{password});
@@ -43,17 +42,21 @@ $C->reg_cb (
 
                if ($ok) {
                   $registered = 1;
+                  $acc->connection->authenticate;
                } else {
                   $reg_error = $error->string;
                }
-
-               $cl->finish;
             });
          }
       });
 
       0
    },
+   session_ready => sub {
+      my ($C, $acc) = @_;
+      $ready_session++;
+      $cl->finish
+   }
 );
 
 $cl->wait;
@@ -64,6 +67,7 @@ SKIP: {
 
    ok ($registered, "registered account");
    is ($reg_error, '', 'no registration error');
+   is ($ready_session, 2, 'sessions ready');
    if ($reg_error) {
       diag (
          "Error in registration: " 
