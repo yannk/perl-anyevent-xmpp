@@ -1,23 +1,19 @@
-- see also: grep 'XXX\|FIXME\|TODO' * -r
-  - lib/Net/XMPP2/Writer.pm: # XXX: removed authname, because it
-                                    ensures maximum connectivitiy
+- Implement XEP-0045: Multi-User Chat
+   - think about: make seperate MUC handler class
 
+- make more tests
+   - oob
+   - data forms
+   - jabber component
 
+- put some serious stuff in the synopsises
 - test enable_feature by time
-
 - look at attribute namespace preservation! (if they got
   prefixes, how to parse this with expat?
   see also http://www.w3.org/TR/REC-xml-names/#scoping-defaulting )
-
-- put some serious stuff in the synopsises
-
-- implement iq-auth!!!!
-
 - fix problem that xml::writer writes after <stream/> ahs been written
   - reproduce by conflicting resources!
-
 - test the xml parse error object somehow!
-
 - add context field to IQ error for all the places origin from IQ errors
   (bind_error, session_error, ...)
 
@@ -32,8 +28,6 @@
       the changed credentials)
    - SRV record lookup
       - weight handling!
-   - in band registration and un-registration!!!
-      - finish in-band-registration XEP
    later:
       - make dns resolution async!
 
@@ -44,9 +38,6 @@
    - util functions to convert them to unix timestamps
 
 - Implement XEP-0115: Entity Capabilities
-
-- Implement XEP-0045: Multi-User Chat
-   - think about: make seperate MUC handler class
 
 - Implement XEP-0190: Best Practice for Closing Idle Streams
 
@@ -60,5 +51,7 @@
 - Implement XEP-0030: Service Discovery
    - see also: XEP-0128: Service Discovery Extensions
    - missing feature: building up a item tree for discovery
-   - defining multiple 'personalities' in the Disco module
-     for eg. handling discos to components and such.
+
+- see also: grep 'XXX\|FIXME\|TODO' * -r
+  - lib/Net/XMPP2/Writer.pm: # XXX: removed authname, because it
+                                    ensures maximum connectivitiy
