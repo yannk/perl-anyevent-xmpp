@@ -1,6 +1,10 @@
 Revision history for Net-XMPP2
 
 0.05
+         - improved error reporting a bit of internal exceptions
+         - fixed a bug where empty passwords didn't work
+         - added some developer tests
+         - typo bugfix in Net::XMPP2::Ext::Registration::submit_form
          - lots of documentation bugfixes and also added some
            more useful examples to the synopsises.
          - fixed a bug with enabling and disabling multiple features

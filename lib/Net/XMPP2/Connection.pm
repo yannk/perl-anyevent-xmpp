@@ -135,7 +135,16 @@ sub new {
    );
 
    $self->{parser}->set_stanza_cb (sub {
-      $self->handle_stanza (@_);
+      eval {
+         $self->handle_stanza (@_);
+      };
+      if ($@) {
+         $self->event (error =>
+            Net::XMPP2::Error::Exception->new (
+               exception => $@, context => 'stanza handling'
+            )
+         );
+      }
    });
    $self->{parser}->set_error_cb (sub {
       my ($ex, $data, $type) = @_;
@@ -194,6 +203,15 @@ sub new {
          );
       },
    );
+
+   $self->set_exception_cb (sub {
+      my ($ex) = @_;
+      $self->event (error =>
+         Net::XMPP2::Error::Exception->new (
+            exception => $ex, context => 'event callback'
+         )
+      );
+   });
 
    return $self;
 }
@@ -498,7 +516,11 @@ sub handle_iq {
       if (my $cb = delete $self->{iqs}->{$id}) {
 
          my $error = Net::XMPP2::Error::IQ->new (node => $node);
-         $cb->(($error->type eq 'continue' ? $node : undef), $error);
+
+         eval {
+            $cb->(($error->type eq 'continue' ? $node : undef), $error);
+         };
+         if ($@) { $self->event (iq_result_cb_exception => $@) }
       }
 
    } else {
@@ -519,7 +541,7 @@ sub send_sasl_auth {
 
    for (qw/username password domain/) {
       die "No '$_' argument given to new, but '$_' is required\n"
-         unless $self->{$_};
+         unless defined $self->{$_};
    }
 
    $self->{writer}->send_sasl_auth (

@@ -28,6 +28,18 @@ You may only derive from this package.
 
 =over 4
 
+=item B<set_exception_cb ($cb)>
+
+If some event callback threw an exception then C<$cb> is called with
+the exception as first argument.
+
+=cut
+
+sub set_exception_cb {
+   my ($self, $cb) = @_;
+   $self->{exception_cb} = $cb;
+}
+
 =item B<reg_cb ($eventname1, $cb1, [$eventname2, $cb2, ...])>
 
 This method registers a callback C<$cb1> for the event with the
@@ -92,36 +104,47 @@ sub event {
 
    my $old_cb_state = $self->{cb_state};
    my @res;
-   eval {
-      my $nxt = [];
+   my $nxt = [];
 
-      for my $rev (@{$self->{events}->{lc $ev}}) {
-         my $state = $self->{cb_state} = {};
+   for my $rev (@{$self->{events}->{lc $ev}}) {
+      my $state = $self->{cb_state} = {};
 
-         my (@r) = $rev->[1]->($self, @arg);
-
-         push @$nxt, $rev unless $state->{remove};
-         push @res, @r if @r;
-      }
-      $self->{events}->{lc $ev} = $nxt;
-
-      for my $ev_frwd (keys %{$self->{event_forwards}}) {
-         my $rev = $self->{event_forwards}->{$ev_frwd};
-         my $state = $self->{cb_state} = {};
-
-         my (@r) = $rev->[1]->($self, $rev->[0], $ev, @arg);
-
-         if ($state->{remove}) {
-            delete $self->{event_forwards}->{$ev_frwd};
+      eval {
+         push @res, $rev->[1]->($self, @arg);
+      };
+      if ($@) {
+         if ($self->{exception_cb}) {
+            $self->{exception_cb}->($@);
+         } else {
+            warn "unhandled callback exception: $@";
          }
-
-         push @res, @r if @r;
       }
-   };
-   if ($@) {
-      warn "Uncaught exception: $@";
+
+      push @$nxt, $rev unless $state->{remove};
+   }
+   $self->{events}->{lc $ev} = $nxt;
+
+   for my $ev_frwd (keys %{$self->{event_forwards}}) {
+      my $rev = $self->{event_forwards}->{$ev_frwd};
+      my $state = $self->{cb_state} = {};
+
+      eval {
+         push @res, $rev->[1]->($self, $rev->[0], $ev, @arg);
+      };
+      if ($@) {
+         if ($self->{exception_cb}) {
+            $self->{exception_cb}->($@);
+         } else {
+            warn "unhandled callback exception: $@";
+         }
+      }
+
+      if ($state->{remove}) {
+         delete $self->{event_forwards}->{$ev_frwd};
+      }
    }
    $self->{cb_state} = $old_cb_state;
+
 
    @res
 }

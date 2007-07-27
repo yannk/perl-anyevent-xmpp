@@ -1,5 +1,6 @@
 package Net::XMPP2::Util;
 use strict;
+no warnings;
 use Encode;
 use Net::LibIDN qw/idn_prep_name idn_prep_resource idn_prep_node/;
 use Net::XMPP2::Namespaces qw/xmpp_ns_maybe/;
