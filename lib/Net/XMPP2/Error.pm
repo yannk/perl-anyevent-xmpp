@@ -11,6 +11,7 @@ use Net::XMPP2::Error::Presence;
 use Net::XMPP2::Error::Message;
 use Net::XMPP2::Error::Parser;
 use Net::XMPP2::Error::Exception;
+use Net::XMPP2::Error::IQAuth;
 
 =head1 NAME
 

@@ -4,13 +4,15 @@ use AnyEvent;
 use IO::Socket::INET;
 use Net::XMPP2::Parser;
 use Net::XMPP2::Writer;
-use Net::XMPP2::Util qw/split_jid/;
+use Net::XMPP2::Util qw/split_jid join_jid/;
 use Net::XMPP2::Event;
 use Net::XMPP2::SimpleConnection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Extendable;
 use Net::XMPP2::Error;
 use Net::DNS;
+use Digest::SHA1 qw/sha1_hex/;
+use Encode;
 
 our @ISA = qw/Net::XMPP2::SimpleConnection Net::XMPP2::Event Net::XMPP2::Extendable/;
 
@@ -112,6 +114,25 @@ This is the password for the C<username> above.
 
 If C<$bool> is true no SSL will be used.
 
+=item disable_sasl => $bool
+
+If C<$bool> is true SASL will NOT be used to authenticate with the server, even
+if it advertises SASL through stream features.  Alternative authentication
+methods will be used, such as IQ Auth (XEP-0078) if the server offers it.
+
+=item disable_iq_auth => $bool
+
+This disables the use of IQ Auth (XEP-0078) for authentication, you might want
+to exclude it because it's deprecated and insecure. (However, I want to reach a
+maximum in compatibility with L<Net::XMPP2> so I'm not disabling this by
+default.
+
+=item anal_iq_auth => $bool
+
+This enables the anal iq auth mechanism that will first look in the stream
+features before trying to start iq authentication. Yes, servers don't always
+advertise what they can. I only implemented this option for my test suite.
+
 =back
 
 =cut
@@ -161,6 +182,11 @@ sub new {
       }
    });
 
+   $self->{parser}->set_stream_cb (sub {
+      $self->{stream_id} = $_[0]->attr ('id');
+   });
+
+
    $self->{iq_id}              = 1;
    $self->{default_iq_timeout} = 60;
 
@@ -188,6 +214,7 @@ sub new {
       sasl_error       => $proxy_cb,
       stream_error     => $proxy_cb,
       bind_error       => $proxy_cb,
+      iq_auth_error    => $proxy_cb,
       iq_result_cb_exception => sub {
          my ($self, $ex) = @_;
          $self->event (error =>
@@ -592,12 +619,27 @@ sub authenticate {
    my ($self) = @_;
    my $node = $self->{features};
    my @mechs = $node->find_all ([qw/sasl mechanisms/], [qw/sasl mechanism/]);
-   my @iqa   = $node->find_all ([qw/iqauth auth/]);
 
-   if (@mechs) {
+   # Yes, and also iq-auth isn't correctly advertised in the
+   # stream features! We all love the depreacted XEP-0078, eh?
+   my @iqa = $node->find_all ([qw/iqauth auth/]);
+
+   if (not ($self->{disable_sasl}) && @mechs) {
       $self->send_sasl_auth (@mechs)
-   } elsif (@iqa) {
-      $self->do_iq_auth;
+
+   } elsif (not $self->{disable_iq_auth}) {
+      if ($self->{anal_iq_auth} && !@iqa) {
+         if (@iqa) {
+            $self->do_iq_auth;
+         } else {
+            die "No authentication method left after anal iq auth, neither SASL or IQ auth.\n";
+         }
+      } else {
+         $self->do_iq_auth;
+      }
+
+   } else {
+      die "No authentication method left, neither SASL or IQ auth.\n";
    }
 }
 
@@ -611,7 +653,9 @@ sub handle_sasl_success {
    $self->{authenticated} = 1;
    $self->{parser}->init;
    $self->{writer}->init;
-   $self->{writer}->send_init_stream ($self->{language}, $self->{domain}, $self->{stream_namespace});
+   $self->{writer}->send_init_stream (
+      $self->{language}, $self->{domain}, $self->{stream_namespace}
+   );
 }
 
 sub handle_error {
@@ -624,7 +668,89 @@ sub handle_error {
 
 sub do_iq_auth {
    my ($self) = @_;
-   # TODO
+
+   if ($self->{anal_iq_auth}) {
+      $self->send_iq (get => {
+         defns => 'auth', node => { ns => 'auth', name => 'query',
+            # heh, something i've seen on some ejabberd site:
+            # childs => [ { name => 'username', childs => [ $self->{username} ] } ] 
+         }
+      }, sub {
+         my ($n, $e) = @_;
+         if ($e) {
+            $self->event (iq_auth_error =>
+               Net::XMPP2::Error::IQAuth->new (context => 'iq_error', iq_error => $e)
+            );
+         } else {
+            my $fields = {};
+            my (@query) = $n->find_all ([qw/auth query/]);
+            if (@query) {
+               for (qw/username password digest resource/) {
+                  if ($query[0]->find_all ([qw/auth/, $_])) {
+                     $fields->{$_} = 1;
+                  }
+               }
+
+               $self->do_iq_auth_send ($fields);
+            } else {
+               $self->event (iq_auth_error =>
+                  Net::XMPP2::Error::IQAuth->new (context => 'no_fields')
+               );
+            }
+         }
+      }, to => $self->{domain});
+   } else {
+      $self->do_iq_auth_send ({ username => 1, password => 1, resource => 1 });
+   }
+}
+
+sub do_iq_auth_send {
+   my ($self, $fields) = @_;
+
+   for (qw/username password resource/) {
+      die "No '$_' argument given to new, but '$_' is required\n"
+         unless defined $self->{$_};
+   }
+
+   my $do_resource = $fields->{resource};
+   my $password = $self->{password};
+
+   if ($fields->{digest}) {
+      my $out_password = encode ("UTF-8", $password);
+      my $out = lc sha1_hex ($self->stream_id () . $out_password);
+      $fields = {
+         username => $self->{username},
+         digest => $out,
+      }
+
+   } else {
+      $fields = {
+         username => $self->{username},
+         password => $password
+      }
+   }
+
+   if ($do_resource && defined $self->{resource}) {
+      $fields->{resource} = $self->{resource}
+   }
+
+   $self->send_iq (set => {
+      defns => 'auth',
+      node => { ns => 'auth', name => 'query', childs => [
+         map { { name => $_, childs => [ $fields->{$_} ] } } reverse sort keys %$fields
+      ]}
+   }, sub {
+      my ($n, $e) = @_;
+      if ($e) {
+         $self->event (iq_auth_error =>
+            Net::XMPP2::Error::IQAuth->new (context => 'iq_error', iq_error => $e)
+         );
+      } else {
+         $self->{authenticated} = 1;
+         $self->{jid} = join_jid ($self->{username}, $self->{domain}, $self->{resource});
+         $self->event (stream_ready => $self->{jid});
+      }
+   }, to => $self->{domain});
 }
 
 =item B<send_presence ($type, $create_cb, %attrs)>
@@ -735,6 +861,14 @@ Returns the last received <features> tag in form of an L<Net::XMPP2::Node> objec
 
 sub features { $_[0]->{features} }
 
+=item B<stream_id>
+
+This is the ID of this stream that was given us by the server.
+
+=cut
+
+sub stream_id { $_[0]->{stream_id} }
+
 =back
 
 =head1 EVENTS
@@ -796,6 +930,10 @@ After this the connection will be disconnected.
 =item sasl_error => $error
 
 This event is emitted on SASL authentication error.
+
+=item iq_auth_error => $error
+
+This event is emitted when IQ authentication (XEP-0078) failed.
 
 =item bind_error => $error, $resource
 

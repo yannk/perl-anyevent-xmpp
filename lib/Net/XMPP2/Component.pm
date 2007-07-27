@@ -91,7 +91,8 @@ sub new {
 
    $self->{parser}->set_stream_cb (sub {
       my $secret = $self->{parser}->{parser}->xml_escape ($self->{secret});
-      $self->{writer}->send_handshake ($_[0]->attr ('id'), $secret);
+      my $id = $self->{stream_id} = $_[0]->attr ('id');
+      $self->{writer}->send_handshake ($id, $secret);
    });
 
    $self->reg_cb (recv_stanza_xml => sub {

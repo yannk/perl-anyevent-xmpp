@@ -1,0 +1,53 @@
+package Net::XMPP2::Error::IQAuth;
+use Net::XMPP2::Error;
+our @ISA = qw/Net::XMPP2::Error/;
+
+=head1 NAME
+
+Net::XMPP2::Error::IQAuth - IQ authentication error
+
+Subclass of L<Net::XMPP2::Error>
+
+=head2 METHODS
+
+=over 4
+
+=item B<type>
+
+This method returns either:
+
+C<iq_error> which means that a IQ error was caught, which
+can be accessed with the C<iq_error> method.
+
+Or: C<no_fields> which means that no form fields were found
+in the IQ auth result.
+
+=cut
+
+sub context   { $_[0]->{context} }
+
+sub iq_error { $_[0]->{iq_error} }
+
+sub string {
+   my ($self) = @_;
+
+   sprintf "iq auth error: '%s' %s",
+      $self->context, ($self->context eq 'iq_error' ? $self->iq_error ()->string : '')
+}
+
+=back
+
+=head1 AUTHOR
+
+Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2007 Robin Redeker, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
+
+1;

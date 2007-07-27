@@ -1,6 +1,8 @@
 - see also: grep 'XXX\|FIXME\|TODO' * -r
   - lib/Net/XMPP2/Writer.pm: # XXX: removed authname, because it
                                     ensures maximum connectivitiy
+
+
 - test enable_feature by time
 
 - look at attribute namespace preservation! (if they got

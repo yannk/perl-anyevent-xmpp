@@ -91,20 +91,24 @@ sub add_extension {
    });
 }
 
-=head2 add_account ($jid, $password, $host, $port)
+=head2 add_account ($jid, $password, $host, $port, $connection_args)
 
 This method adds a jabber account for connection with the JID C<$jid>
 and the password C<$password>.
 
 C<$host> and C<$port> are optional and can be undef. C<$host> overrides the
-host to connect to.
+host in the C<$jid>.
+
+C<$connection_args> must either be undef or a hashreference to
+additional arguments for the constructor of the L<Net::XMPP2::IM::Connection>
+that will be used to connect the account.
 
 Returns 1 on success and undef when the account already exists.
 
 =cut
 
 sub add_account {
-   my ($self, $jid, $password, $host, $port) = @_;
+   my ($self, $jid, $password, $host, $port, $connection_args) = @_;
 
    $jid = stringprep_jid $jid;
    my $bj = prep_bare_jid $jid;
@@ -118,6 +122,7 @@ sub add_account {
             password => $password,
             host     => $host,
             port     => $port,
+            args     => $connection_args,
          );
 
    $self->update_connections

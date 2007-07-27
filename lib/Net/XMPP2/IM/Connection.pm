@@ -136,7 +136,7 @@ sub init_connection {
 
    } else {
       $self->retrieve_roster (sub {
-         $self->initial_presence;
+         $self->initial_presence; # XXX: is this the right order? after roster fetch?
          $self->{session_active} = 1;
          $self->event ('session_ready');
       });

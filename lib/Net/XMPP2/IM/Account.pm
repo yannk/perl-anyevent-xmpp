@@ -44,7 +44,8 @@ sub spawn_connection {
       password => $self->{password},
       ($self->{host} ? (override_host => $self->{host}) : ()),
       ($self->{port} ? (override_port => $self->{port}) : ()),
-      %args
+      %args,
+      %{$self->{args} || {}},
    )
 }
 

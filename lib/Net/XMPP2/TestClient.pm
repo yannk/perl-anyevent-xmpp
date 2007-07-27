@@ -49,8 +49,10 @@ sub new_or_exit {
       $self->{debug} = 1;
    }
 
+   $self->{tests};
+
    if ($ENV{NET_XMPP2_TEST}) {
-      plan tests => $self->{tests} + 1;
+      plan tests => $self->{tests} + 1
    } else {
       plan skip_all => "environment var NET_XMPP2_TEST not set! (see also Net::XMPP2::TestClient)!";
       exit;
@@ -76,10 +78,10 @@ sub init {
 
    $self->{jid} = $jid;
    $self->{password} = $password;
-   $cl->add_account ($jid, $password);
+   $cl->add_account ($jid, $password, undef, undef, $self->{connection_args});
 
    if ($self->{two_accounts}) {
-      $cl->add_account ("2nd_".$jid, $password);
+      $cl->add_account ("2nd_".$jid, $password, undef, undef, $self->{connection_args});
       $self->{connected_accounts} = {};
 
       $cl->reg_cb (session_ready => sub {
@@ -105,6 +107,8 @@ sub init {
 sub main_account { ($_[0]->{jid}, $_[0]->{password}) }
 
 sub client { $_[0]->{client} }
+
+sub tests { $_[0]->{tests} }
 
 sub instance_ext {
    my ($self, $ext, @args) = @_;
