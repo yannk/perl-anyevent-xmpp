@@ -45,8 +45,12 @@ sub new_or_exit {
       @_
    };
 
+   if ($ENV{NET_XMPP2_TEST_DEBUG}) {
+      $self->{debug} = 1;
+   }
+
    if ($ENV{NET_XMPP2_TEST}) {
-      plan tests => $self->{tests};
+      plan tests => $self->{tests} + 1;
    } else {
       plan skip_all => "environment var NET_XMPP2_TEST not set! (see also Net::XMPP2::TestClient)!";
       exit;
@@ -80,11 +84,11 @@ sub init {
 
       $cl->reg_cb (session_ready => sub {
          my ($cl, $acc) = @_;
-         $self->{connected_accounts}->{$acc->bare_jid} = 1;
-         my (@jids) = keys %{$self->{connected_accounts}};
+         $self->{connected_accounts}->{$acc->bare_jid} = $acc->jid;
+         my (@jids) = values %{$self->{connected_accounts}};
          my $cnt = scalar @jids;
          if ($cnt > 1) {
-            $cl->event (two_accounts_ready => @jids);
+            $cl->event (two_accounts_ready => $acc, @jids);
          }
       });
    }
@@ -104,7 +108,8 @@ sub client { $_[0]->{client} }
 
 sub instance_ext {
    my ($self, $ext, @args) = @_;
-   require $ext;
+   eval "require $ext; 1";
+   if ($@) { die "Couldn't load '$ext': $@" }
    my $eo = $ext->new (@args);
    $self->{client}->add_extension ($eo);
    $eo
@@ -123,7 +128,10 @@ sub wait {
    $self->{condvar}->wait;
 
    if ($self->error) {
+      fail ("error free");
       diag ($self->error);
+   } else {
+      pass ("error free");
    }
 }
 

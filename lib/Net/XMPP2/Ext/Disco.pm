@@ -82,7 +82,9 @@ sub init {
 
 This sets the identity of the top info node.
 
-C<$name> is optional and can be undef.
+C<$name> is optional and can be undef.  Please note that C<$name> will
+overwrite all previous set names! If C<$name> is undefined then
+no previous set name is overwritten.
 
 For a list of valid identites look at:
 
@@ -101,11 +103,20 @@ Valid identity C<$type>s for C<$category = "client"> may be:
 
 sub set_identity {
    my ($self, $category, $type, $name) = @_;
-   $self->{iden}->{cat}  = $category;
-   $self->{iden}->{type} = $type;
-   $self->{iden}->{name} = $name;
+   $self->{iden_name} = $name;
+   $self->{iden}->{$category}->{$type} = 1;
 }
 
+=item B<unset_identity ($category, $type)>
+
+This function removes the identity C<$category> and C<$type>.
+
+=cut
+
+sub unset_identity {
+   my ($self, $category, $type) = @_;
+   delete $self->{iden}->{$category}->{$type};
+}
 
 =item B<enable_feature ($uri)>
 
@@ -178,11 +189,13 @@ sub handle_disco_query {
             } else {
                $w->addPrefix (xmpp_ns ('disco_info'), '');
                $w->startTag ([xmpp_ns ('disco_info'), 'query']);
-                  $self->write_identity ($w,
-                     $self->{iden}->{cat},
-                     $self->{iden}->{type},
-                     $self->{iden}->{name},
-                  );
+                  for my $cat (keys %{$self->{iden}}) {
+                     for my $type (keys %{$self->{iden}->{$cat}}) {
+                        $self->write_identity ($w,
+                           $cat, $type, $self->{iden_name}
+                        );
+                     }
+                  }
                   for (sort grep { $self->{feat}->{$_} } keys %{$self->{feat}}) {
                      $self->write_feature ($w, $_);
                   }

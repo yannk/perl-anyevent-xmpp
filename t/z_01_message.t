@@ -15,11 +15,11 @@ my $recv_message = "";
 
 $C->reg_cb (
    two_accounts_ready => sub {
-      my ($C, $jid1, $jid2) = @_;
+      my ($C, $acc, $jid1, $jid2) = @_;
       my $con = $C->get_account ($jid1)->connection;
 
-      $src = $jid1;
-      $dest = $jid2;
+      $src  = bare_jid $jid1;
+      $dest = bare_jid $jid2;
 
       my $msg = Net::XMPP2::IM::Message->new (
          body    => "test body",
