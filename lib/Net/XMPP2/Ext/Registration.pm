@@ -13,32 +13,33 @@ Net::XMPP2::Ext::Registration - Handles all tasks of in band registration
    my $con = Net::XMPP2::Connection->new (...);
 
    $con->reg_cb (stream_pre_authentication => sub {
-      my ($con, $rcont) = @_;
+      my ($con) = @_;
+      my $reg = Net::XMPP2::Ext::Registration->new (connection => $con);
 
-      my $reg = Net::XMPP2::Ext::Registration->new;
-      $reg->send_registration_request ($con, sub {
-         my ($reg, $con, $form, $error) = @_;
+      $reg->send_registration_request (sub {
+         my ($reg, $form, $error) = @_;
 
-         if ($form) {
-            my $res = $form->try_fillout_registration ('myusername', 'mypassword');
-
-            $reg->submit_form ($con, $res, sub {
-               my ($reg, $con, $ok, $error) = @_;
-
-               if ($ok) {
-                  $con->authenticate; # just make sure the connection knows your
-                                      # username and password :-)
-               } else {
-                  print "error: " . $error->string . "\n";
-               }
-            });
+         if ($error) {
+            # error handling
 
          } else {
-            print "error: " . $error->string . "\n";
+            my $af = $form->try_fillout_registration ("tester", "secret");
+
+            $reg->submit_form ($af, sub {
+               my ($reg, $ok, $error, $form) = @_;
+
+               if ($ok) { # registered successfully!
+                  $con->authenticate
+
+               } else {   # error
+                  if ($form) { # we got an alternative form!
+                     # fill it out and submit it with C<submit_form> again
+                  }
+               }
+            });
          }
       });
 
-      $$rcont = 0;
       0
    });
 
@@ -130,10 +131,6 @@ sub send_registration_request {
    });
 }
 
-=item B<send_unregistration_request>
-
-=cut
-
 sub _error_or_form_cb {
    my ($self, $e, $cb) = @_;
 
@@ -150,9 +147,18 @@ sub _error_or_form_cb {
 
       $cb->($self, 0, $error, $form)
    } else {
-      $cb->($self, 0, $error)
+      $cb->($self, 0, $error, undef)
    }
 }
+
+=item B<send_unregistration_request ($cb)>
+
+This method sends an unregistration request.
+
+For description of the semantics of the callback in C<$cb>
+plase look in the description of the C<submit_form> method below.
+
+=cut
 
 sub send_unregistration_request {
    my ($self, $cb) = @_;
@@ -174,6 +180,16 @@ sub send_unregistration_request {
    });
 }
 
+=item B<send_password_change_request ($username, $password, $cb)>
+
+This method sends a password change request for the user C<$username>
+with the new password C<$password>.
+
+For description of the semantics of the callback in C<$cb>
+plase look in the description of the C<submit_form> method below.
+
+=cut
+
 sub send_password_change_request {
    my ($self, $username, $password, $cb) = @_;
 
@@ -188,7 +204,7 @@ sub send_password_change_request {
    }, sub {
       my ($node, $error) = @_;
       if ($node) {
-         $cb->($self, 1)
+         $cb->($self, 1, undef, undef)
       } else {
          $self->_error_or_form_cb ($error, $cb);
       }
@@ -231,7 +247,7 @@ sub submit_form {
       my ($n, $e) = @_;
 
       if ($n) {
-         $cb->($self, 1)
+         $cb->($self, 1, undef, undef)
       } else {
          $self->_error_or_form_cb ($e, $cb);
       }
