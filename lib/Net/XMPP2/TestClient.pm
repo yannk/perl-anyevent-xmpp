@@ -1,5 +1,6 @@
 package Net::XMPP2::TestClient;
 use strict;
+no warnings;
 use AnyEvent;
 use Net::XMPP2::Client;
 use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid dump_twig_xml/;
@@ -40,13 +41,14 @@ sub new_or_exit {
    my $class = ref($this) || $this;
    my $self = {
       timeout => 10,
+      finish_count => 1,
       @_
    };
 
    if ($ENV{NET_XMPP2_TEST}) {
       plan tests => $self->{tests};
    } else {
-      plan skip_all => "NET_XMPP2_TEST Environment variable not set!";
+      plan skip_all => "environment var NET_XMPP2_TEST not set! (see also Net::XMPP2::TestClient)!";
       exit;
    }
    bless $self, $class;
@@ -76,7 +78,7 @@ sub init {
       $cl->add_account ("2nd_".$jid, $password);
       $self->{connected_accounts} = {};
 
-      $cl->reg_cb (stream_ready => sub {
+      $cl->reg_cb (session_ready => sub {
          my ($cl, $acc) = @_;
          $self->{connected_accounts}->{$acc->bare_jid} = 1;
          my (@jids) = keys %{$self->{connected_accounts}};

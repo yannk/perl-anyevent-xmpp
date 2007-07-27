@@ -6,6 +6,8 @@ README
 t/00-load.t
 t/boilerplate.t
 t/pod.t
+t/z_00_register.t
+t/z_20_unregister.t
 samples/devcl/DevCL/Browser.pm
 samples/devcl/DevCL/TreeView.pm
 samples/devcl/DevCL/Main.pm
@@ -58,4 +60,5 @@ lib/Net/XMPP2/Connection.pm
 lib/Net/XMPP2/Component.pm
 lib/Net/XMPP2/Error.pm
 lib/Net/XMPP2/Node.pm
+lib/Net/XMPP2/TestClient.pm
 lib/Net/XMPP2.pm

@@ -335,7 +335,7 @@ sub add_subject {
    while (@_) {
       my $subj = shift;
       my $lang = shift;
-      $self->{subjects}->{$lang || $self->{lang}} = $subj;
+      $self->{subjects}->{$lang || $self->{lang} || ''} = $subj;
    }
    $self
 }
@@ -423,7 +423,7 @@ sub add_body {
    while (@_) {
       my $body = shift;
       my $lang = shift;
-      $self->{bodies}->{$lang || $self->{lang}} = $body;
+      $self->{bodies}->{$lang || $self->{lang} || ''} = $body;
    }
    $self
 }
