@@ -625,7 +625,7 @@ sub send_presence {
 
 =item B<send_message ($to, $type, $create_cb, %attrs)>
 
-This method sends a presence stanza, for the meanings
+This method sends a message stanza, for the meanings
 of C<$to>, C<$type>, C<$create_cb> and C<%attrs> please take a look
 at the documentation for C<send_message> method of L<Net::XMPP2::Writer>.
 
