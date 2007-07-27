@@ -20,7 +20,7 @@ Net::XMPP2::Ext::Disco - Service discovery manager class for XEP-0030
    $disco->request_items ($con, 'romeo@montague.net', undef,
       sub {
          my ($disco, $items, $error) = @_;
-         if ($error) { print "ERROR".$error->string."\n" }
+         if ($error) { print "ERROR:" . $error->string . "\n" }
          else {
             ... do something with the $items ...
          }
