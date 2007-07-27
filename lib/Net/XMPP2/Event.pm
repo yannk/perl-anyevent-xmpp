@@ -57,6 +57,23 @@ to return any value it should return an empty list.
 All elements of the returned list will be accumulated and the semantic of the
 accumulated return values depends on the events.
 
+For every event there are two other events emitted:
+
+Before the callbacks for C<$eventname> is being exectued the event
+C<"before_$eventname"> is being emitted.
+And after the callbacks for C<$eventname> have been run, the event
+C<"after_$eventname"> is being emitted.
+
+The C<"before_$eventname"> callbacks allow you to stop the execution
+of all callbacks for the event C<$eventname> and C<"after_$eventname">.
+This can be used to intercept events and stop them.
+
+(Please note that for Net::XMPP2::Ext::* there are special
+events for the runs before and after the events. They are named
+C<"ext_before_$eventname"> and C<"ext_after_$eventname">. If you are
+writing an extension you should use these events to ensure that
+users of L<Net::XMPP2> can still intercept everything.)
+
 =cut
 
 sub reg_cb {
@@ -97,9 +114,51 @@ sub unreg_cb {
 Emits the event C<$eventname> and passes the arguments C<@args>.
 The return value is a list of defined return values from the event callbacks.
 
+See also the specification of the before and after events in C<reg_cb> above.
+
 =cut
 
 sub event {
+   my ($self, $ev, @arg) = @_;
+
+   my $old_stop = $self->{stop_event};
+   $self->{stop_event} = 0;
+
+   my @res;
+   push @res, $self->_event ("before_$ev", @arg);
+
+   if ($self->{stop_event}) {
+      $self->{stop_event} = $old_stop;
+      return @res;
+   }
+
+   push @res, $self->_event ("ext_before_$ev", @arg);
+
+   if ($self->{stop_event}) {
+      $self->{stop_event} = $old_stop;
+      return @res;
+   }
+
+
+   push @res, $self->_event ($ev, @arg);
+
+   push @res, $self->_event ("ext_after_$ev", @arg);
+
+   push @res, $self->_event ("after_$ev", @arg);
+
+   $self->{stop_event} = $old_stop;
+
+   @res
+}
+
+=item B<_event ($eventname, @args)>
+
+This directly executes the event C<$eventname> without executing
+callbacks of the before and after events (as specified in C<reg_cb> above).
+
+=cut
+
+sub _event {
    my ($self, $ev, @arg) = @_;
 
    my $old_cb_state = $self->{cb_state};
@@ -161,14 +220,29 @@ sub unreg_me {
    $self->{cb_state}->{remove} = 1;
 }
 
+=item B<stop_event>
+
+When called in a 'before_' event callback then the execution of the
+event is stopped after all 'before_' callbacks have been run.
+
+=cut
+
+sub stop_event {
+   my ($self) = @_;
+   $self->{stop_event} = 1;
+}
+
 =item B<add_forward ($obj, $forward_cb)>
 
-This method allows to forward or copy all events to a object.
+This method allows to forward or copy all events to an object.
 C<$forward_cb> will be called everytime an event is generated in C<$self>.
 The first argument to the callback C<$forward_cb> will be <$self>, the second
 will be C<$obj>, the third will be the event name and the rest will be
 the event arguments. (For third and rest of argument also see description
 of C<event>).
+
+(Please note that it might be most useful to call C<_event> in the callback
+to allow objects that receive the forwarded events to react better.)
 
 =cut
 

@@ -4,6 +4,8 @@ Revision history for Net-XMPP2
          - implemented iq auth (XEP-0078)
          - fixed some bugs and improved the API a bit
            (in compatible ways)
+         - implemented the possibility of intercepting events
+           from the library.
 
 0.05 Fri Jul 27 17:45:16 CEST 2007
          - fixed destructor problem in disco

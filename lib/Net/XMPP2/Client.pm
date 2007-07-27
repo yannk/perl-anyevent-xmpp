@@ -87,7 +87,7 @@ sub add_extension {
    my ($self, $ext) = @_;
    $self->add_forward ($ext, sub {
       my ($self, $ext, $ev, $acc, @args) = @_;
-      $ext->event ($ev, $acc->connection (), @args);
+      $ext->_event ($ev, $acc->connection (), @args);
    });
 }
 
@@ -166,7 +166,7 @@ sub update_connections {
 
          $con->add_forward ($self, sub {
             my ($con, $self, $ev, @arg) = @_;
-            $self->event ($ev, $acc, @arg);
+            $self->_event ($ev, $acc, @arg);
          });
 
          $con->reg_cb (

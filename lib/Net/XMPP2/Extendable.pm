@@ -27,7 +27,7 @@ sub add_extension {
    my ($self, $ext) = @_;
    $self->add_forward ($ext, sub {
       my ($self, $ext, $ev, @args) = @_;
-      $ext->event ($ev, $self, @args);
+      $ext->_event ($ev, $self, @args);
    });
 }
 
