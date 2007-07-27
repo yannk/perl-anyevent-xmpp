@@ -2,7 +2,7 @@ NAME
     Net::XMPP2 - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.04
+    Version 0.05
 
 SYNOPSIS
        use Net::XMPP2::Connection;
@@ -88,6 +88,16 @@ RELEASE NOTES
     Here are some notes to the releases (release of this version is at top):
 
   Version
+    * 0.05
+        I added some unit tests and fixed a lot of bugs. The unit tests are
+        mostly for me (the AUTHOR) to not accidentally release a buggy
+        version with too ugly show stopper bugs.
+
+        The tests require network access to a jabber server and won't run
+        unless you set the right environment variable. If you want to run
+        these tests yourself you might want to take a look at
+        Net::XMPP2::TestClient.
+
     * 0.04
         After realizing that in band registration in Net::XMPP2::Ext was
         already in in version 0.03 I finally had to implement it.

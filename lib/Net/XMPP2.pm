@@ -116,6 +116,16 @@ Here are some notes to the releases (release of this version is at top):
 
 =over 4
 
+=item * 0.05
+
+I added some unit tests and fixed a lot of bugs. The unit tests
+are mostly for me (the L<AUTHOR>) to not accidentally release a buggy
+version with too ugly show stopper bugs.
+
+The tests require network access to a jabber server and won't run unless you
+set the right environment variable.  If you want to run these tests yourself
+you might want to take a look at L<Net::XMPP2::TestClient>.
+
 =item * 0.04
 
 After realizing that in band registration in L<Net::XMPP2::Ext> was already
