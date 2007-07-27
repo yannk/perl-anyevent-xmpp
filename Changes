@@ -3,6 +3,8 @@ Revision history for Net-XMPP2
 0.05
          - lots of documentation bugfixes and also added some
            more useful examples to the synopsises.
+         - fixed a bug with enabling and disabling multiple features
+           with enable_feature (as Ext::OOB does).
 
 0.04 Thu Jul 26 20:41:57 CEST 2007
          - actually added event send_stanza_data after documenting it

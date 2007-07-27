@@ -119,11 +119,13 @@ These features are enabled by default:
    http://jabber.org/protocol/disco#info
    http://jabber.org/protocol/disco#items
 
+You can pass also a list of features you want to enable to C<enable_feature>!
+
 =cut
 
 sub enable_feature {
-   my ($self, $feature) = @_;
-   $self->{feat}->{$feature} = 1
+   my ($self, @feature) = @_;
+   $self->{feat}->{$_} = 1 for @feature;
 }
 
 =item B<disable_feature ($uri)>
@@ -133,16 +135,13 @@ should be one of the values from the B<Name> column on:
 
    http://www.xmpp.org/registrar/disco-features.html
 
-These features are enabled by default:
-
-   http://jabber.org/protocol/disco#info
-   http://jabber.org/protocol/disco#items
+You can pass also a list of features you want to disable to C<disable_feature>!
 
 =cut
 
 sub disable_feature {
-   my ($self, $feature) = @_;
-   delete $self->{feat}->{$feature}
+   my ($self, @feature) = @_;
+   delete $self->{feat}->{$_} for @feature;
 }
 
 sub write_feature {
