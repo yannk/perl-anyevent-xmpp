@@ -160,7 +160,7 @@ sub new_contact {
 
    my $c = Net::XMPP2::IM::Contact->new (
       connection => $self->{connection},
-      jid        => prep_bare_jid ($jid)
+      jid        => bare_jid ($jid)
    );
    $c->send_update (
        $cb,

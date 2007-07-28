@@ -27,7 +27,6 @@ sub new {
    my $this = shift;
    my $class = ref($this) || $this;
    my $self = bless { @_ }, $class;
-   $self->{jid} = stringprep_jid $self->{jid};
    $self
 }
 
@@ -90,7 +89,8 @@ sub jid {
 
 =item B<bare_jid ()>
 
-Returns always the bare jid of this account.
+Returns always the bare JID of this account after stringprep has been applied,
+so you can compare the JIDs returned from this function.
 
 =cut
 

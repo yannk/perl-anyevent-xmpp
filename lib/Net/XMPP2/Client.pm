@@ -109,8 +109,6 @@ Returns 1 on success and undef when the account already exists.
 
 sub add_account {
    my ($self, $jid, $password, $host, $port, $connection_args) = @_;
-
-   $jid = stringprep_jid $jid;
    my $bj = prep_bare_jid $jid;
 
    return if exists $self->{accounts}->{$bj};

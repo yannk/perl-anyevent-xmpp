@@ -698,7 +698,7 @@ sub do_iq_auth {
                );
             }
          }
-      }, to => $self->{domain});
+      });
    } else {
       $self->do_iq_auth_send ({ username => 1, password => 1, resource => 1 });
    }
@@ -750,7 +750,7 @@ sub do_iq_auth_send {
          $self->{jid} = join_jid ($self->{username}, $self->{domain}, $self->{resource});
          $self->event (stream_ready => $self->{jid});
       }
-   }, to => $self->{domain});
+   });
 }
 
 =item B<send_presence ($type, $create_cb, %attrs)>
