@@ -1,9 +1,10 @@
 package Net::XMPP2::IM::Roster;
 use Net::XMPP2::IM::Contact;
 use Net::XMPP2::IM::Presence;
-use Net::XMPP2::Util qw/prep_bare_jid/;
+use Net::XMPP2::Util qw/prep_bare_jid bare_jid/;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use strict;
+no warnings;
 
 =head1 NAME
 
@@ -71,24 +72,13 @@ sub update_presence {
    my $contact = $self->touch_jid ($jid);
 
    if ($type eq 'subscribe') {
-      my (@doit) =
-         $self->{connection}->event (contact_request_subscribe => $self, $contact);
-      return $contact unless @doit;
-
-      if (grep { $_ } @doit) {
-         $contact->send_subscribed;
-      } else {
-         $contact->send_unsubscribed;
-      }
+      $self->{connection}->event (contact_request_subscribe => $self, $contact);
 
    } elsif ($type eq 'subscribed') {
       $self->{connection}->event (contact_subscribed => $self, $contact);
 
    } elsif ($type eq 'unsubscribe') {
-      my (@doit) =
-         $self->{connection}->event (contact_did_unsubscribe => $self, $contact);
-      return $contact unless grep { $_ } @doit;
-      $contact->send_unsubscribe;
+      $self->{connection}->event (contact_did_unsubscribe => $self, $contact);
 
    } elsif ($type eq 'unsubscribed') {
       $self->{connection}->event (contact_unsubscribed => $self, $contact);
@@ -100,15 +90,16 @@ sub update_presence {
 }
 
 sub touch_jid {
-   my ($self, $jid) = @_;
+   my ($self, $jid, $contact) = @_;
    my $bjid = prep_bare_jid ($jid);
 
    unless ($self->{contacts}->{$bjid}) {
       $self->{contacts}->{$bjid} =
-         Net::XMPP2::IM::Contact->new (
-            connection => $self->{connection},
-            jid        => Net::XMPP2::Util::bare_jid ($jid)
-         )
+         $contact
+         || Net::XMPP2::IM::Contact->new (
+               connection => $self->{connection},
+               jid        => Net::XMPP2::Util::bare_jid ($jid)
+            )
    }
 
    $self->{contacts}->{$bjid}
@@ -149,21 +140,35 @@ C<$name> is the nickname of the contact, which can be
 undef. C<$groups> should be a array reference containing
 the groups this contact should be in.
 
-The callback in C<$cb> will be called when the creation
-is finished. The first argument will be an L<Net::XMPP2::Error::IQ>
-object if the request resulted in an error.
+The callback in C<$cb> will be called when the creation is finished. The first
+argument will be the C<Net::XMPP2::IM::Contact> object if no error occured. The
+second argument will be an L<Net::XMPP2::Error::IQ> object if the request
+resulted in an error.
+
+Please note that the contact you are given in that callback might not yet
+be on the roster (C<is_on_roster> still returns a false value), if the
+server did send the roster push after the iq result of the roster set, so
+don't rely on the fact that the contact is on the roster.
 
 =cut
 
 sub new_contact {
    my ($self, $jid, $name, $groups, $cb) = @_;
 
+   $groups = [ $groups ] unless ref $groups;
+
    my $c = Net::XMPP2::IM::Contact->new (
       connection => $self->{connection},
       jid        => bare_jid ($jid)
    );
    $c->send_update (
-       $cb,
+       sub {
+          my ($con, $err) = @_;
+          unless ($err) {
+             $self->touch_jid ($jid, $con);
+          }
+          $cb->($con, $err);
+       },
        (defined $name ? (name => $name) : ()),
        groups => ($groups || [])
    );
@@ -250,19 +255,6 @@ See also documentation of C<get_contacts> method of L<Net::XMPP2::IM::Roster> ab
 sub get_contacts_off_roster {
    my ($self) = @_;
    grep { not $_->is_on_roster } values %{$self->{contacts}}
-}
-
-=item B<subscribe ($jid)>
-
-This method sends a subscription request to C<$jid>.
-If the optional C<$not_mutual> paramenter is true
-the subscription will not be mutual.
-
-=cut
-
-sub subscribe {
-   my ($self) = @_;
-   # FIXME / TODO
 }
 
 =item B<debug_dump>

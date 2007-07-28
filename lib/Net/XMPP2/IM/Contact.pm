@@ -1,5 +1,6 @@
 package Net::XMPP2::IM::Contact;
 use strict;
+no warnings;
 use Net::XMPP2::Util qw/split_jid/;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::IM::Presence;
@@ -102,7 +103,9 @@ sub send_update {
       },
       sub {
          my ($node, $error) = @_;
-         $cb->($error) if $cb
+         my $con = undef;
+         unless ($error) { $con = $self }
+         $cb->($con, $error) if $cb
       }
    );
 }
@@ -328,6 +331,16 @@ sub subscription {
    $_[0]->{subscription}
 }
 
+=item B<ask>
+
+Returns 'subscribe' if we asked this contact for subscription.
+
+=cut
+
+sub ask {
+   $_[0]->{ask}
+}
+
 =item B<subscription_pending>
 
 Returns true if this contact has a pending subscription.
@@ -374,10 +387,11 @@ sub make_message {
 
 sub debug_dump {
    my ($self) = @_;
-   printf "- %-30s    [%-20s] (%s)\n",
+   printf "- %-30s    [%-20s] (%s){%s}\n",
       $self->jid,
       $self->name || '',
-      $self->subscription;
+      $self->subscription,
+      $self->ask;
 
    for ($self->get_presences) {
       $_->debug_dump;

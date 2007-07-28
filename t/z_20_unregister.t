@@ -42,12 +42,12 @@ $C->reg_cb (
 
 $cl->wait;
 
-is ($unregistered, 2, "registered 2 accounts");
-is ($reg_error, '', 'no registration error');
+is ($unregistered, 2, "unregistered 2 accounts");
+is ($reg_error, '', 'no unregistration error');
 if ($reg_error) {
    diag (
-      "Error in registration: "
+      "Error in unregistration: "
       . $reg_error
-      . ", please register two accounts yourself for the next tests."
+      . ", please unregister two accounts yourself for the next tests."
    );
 }

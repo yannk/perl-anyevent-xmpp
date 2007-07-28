@@ -1,6 +1,9 @@
 Revision history for Net-XMPP2
 
 0.06
+         - reworked subscription system a bit, now you
+           have to subscribe manually by calling the contact's
+           methods yourself.
          - fixed weirdties with JID prepping
          - removed to attribute from iq auth get
          - implemented iq auth (XEP-0078)
