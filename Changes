@@ -1,6 +1,8 @@
 Revision history for Net-XMPP2
 
 0.06
+         - fixed weirdties with JID prepping
+         - removed to attribute from iq auth get
          - implemented iq auth (XEP-0078)
          - fixed some bugs and improved the API a bit
            (in compatible ways)
