@@ -234,30 +234,8 @@ sub handle_message {
       return if $error->type ne 'continue';
    }
 
-   my $from     = $node->attr ('from');
-   my $to       = $node->attr ('to');
-   my $type     = $node->attr ('type');
-   my ($thread) = $node->find_all ([qw/client thread/]);
-
-   my %bodies;
-   my %subjects;
-
-   $bodies{$_->attr ('lang') || ''} = $_->text
-      for $node->find_all ([qw/client body/]);
-   $subjects{$_->attr ('lang') || ''} = $_->text
-      for $node->find_all ([qw/client subject/]);
-
-   my $msg =
-      Net::XMPP2::IM::Message->new (
-         connection => $self,
-         from       => $from,
-         to         => $to,
-         type       => $type,
-         bodies     => \%bodies,
-         subjects   => \%subjects,
-         thread     => $thread
-      );
-
+   my $msg = Net::XMPP2::IM::Message->new (connection => $self);
+   $msg->from_node ($node);
    $self->event (message => $msg);
 }
 

@@ -1,10 +1,15 @@
 - Implement XEP-0045: Multi-User Chat
    - think about: make seperate MUC handler class
+
 - rename $acc->bare_jid to $acc->prep_bare_jid
+
 - make more tests
    - oob
    - data forms
    - jabber component
+
+- fix the inaviodable memoryleaks with the callbacks
+  the circular object structs.
 
 - put some serious stuff in the synopsises
 - test enable_feature by time

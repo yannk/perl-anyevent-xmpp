@@ -111,6 +111,29 @@ sub new {
    $self
 }
 
+sub from_node {
+   my ($self, $node) = @_;
+   my $from     = $node->attr ('from');
+   my $to       = $node->attr ('to');
+   my $type     = $node->attr ('type');
+   my ($thread) = $node->find_all ([qw/client thread/]);
+
+   my %bodies;
+   my %subjects;
+
+   $bodies{$_->attr ('lang') || ''} = $_->text
+      for $node->find_all ([qw/client body/]);
+   $subjects{$_->attr ('lang') || ''} = $_->text
+      for $node->find_all ([qw/client subject/]);
+
+   $self->{from}     = $from;
+   $self->{to}       = $to;
+   $self->{type}     = $type;
+   $self->{thread}   = $thread;
+   $self->{bodies}   = \%bodies;
+   $self->{subjects} = \%subjects;
+}
+
 sub to_string {
    my ($self) = @_;
    $self->any_body

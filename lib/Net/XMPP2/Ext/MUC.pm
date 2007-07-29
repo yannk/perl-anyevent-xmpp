@@ -58,9 +58,19 @@ sub init {
       ext_before_presence_xml => sub {
          my ($self, $con, $node) = @_;
          my $from_jid = $node->attr ('from');
+
          if (exists $self->{room_evs}->{prep_bare_jid $from_jid}) {
+            $self->stop_event;
             $self->{room_evs}->{prep_bare_jid $from_jid}->handle_presence ($node);
-            #$self->stop_event;
+         }
+      },
+      ext_before_message_xml => sub {
+         my ($self, $con, $node) = @_;
+         my $from_jid = $node->attr ('from');
+
+         if (exists $self->{room_evs}->{prep_bare_jid $from_jid}) {
+            $self->stop_event;
+            $self->{room_evs}->{prep_bare_jid $from_jid}->handle_message ($node);
          }
       },
       disconnect => sub {
@@ -162,17 +172,22 @@ sub join_room {
       });
 
    my $rcb_id;
-   $rcb_id = $room->reg_cb (join_error => sub {
-      my ($room, $error) = @_;
-      delete $self->{room_join_timer}->{$pbj};
-      $room->unreg_cb ($rcb_id);
-      $cb->($error);
-   }, enter => sub {
-      my ($room) = @_;
-      delete $self->{room_join_timer}->{$pbj};
-      $room->unreg_cb ($rcb_id);
-      $cb->(undef);
-   });
+   $rcb_id = $room->reg_cb (
+      join_error => sub {
+         my ($room, $error) = @_;
+
+         delete $self->{room_join_timer}->{$pbj};
+         $room->unreg_cb ($rcb_id);
+         $cb->($error);
+      },
+      enter => sub {
+         my ($room) = @_;
+
+         delete $self->{room_join_timer}->{$pbj};
+         $room->unreg_cb ($rcb_id);
+         $cb->(undef);
+      }
+   );
 
    $room->send_join ($nick);
 }
@@ -185,8 +200,15 @@ sub install_room {
 
    $room->add_forward ($self, sub {
       my ($room, $self, $ev, @args) = @_;
-      $self->event ('room_' . $ev, $self->{connection}, $room, @args);
+      $self->_event ($ev . '_room', $self->{connection}, $room, @args);
    });
+
+   $room->reg_cb (
+      ext_after_leave => sub {
+         my ($room) = @_;
+         $room->remove_forward ($self);
+      }
+   );
 
    $room
 }
@@ -196,6 +218,21 @@ sub uninstall_room {
    my $jid = $room->{jid};
    delete $self->{room_evs}->{prep_bare_jid $jid};
    delete $room->{muc};
+}
+
+=item B<get_room ($jid)>
+
+This returns the L<Net::XMPP2::Ext::MUC::Room> object
+for the bare part of the C<$jid> if we are joining or have
+joined such a room.
+
+If we are not joined undef is returned.
+
+=cut
+
+sub get_room {
+   my ($self, $jid) = @_;
+   $self->{room_evs}->{prep_bare_jid $jid}
 }
 
 =item B<is_connected>

@@ -139,7 +139,6 @@ sub event {
       return @res;
    }
 
-
    push @res, $self->_event ($ev, @arg);
 
    push @res, $self->_event ("ext_after_$ev", @arg);
@@ -187,6 +186,8 @@ sub _event {
       my $rev = $self->{event_forwards}->{$ev_frwd};
       my $state = $self->{cb_state} = {};
 
+      my $stop_before = $rev->[0]->{stop_event};
+      $rev->[0]->{stop_event} = 0;
       eval {
          push @res, $rev->[1]->($self, $rev->[0], $ev, @arg);
       };
@@ -197,6 +198,10 @@ sub _event {
             warn "unhandled callback exception: $@";
          }
       }
+      if ($rev->[0]->{stop_event}) {
+         $self->stop_event;
+      }
+      $rev->[0]->{stop_event} = $stop_before;
 
       if ($state->{remove}) {
          delete $self->{event_forwards}->{$ev_frwd};
