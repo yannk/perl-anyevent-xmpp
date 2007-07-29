@@ -1,8 +1,6 @@
 - Implement XEP-0045: Multi-User Chat
    - think about: make seperate MUC handler class
 
-- rename $acc->bare_jid to $acc->prep_bare_jid
-
 - make more tests
    - oob
    - data forms
