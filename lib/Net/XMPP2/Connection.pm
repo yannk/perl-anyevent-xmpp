@@ -759,7 +759,7 @@ This method sends a presence stanza, for the meanings
 of C<$type>, C<$create_cb> and C<%attrs> please take a look
 at the documentation for C<send_presence> method of L<Net::XMPP2::Writer>.
 
-This methods does attach an id attribute to the message stanza and
+This methods does attach an id attribute to the presence stanza and
 will return the id that was used (so you can react on possible replies).
 
 =cut

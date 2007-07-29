@@ -91,7 +91,7 @@ sub connect {
 
    $self->{r} =
       AnyEvent->io (poll => 'r', fh => $sock, cb => sub {
-         my $l = sysread $sock, my $data, 1024;
+         my $l = sysread $sock, my $data, 4096;
 
          if ($l) {
             $self->{read_buffer} .= decode_utf8 $data;

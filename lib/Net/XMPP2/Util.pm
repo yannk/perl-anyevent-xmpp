@@ -7,7 +7,8 @@ use Net::XMPP2::Namespaces qw/xmpp_ns_maybe/;
 require Exporter;
 our @EXPORT_OK = qw/resourceprep nodeprep prep_join_jid join_jid
                     split_jid stringprep_jid prep_bare_jid bare_jid
-                    is_bare_jid simxml dump_twig_xml install_default_debug_dump/;
+                    is_bare_jid simxml dump_twig_xml install_default_debug_dump
+                    cmp_jid/;
 our @ISA = qw/Exporter/;
 
 =head1 NAME
@@ -134,6 +135,18 @@ sub stringprep_jid {
    return prep_join_jid ($user, $host, $res);
 }
 
+=item B<cmp_jid ($jid1, $jid2)>
+
+This function compares two jids C<$jid1> and C<$jid2>
+whether they are equal.
+
+=cut
+
+sub cmp_jid {
+   my ($jid1, $jid2) = @_;
+   stringprep_jid ($jid1) eq stringprep_jid ($jid2)
+}
+
 =item B<prep_bare_jid ($jid)>
 
 This function makes the jid C<$jid> a bare jid, meaning:
@@ -170,7 +183,7 @@ bare JID.
 sub is_bare_jid {
    my ($jid) = @_;
    my ($user, $host, $res) = split_jid ($jid);
-   defined $res
+   not defined $res
 }
 
 =item B<simxml ($w, %xmlstruct)>
