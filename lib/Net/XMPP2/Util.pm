@@ -8,7 +8,11 @@ require Exporter;
 our @EXPORT_OK = qw/resourceprep nodeprep prep_join_jid join_jid
                     split_jid stringprep_jid prep_bare_jid bare_jid
                     is_bare_jid simxml dump_twig_xml install_default_debug_dump
-                    cmp_jid/;
+                    cmp_jid
+                    node_jid domain_jid res_jid
+                    prep_node_jid prep_domain_jid prep_res_jid
+                    from_xmpp_datetime to_xmpp_datetime to_xmpp_time
+                    /;
 our @ISA = qw/Exporter/;
 
 =head1 NAME
@@ -116,6 +120,26 @@ sub split_jid {
    }
 }
 
+=item B<node_jid ($jid)>
+=item B<domain_jid ($jid)>
+=item B<res_jid ($jid)>
+=item B<prep_node_jid ($jid)>
+=item B<prep_domain_jid ($jid)>
+=item B<prep_res_jid ($jid)>
+
+These functions return the corresponding parts of a JID.
+The C<prep_> prefixed JIDs return the stringprep'ed versions.
+
+=cut
+
+sub node_jid   { (split_jid ($_[0]))[0] }
+sub domain_jid { (split_jid ($_[0]))[1] }
+sub res_jid    { (split_jid ($_[0]))[2] }
+
+sub prep_node_jid   { nodeprep     (node_jid   ($_[0])) }
+sub prep_domain_jid {              (domain_jid ($_[0])) }
+sub prep_res_jid    { resourceprep (res_jid    ($_[0])) }
+
 =item B<stringprep_jid ($jid)>
 
 This applies stringprep to all parts of the jid according to the RFC 3920.
@@ -216,7 +240,6 @@ Where node is:
 
 Please note: C<childs> stands for C<child sequence> :-)
 
-=back
 
 =cut
 
@@ -271,6 +294,86 @@ sub simxml {
    }
 }
 
+=item B<to_xmpp_time ($sec, $min, $hour, $tz, $secfrac)>
+
+This function transforms a time to the XMPP date time format.
+The meanings and value ranges of C<$sec>, ..., C<$hour> are explained
+in the perldoc of Perl's builtin C<localtime>.
+
+C<$tz> has to be either C<"UTC"> or of the form C<[+-]hh:mm>, it can be undefined
+and wont occur in the time string then.
+
+C<$secfrac> are optional and can be the fractions of the second.
+
+See also XEP-0082.
+
+=cut
+
+sub to_xmpp_time {
+   my ($sec, $min, $hour, $tz, $secfrac) = @_;
+   my $frac = sprintf "%.3f", $secfrac;
+   substr $frac, 0, 1, '';
+   sprintf "%02d:%02d:%02d%s%s",
+      $hour, $min, $sec,
+      (defined $secfrac ? $frac : ""),
+      (defined $tz ? $tz : "")
+}
+
+=item B<to_xmpp_datetime ($sec,$min,$hour,$mday,$mon,$year,$tz, $secfrac)>
+
+This function transforms a time to the XMPP date time format.
+The meanings of C<$sec>, ..., C<$year> are explained in the perldoc
+of Perl's C<localtime> builtin and have the same value ranges.
+
+C<$tz> has to be either C<"UTC"> or of the form C<[+-]hh:mm>, if it is
+undefined "UTC" will be used.
+
+C<$secfrac> are optional and can be the fractions of the second.
+
+See also XEP-0082.
+
+=cut
+
+sub to_xmpp_datetime {
+   my ($sec, $min, $hour, $mday, $mon, $year, $tz, $secfrac) = @_;
+   my $time = to_xmpp_time ($sec, $min, $hour, (defined $tz ? $tz : 'UTC'), $secfrac);
+   sprintf "%04d-%02d-%02dT%s", $year + 1900, $mon + 1, $mday, $time;
+}
+
+=item B<from_xmpp_datetime ($string)>
+
+This function transforms the C<$string> which is either a time or datetime in XMPP
+format. If the string was not in the right format an empty list is returned.
+Otherwise this is returned:
+
+   my ($sec, $min, $hour, $mday, $mon, $year, $tz, $secfrac)
+      = from_xmpp_datetime ($string);
+
+For the value ranges and semantics of C<$sec>, ..., C<$srcfrac> please look at the
+documentation for C<to_xmpp_datetime>.
+
+C<$tz> and C<$secfrac> might be undefined.
+
+If C<$string> contained just a time C<$mday>, C<$mon> and C<$year> will be undefined.
+
+See also XEP-0082.
+
+=cut
+
+sub from_xmpp_datetime {
+   my ($string) = @_;
+   if ($string !~
+      /^(?:(\d{4})-?(\d{2})-?(\d{2})T)?(\d{2}):(\d{2}):(\d{2})(\.\d{3})?(UTC|[+-]\d{2}:\d{2})?/)
+   {
+      return ()
+   }
+   ($6, $5, $4,
+      ($3 ne '' ? $3        : undef),
+      ($2 ne '' ? $2 - 1    : undef),
+      ($1 ne '' ? $1 - 1900 : undef),
+      ($8 ne '' ? $8        : undef),
+      ($7 ne '' ? $7        : undef))
+}
 
 sub dump_twig_xml {
    my $data = shift;
@@ -297,6 +400,8 @@ sub install_default_debug_dump {
       },
    )
 }
+
+=back
 
 =head1 AUTHOR
 

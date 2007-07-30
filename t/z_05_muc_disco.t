@@ -5,7 +5,7 @@ no warnings;
 use Test::More;
 use Net::XMPP2::TestClient;
 use Net::XMPP2::IM::Message;
-use Net::XMPP2::Util qw/bare_jid prep_bare_jid split_jid/;
+use Net::XMPP2::Util qw/bare_jid prep_bare_jid split_jid cmp_jid/;
 use Net::XMPP2::Ext::MUC;
 
 my $MUC = $ENV{NET_XMPP2_TEST_MUC};
@@ -19,7 +19,7 @@ my $ROOM = "test@".$MUC;
 
 my $cl =
    Net::XMPP2::TestClient->new_or_exit (
-      tests => 8, two_accounts => 1, finish_count => 1
+      tests => 9, two_accounts => 1, finish_count => 1
    );
 my $C     = $cl->client;
 my $disco = $cl->instance_ext ('Net::XMPP2::Ext::Disco');
@@ -33,6 +33,7 @@ my $muc_joined_cb         = 0;
 my $muc_joined_ev         = 0;
 my $muc_left_once         = 0;
 my $muc_joined_after_leave_cb = 0;
+my $muc_status_check      = 0;
 
 $C->reg_cb (
    before_session_ready => sub {
@@ -86,7 +87,7 @@ sub step_join_rooms {
                $muc->join_room ($ROOM, $node, sub {
                   unless ($_[0]) {
                      $muc_joined_after_leave_cb++;
-                     step_exchange_messages ($C, $mucs, $jid1, $jid2);
+                     step_check_status ($C, $mucs, $jid1, $jid2);
                   }
                });
             }
@@ -104,8 +105,47 @@ sub step_join_rooms {
    }
 }
 
-sub step_exchange_messages {
+sub step_check_status {
    my ($C, $mucs, $jid1, $jid2) = @_;
+
+   my $room1       = $mucs->{prep_bare_jid $jid1}->get_room ($ROOM);
+   my $room2       = $mucs->{prep_bare_jid $jid2}->get_room ($ROOM);
+   my $inr_jid_1   = $room1->nick_jid;
+   my $inr_jid_2   = $room2->nick_jid;
+   my @room1_users = $room1->users;
+   my @room2_users = $room2->users;
+
+   if ($room1->users >= 2) {
+      $muc_status_check |= 1;
+   }
+   if ($room2->users >= 2) {
+      $muc_status_check |= 2;
+   }
+   if (scalar (grep {
+             cmp_jid ($_->in_room_jid, $inr_jid_1)
+          || cmp_jid ($_->in_room_jid, $inr_jid_2)
+       } @room1_users) == 2)
+   {
+      $muc_status_check |= 4;
+   }
+   if (scalar (grep {
+             cmp_jid ($_->in_room_jid, $inr_jid_1)
+          || cmp_jid ($_->in_room_jid, $inr_jid_2)
+       } @room2_users) == 2)
+   {
+      $muc_status_check |= 8;
+   }
+
+   my $inr_user1 = $room1->get_me;
+   my $inr_user2 = $room2->get_me;
+
+   if ($inr_user1->affiliation ne '' && $inr_user1->role ne '') {
+      $muc_status_check |= 16;
+   }
+   if ($inr_user2->affiliation ne '' && $inr_user2->role ne '') {
+      $muc_status_check |= 32;
+   }
+
    $cl->finish
 }
 
@@ -119,3 +159,5 @@ is ($muc_joined_cb,             2, "joined MUC two times (callback)");
 is ($muc_joined_ev,             3, "joined MUC two times (event)");
 is ($muc_left_once,             1, "once left the room");
 is ($muc_joined_after_leave_cb, 1, "once enterd the room (callback)");
+is ($muc_status_check,  1|2|4|8|16|32,
+                                   "muc room status checks");

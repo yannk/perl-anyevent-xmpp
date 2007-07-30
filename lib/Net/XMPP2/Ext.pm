@@ -65,6 +65,14 @@ This extension lets you register new accounts "in-band".
 To use this look at the description of the C<register> option to the C<new>
 method of L<Net::XMPP2::Connection>.
 
+=item XEP-0082 - XMPP Date and Time Profiles
+
+Implemented some functions to deal with XMPP timestamps, see L<Net::XMPP2::Util>
+C<to_xmpp_time>, C<to_xmpp_datetime>, C<from_xmpp_datetime>.
+
+They are meant as simple formatters for you, you will still need to handle timezone
+stuff and such yourself.
+
 =item XEP-0086 - Error Condition Mappings
 
    "A mapping to enable legacy entities to correctly handle errors from XMPP-aware entities."

@@ -1,7 +1,9 @@
+'x' means: is done!
+
 - Implement XEP-0045: Multi-User Chat
+   x store full jid info on entering room
    - improve room info handler class to retrieve interesting information eaasier
       - room occupant query
-   - store full jid info on entering room
    - implement status code mappings
       - that room logged
       - non anonymous
@@ -16,9 +18,9 @@
       - 11. Error and Status Codes
          - 11.1 Error Codes
          - 11.2 Status Codes
-   - entering password protected rooms
    - implement delayed delivery for messages
       - to mark history of room
+   - entering password protected rooms
    - managing of discussion history when entering
       - maxchars, maxstanzas, seconds, since
    - nickname changes
@@ -103,9 +105,6 @@
 - Net::XMPP2::IM missing functionality to be RFC 3921 conform:
    - 7.2.  Business Rules
 
-- Implement XEP-0082: XMPP Date and Time Profiles
-   - util functions to convert them to unix timestamps
-
 - Implement XEP-0115: Entity Capabilities
 
 - Implement XEP-0190: Best Practice for Closing Idle Streams
@@ -124,3 +123,10 @@
 - see also: grep 'XXX\|FIXME\|TODO' * -r
   - lib/Net/XMPP2/Writer.pm: # XXX: removed authname, because it
                                     ensures maximum connectivitiy
+
+long term?
+==========
+
+x Implement XEP-0082: XMPP Date and Time Profiles
+   - provide maybe _to functions for the old format,
+     it's still in use out there

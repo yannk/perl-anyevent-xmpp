@@ -1,7 +1,11 @@
 package Net::XMPP2::Ext::MUC::Room;
 use strict;
+no warnings;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
-use Net::XMPP2::Util qw/bare_jid prep_bare_jid cmp_jid split_jid join_jid is_bare_jid/;
+use Net::XMPP2::Util qw/
+   bare_jid prep_bare_jid cmp_jid split_jid join_jid is_bare_jid
+   prep_res_jid
+/;
 use Net::XMPP2::Event;
 use Net::XMPP2::Ext::MUC::User;
 use Net::XMPP2::Error::MUC;
@@ -43,6 +47,15 @@ sub new {
 sub init {
    my ($self) = @_;
    $self->{jid} = bare_jid ($self->{jid});
+
+   my $proxy = sub {
+      my ($self, $error) = @_;
+      $self->event (error => $error);
+   };
+
+   $self->reg_cb (
+      join_error => $proxy,
+   );
 }
 
 sub handle_message {
@@ -70,13 +83,13 @@ sub handle_presence {
             type           => 'presence_error'
          );
          $self->event (join_error => $muce);
-         $self->event (error      => $muce);
 
       } else {
 
          if (cmp_jid ($from, $self->nick_jid)) {
             my $user = $self->add_user_xml ($node);
             $self->{status} = JOINED;
+            $self->{me} = $user;
             $self->event (enter => $user);
 
          } else {
@@ -99,7 +112,7 @@ sub handle_presence {
             $self->we_left_room ();
 
          } else {
-            my ($room, $srv, $nick) = split_jid ($from);
+            my $nick = prep_res_jid ($from);
 
             my $user = delete $self->{users}->{$nick};
             if ($user) {
@@ -110,7 +123,8 @@ sub handle_presence {
             }
          }
       } else {
-         my $pre = $self->get_user ($from);
+         my $nick = prep_res_jid $from;
+         my $pre  = $self->{users}->{$nick};
          my $user = $self->add_user_xml ($node);
          if ($pre) {
             $self->event (presence => $user);
@@ -125,18 +139,52 @@ sub we_left_room {
    my ($self) = @_;
    $self->{users}  = {};
    $self->{status} = LEFT;
+   delete $self->{me};
 }
 
+=item B<get_user ($nick)>
+
+This method returns the user with the C<$nick> in the room.
+
+=cut
+
 sub get_user {
+   my ($self, $nick) = @_;
+   $self->{users}->{$nick}
+}
+
+=item B<get_me>
+
+This method returns the L<Net::XMPP2::Ext::MUC::User> object of yourself
+in the room. If will return undef if we are not in the room anymore.
+
+=cut
+
+sub get_me {
+   my ($self) = @_;
+   $self->{me}
+}
+
+=item B<get_user_jid ($jid)>
+
+This method looks whether a user with the JID C<$jid> exists
+in the room. That means whether the node and domain part of the
+JID match the rooms node and domain part, and the resource part of the
+JID matches a joined nick.
+
+=cut
+
+sub get_user_jid {
    my ($self, $jid) = @_;
    my ($room, $srv, $nick) = split_jid ($jid);
+   return unless prep_join_jid ($room, $srv) eq prep_bare_jid $self->jid;
    $self->{users}->{$nick}
 }
 
 sub add_user_xml {
    my ($self, $node) = @_;
    my $from = $node->attr ('from');
-   my ($room, $srv, $nick) = split_jid ($from);
+   my $nick = prep_res_jid ($from);
 
    my $user = $self->{users}->{$nick};
    unless ($user) {

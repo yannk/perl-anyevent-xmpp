@@ -42,17 +42,19 @@ sub update {
    my $from = $node->attr ('from');
    my ($room, $srv, $nick) = split_jid ($from);
 
-   my ($aff, $role, $stati);
+   my ($aff, $role, $stati, $jid);
    $stati = {};
 
    if ($xuser) {
       if (my ($item) = $xuser->find_all ([qw/muc_user item/])) {
          $aff  = $item->attr ('affiliation');
          $role = $item->attr ('role');
+         $jid  = $item->attr ('jid');
       }
    }
    $self->{nick}        = $nick;
    $self->{affiliation} = $aff;
+   $self->{real_jid}    = $jid if defined $jid && $jid ne '';
    $self->{role}        = $role;
 }
 
@@ -92,6 +94,23 @@ The L<Net::XMPP2::Ext::MUD::Room> this user is in.
 =cut
 
 sub room { $_[0]->{room} }
+
+=item B<in_room_jid>
+
+The room local JID of the user.
+
+=cut
+
+sub in_room_jid { $_[0]->{jid} }
+
+=item B<real_jid>
+
+The real JID of the user, this might be undef if it is an
+anonymous room.
+
+=cut
+
+sub real_jid { $_[0]->{real_jid} }
 
 =back
 
