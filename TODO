@@ -2,6 +2,10 @@
 
 - Implement XEP-0045: Multi-User Chat
    x store full jid info on entering room
+   x implement delayed delivery for messages
+      - WRITE TEST!
+      - to mark history of room
+
    - improve room info handler class to retrieve interesting information eaasier
       - room occupant query
    - implement status code mappings
@@ -18,8 +22,6 @@
       - 11. Error and Status Codes
          - 11.1 Error Codes
          - 11.2 Status Codes
-   - implement delayed delivery for messages
-      - to mark history of room
    - entering password protected rooms
    - managing of discussion history when entering
       - maxchars, maxstanzas, seconds, since
