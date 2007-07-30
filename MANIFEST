@@ -6,9 +6,13 @@ README
 t/00-load.t
 t/boilerplate.t
 t/pod.t
+t/datetime.t
 t/z_00_register.t
 t/z_01_message.t
 t/z_02_disco.t
+t/z_03_iq_auth.t
+t/z_04_presence.t
+t/z_05_muc_disco.t
 t/z_20_unregister.t
 samples/devcl/DevCL/Browser.pm
 samples/devcl/DevCL/TreeView.pm
@@ -32,6 +36,7 @@ lib/Net/XMPP2/IM/Connection.pm
 lib/Net/XMPP2/IM/Presence.pm
 lib/Net/XMPP2/IM/Account.pm
 lib/Net/XMPP2/IM/Message.pm
+lib/Net/XMPP2/IM/Delayed.pm
 lib/Net/XMPP2/Ext/Disco/Info.pm
 lib/Net/XMPP2/Ext/Disco/Items.pm
 lib/Net/XMPP2/Ext/DataForm.pm
@@ -45,6 +50,8 @@ lib/Net/XMPP2/Util.pm
 lib/Net/XMPP2/Ext.pm
 lib/Net/XMPP2/Error/SASL.pm
 lib/Net/XMPP2/Error/IQ.pm
+lib/Net/XMPP2/Error/IQAuth.pm
+lib/Net/XMPP2/Error/MUC.pm
 lib/Net/XMPP2/Error/Register.pm
 lib/Net/XMPP2/Error/Exception.pm
 lib/Net/XMPP2/Error/Stanza.pm
@@ -52,6 +59,11 @@ lib/Net/XMPP2/Error/Stream.pm
 lib/Net/XMPP2/Error/Parser.pm
 lib/Net/XMPP2/Error/Presence.pm
 lib/Net/XMPP2/Error/Message.pm
+lib/Net/XMPP2/Ext/MUC.pm
+lib/Net/XMPP2/Ext/MUC/Message.pm
+lib/Net/XMPP2/Ext/MUC/Room.pm
+lib/Net/XMPP2/Ext/MUC/RoomInfo.pm
+lib/Net/XMPP2/Ext/MUC/User.pm
 lib/Net/XMPP2/Event.pm
 lib/Net/XMPP2/Client.pm
 lib/Net/XMPP2/SimpleConnection.pm

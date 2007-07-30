@@ -1,6 +1,11 @@
 Revision history for Net-XMPP2
 
 0.06
+         - started implementation of interfaces for MUC (XEP-0045).
+         - added support for:
+            - XEP-0082 - XMPP Date and Time Profiles
+            - XEP-0091 - Delayed Delivery (legacy)
+            - XEP-0203 - Delayed Delivery (new)
          - reworked subscription system a bit, now you
            have to subscribe manually by calling the contact's
            methods yourself.

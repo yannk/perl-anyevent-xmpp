@@ -2,6 +2,9 @@ package Net::XMPP2::IM::Presence;
 use strict;
 use Net::XMPP2::Util;
 use Net::XMPP2::IM::Message;
+use Net::XMPP2::IM::Delayed;
+
+our @ISA = qw/Net::XMPP2::IM::Delayed/;
 
 =head1 NAME
 
@@ -14,6 +17,9 @@ Net::XMPP2::IM::Presence - XMPP presence
 This module represents an XMPP presence. It stores
 the full JID of the contact, the show value, status value
 and priority.
+
+L<Net::XMPP2::IM::Presence> is derived from L<Net::XMPP2::IM::Delayed>,
+use the interface described there to find out whether this presence was delayed.
 
 =head1 METHODS
 
@@ -36,6 +42,8 @@ sub clone {
 
 sub update {
    my ($self, $node) = @_;
+
+   $self->fetch_delay_from_node ($node);
 
    my $type       = $node->attr ('type');
    my ($show)     = $node->find_all ([qw/client show/]);

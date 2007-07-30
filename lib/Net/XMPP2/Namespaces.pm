@@ -31,6 +31,8 @@ our %NAMESPACES = (
    muc_user    => 'http://jabber.org/protocol/muc#user',
    muc_owner   => 'http://jabber.org/protocol/muc#owner',
    search      => 'jabber:iq:search',
+   x_delay     => 'jabber:x:delay',
+   delay       => 'urn:xmpp:delay',
 );
 
 =head1 NAME
