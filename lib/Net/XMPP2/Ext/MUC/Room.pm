@@ -60,7 +60,10 @@ sub init {
 
 sub handle_message {
    my ($self, $node) = @_;
-   warn "HANDLE MESSAGE\n";
+   my $msg = Net::XMPP2::Ext::MUC::Message->new (room => $self);
+   $msg->from_node ($node);
+   my $is_echo = cmp_jid ($msg->from, $self->nick_jid);
+   $self->event (message => $msg, $is_echo);
 }
 
 sub handle_presence {
@@ -225,6 +228,29 @@ sub send_join {
    }, to => $self->{nick_jid});
 }
 
+sub message_class { 'Net::XMPP2::Ext::MUC::Message' }
+
+=item B<make_message (@args)>
+
+This method constructs a L<Net::XMPP2::Ext::MUC::Message> with
+a connection to this room.
+
+C<@args> are further arguments for the constructor of L<Net::XMPP2::Ext::MUC::Message>.
+The default C<to> argument for the message is the room and the
+C<type> will be 'groupchat'.
+
+=cut
+
+sub make_message {
+   my ($self, @args) = @_;
+   $self->message_class ()->new (
+      room       => $self,
+      to         => $self->jid,
+      type       => 'groupchat',
+      @args
+   )
+}
+
 =item B<send_part ($msg)>
 
 This lets you part the room, C<$msg> is an optional part message
@@ -293,6 +319,57 @@ sub is_joined {
    $self->is_connected
    && $self->{status} == JOINED
 }
+
+=back
+
+=head1 EVENTS
+
+These events can be registered on with C<reg_cb>:
+
+=over 4
+
+=item message => $msg, $is_echo
+
+This event is emitted when a message was received from the room.
+C<$msg> is a L<Net::XMPP2::Ext::MUC::Message> object and C<$is_echo>
+is true if the message is an echo.
+
+=item error => $error
+
+This event is emitted when any error occured.
+C<$error> is a L<Net::XMPP2::Error::MUC> object.
+
+=item join_error => $error
+
+This event is emitted when a error occured when joining a room.
+C<$error> is a L<Net::XMPP2::Error::MUC> object.
+
+=item enter => $user
+
+This event is emitted when we successfully joined the room.
+C<$user> is a L<Net::XMPP2::Ext::MUC::User> object which is
+the user handle for ourself.
+
+=item join => $user
+
+This event is emitted when a new user joins the room.
+C<$user> is the L<Net::XMPP2::Ext::MUC::User> of that user.
+
+=item presence => $user
+
+This event is emitted when a user changes it's presence status
+(eg. affiliation or role, or away status).
+C<$user> is the L<Net::XMPP2::Ext::MUC::User> of that user.
+
+=item part => $user
+
+This event is emitted when a user leaves the channel.  C<$user> is the
+L<Net::XMPP2::Ext::MUC::User> of that user, but please note that you shouldn't
+send any messages to this user anymore.
+
+=item leave
+
+This event is emitted when we leave the room.
 
 =back
 

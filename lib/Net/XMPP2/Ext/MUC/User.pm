@@ -3,6 +3,7 @@ use strict;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Event;
 use Net::XMPP2::IM::Presence;
+use Net::XMPP2::Ext::MUC::Message;
 use Net::XMPP2::Util qw/split_jid/;
 
 our @ISA = qw/Net::XMPP2::IM::Presence/;
@@ -111,6 +112,27 @@ anonymous room.
 =cut
 
 sub real_jid { $_[0]->{real_jid} }
+
+=item B<make_message (@args)>
+
+Returns a L<Net::XMPP2::Ext::MUC::Message> object with the to field set to
+this presence full JID.
+
+C<@args> are further arguments to the constructor of the message.
+
+=cut
+
+sub message_class { 'Net::XMPP2::Ext::MUC::Message' }
+
+sub make_message {
+   my ($self, @args) = @_;
+   $self->message_class ()->new (
+      connection => $self->{connection},
+      to         => $self->jid,
+      @args
+   );
+}
+
 
 =back
 

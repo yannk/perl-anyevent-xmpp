@@ -125,18 +125,23 @@ sub status {
    undef
 }
 
-=item B<make_message>
+=item B<make_message (@args)>
 
 Returns a L<Net::XMPP2::IM::Message> object with the to field set to
 this presence full JID.
 
+C<@args> are further arguments to the constructor of the message.
+
 =cut
 
+sub message_class { 'Net::XMPP2::IM::Message' }
+
 sub make_message {
-   my ($self) = @_;
-   Net::XMPP2::IM::Message->new (
+   my ($self, @args) = @_;
+   $self->message_class ()->new (
       connection => $self->{connection},
-      to         => $self->jid
+      to         => $self->jid,
+      @args
    );
 }
 

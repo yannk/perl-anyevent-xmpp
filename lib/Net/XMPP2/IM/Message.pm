@@ -193,7 +193,7 @@ sub make_reply {
    my ($self, $msg) = @_;
 
    unless ($msg) {
-      $msg = Net::XMPP2::IM::Message->new ();
+      $msg = $self->new ();
    }
 
    $msg->{connection} = $self->{connection};
