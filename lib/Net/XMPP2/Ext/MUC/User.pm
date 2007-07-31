@@ -113,23 +113,23 @@ anonymous room.
 
 sub real_jid { $_[0]->{real_jid} }
 
-=item B<make_message (@args)>
+=item B<make_message (%args)>
 
 Returns a L<Net::XMPP2::Ext::MUC::Message> object with the to field set to
 this presence full JID.
 
-C<@args> are further arguments to the constructor of the message.
+C<%args> are further arguments to the constructor of the message.
 
 =cut
 
 sub message_class { 'Net::XMPP2::Ext::MUC::Message' }
 
 sub make_message {
-   my ($self, @args) = @_;
+   my ($self, %args) = @_;
    $self->message_class ()->new (
-      connection => $self->{connection},
+      room       => $self->room,
       to         => $self->jid,
-      @args
+      %args
    );
 }
 

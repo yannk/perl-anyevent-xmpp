@@ -4,7 +4,7 @@ no warnings;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Util qw/
    bare_jid prep_bare_jid cmp_jid split_jid join_jid is_bare_jid
-   prep_res_jid
+   prep_res_jid prep_join_jid
 /;
 use Net::XMPP2::Event;
 use Net::XMPP2::Ext::MUC::User;
@@ -230,24 +230,24 @@ sub send_join {
 
 sub message_class { 'Net::XMPP2::Ext::MUC::Message' }
 
-=item B<make_message (@args)>
+=item B<make_message (%args)>
 
 This method constructs a L<Net::XMPP2::Ext::MUC::Message> with
 a connection to this room.
 
-C<@args> are further arguments for the constructor of L<Net::XMPP2::Ext::MUC::Message>.
+C<%args> are further arguments for the constructor of L<Net::XMPP2::Ext::MUC::Message>.
 The default C<to> argument for the message is the room and the
 C<type> will be 'groupchat'.
 
 =cut
 
 sub make_message {
-   my ($self, @args) = @_;
+   my ($self, %args) = @_;
    $self->message_class ()->new (
       room       => $self,
       to         => $self->jid,
       type       => 'groupchat',
-      @args
+      %args
    )
 }
 

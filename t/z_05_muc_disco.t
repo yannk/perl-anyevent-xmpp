@@ -19,7 +19,7 @@ my $ROOM = "test@".$MUC;
 
 my $cl =
    Net::XMPP2::TestClient->new_or_exit (
-      tests => 13, two_accounts => 1, finish_count => 1
+      tests => 16, two_accounts => 1, finish_count => 1
    );
 my $C     = $cl->client;
 my $disco = $cl->instance_ext ('Net::XMPP2::Ext::Disco');
@@ -35,10 +35,14 @@ my $muc_left_once         = 0;
 my $muc_joined_after_leave_cb = 0;
 my $muc_status_check      = 0;
 
+my $muc_got_delayed_message       = '';
+
 my $muc_first_groupchat_msg       = '';
 my $muc_first_groupchat_msg_echo  = '';
 my $muc_second_groupchat_msg      = '';
 my $muc_second_groupchat_msg_echo = '';
+my $muc_first_private_message       = '';
+my $muc_second_private_message      = '';
 
 $C->reg_cb (
    before_session_ready => sub {
@@ -78,10 +82,21 @@ sub step_join_rooms {
             my ($muc, $con, $room, $user) = @_;
 
             $muc_joined_ev++;
+
+            $room->make_message (body => "made it (".$user->jid.")!")->send;
+
             if ($muc_joined_ev == 2) {
               $mucs->{prep_bare_jid $jid1}
                  ->get_room ($ROOM)
                     ->send_part ("parting for tests");
+            }
+         },
+         message_room => sub {
+            my ($muc, $con, $room, $msg) = @_;
+
+            if ($msg->is_delayed) {
+               $muc_got_delayed_message++;
+               $muc->unreg_me;
             }
          },
          leave_room => sub {
@@ -159,8 +174,11 @@ sub step_send_messages {
 
    $room2->reg_cb (message => sub {
       my ($room2, $msg, $is_echo) = @_;
+
+      return if $msg->any_body =~ /^made/;
+
       if ($msg->type eq 'groupchat'
-          && !$msg->delay_stamp
+          && !$msg->is_delayed
           && cmp_jid ($msg->from, $room1->nick_jid)
           && !$is_echo)
       {
@@ -170,7 +188,7 @@ sub step_send_messages {
          $repl->send;
 
       } elsif ($msg->type eq 'groupchat'
-               && !$msg->delay_stamp
+               && !$msg->is_delayed
                && cmp_jid ($msg->from, $room2->nick_jid)
                && $is_echo)
       {
@@ -182,30 +200,49 @@ sub step_send_messages {
    $room1->reg_cb (message => sub {
       my ($room1, $msg, $is_echo) = @_;
 
+      return if $msg->any_body =~ /^made/;
+
       if ($msg->type eq 'groupchat'
-          && !$msg->delay_stamp
+          && !$msg->is_delayed
           && cmp_jid ($msg->from, $room1->nick_jid)
           && $is_echo)
       {
          $muc_first_groupchat_msg_echo = $msg->any_body;
 
       } elsif ($msg->type eq 'groupchat'
-               && !$msg->delay_stamp
+               && !$msg->is_delayed
                && cmp_jid ($msg->from, $room2->nick_jid)
                && !$is_echo)
       {
          $muc_second_groupchat_msg = $msg->any_body;
          $room1->unreg_me;
-         step_look_for_delayed_messages ($C, $mucs, $jid1, $jid2, $room1, $room2);
+         step_private_messages ($C, $mucs, $jid1, $jid2, $room1, $room2);
       }
    });
 
    $room1->make_message (body => "Hi there, I'm a bot!")->send;
 }
 
-sub step_look_for_delayed_messages {
+sub step_private_messages {
    my ($C, $mucs, $jid1, $jid2, $room1, $room2) = @_;
-   $cl->finish;
+
+   $room1->reg_cb (message => sub {
+      my ($room1, $msg) = @_;
+      if ($msg->type eq 'chat'
+          && cmp_jid ($msg->from, $room2->nick_jid)) {
+         $muc_first_private_message = $msg->any_body;
+         $msg->make_reply->add_body ("Hi, i got your msg!")->send;
+      }
+   });
+   $room2->reg_cb (message => sub {
+      my ($room2, $msg) = @_;
+      if ($msg->type eq 'chat'
+          && cmp_jid ($msg->from, $room1->nick_jid)) {
+         $muc_second_private_message = $msg->any_body;
+         $cl->finish;
+      }
+   });
+   $room2->get_user_jid ($room1->nick_jid)->make_message (body => "Are you there?", type => 'chat')->send;
 }
 
 $cl->wait;
@@ -220,7 +257,12 @@ is ($muc_left_once,             1, "once left the room");
 is ($muc_joined_after_leave_cb, 1, "once enterd the room (callback)");
 is ($muc_status_check,  1|2|4|8|16|32,
                                    "muc room status checks");
-is ($muc_first_groupchat_msg       ,  'Hi there, I\'m a bot!', "first muc message");
-is ($muc_first_groupchat_msg_echo  ,  'Hi there, I\'m a bot!', "first muc message echo");
-is ($muc_second_groupchat_msg      ,  'Hi there too!', "second muc message");
-is ($muc_second_groupchat_msg_echo ,  'Hi there too!', "second muc message echo");
+ok ($muc_got_delayed_message,      "muc got delayed messages (and unreg cb)");
+
+is ($muc_first_groupchat_msg       , 'Hi there, I\'m a bot!', "first muc message");
+is ($muc_first_groupchat_msg_echo  , 'Hi there, I\'m a bot!', "first muc message echo");
+is ($muc_second_groupchat_msg      , 'Hi there too!', "second muc message");
+is ($muc_second_groupchat_msg_echo , 'Hi there too!', "second muc message echo");
+
+is ($muc_first_private_message     , 'Are you there?', 'first private muc message');
+is ($muc_second_private_message    , 'Hi, i got your msg!', 'second private muc message');

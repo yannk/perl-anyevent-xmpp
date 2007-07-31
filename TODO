@@ -3,8 +3,11 @@
 - Implement XEP-0045: Multi-User Chat
    x store full jid info on entering room
    x implement delayed delivery for messages
-      - WRITE TEST!
+      x WRITE TEST!
       - to mark history of room
+   x 7.8 Sending a Private Message
+   x 7.9 Sending a Message to All Occupants
+     - vissitor error (when room not allow without voice to chat)
    - improve room info handler class to retrieve interesting information eaasier
       - room occupant query
    - implement status code mappings
@@ -32,9 +35,6 @@
    - invitations
    - 7.6 Converting a One-to-One Chat Into a Conference
    - 7.7 Occupant Modification of the Room Subject
-   - 7.8 Sending a Private Message
-   x 7.9 Sending a Message to All Occupants
-     - vissitor error (when room not allow without voice to chat)
    - 7.10 Registering with a Room
    - 7.11 Discovering Reserved Room Nickname
    - 7.12 Requesting Voice

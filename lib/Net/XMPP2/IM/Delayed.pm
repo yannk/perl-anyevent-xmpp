@@ -108,6 +108,18 @@ sub delay_reason {
    $self->{delay}->{reason}
 }
 
+=item B<is_delayed>
+
+If this method returns a true value then this stanza was delayed.
+Otherwise it returns undef.
+
+=cut
+
+sub is_delayed {
+   my ($self) = @_;
+   $self->{delay}
+}
+
 =back
 
 =head1 AUTHOR

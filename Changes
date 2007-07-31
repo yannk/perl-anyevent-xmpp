@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.06
+         - reviewed the message API a bit, take care
          - started implementation of interfaces for MUC (XEP-0045).
          - added support for:
             - XEP-0082 - XMPP Date and Time Profiles
@@ -13,7 +14,6 @@ Revision history for Net-XMPP2
          - removed to attribute from iq auth get
          - implemented iq auth (XEP-0078)
          - fixed some bugs and improved the API a bit
-           (in compatible ways)
          - implemented the possibility of intercepting events
            from the library.
 
