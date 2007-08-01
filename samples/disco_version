@@ -5,22 +5,44 @@ use Event;
 use AnyEvent;
 use Net::XMPP2::Client;
 use Net::XMPP2::Ext::Version;
+use POSIX qw/strftime/;
+
+my ($jid,$pass) = qw/net_xmpp2@jabber.org test/;
+($jid, $pass) = @ARGV if @ARGV;
+
+sub timestamp {
+   strftime "%d%m%Y_%H%M", localtime (time);
+}
+my $TIMESTAMP = timestamp ();
 
 sub append_outputfile {
-   open OUT, ">>disco_version.output"
+   open OUT, ">>disco_version.\Q$TIMESTAMP\E.output"
+      or die "Couldn't open disco_version.output: $!\n";
+   print OUT $_[0];
+   close OUT;
+}
+sub append_failed {
+   open OUT, ">>disco_version.\Q$TIMESTAMP\E.failed"
       or die "Couldn't open disco_version.output: $!\n";
    print OUT $_[0];
    close OUT;
 }
 
+my %req;
+my ($out_cnt, $in_cnt);
+
 sub version_req {
    my ($vers, $con, $dest) = @_;
+   return if $req{$dest};
+   $out_cnt++;
 
    $vers->request_version ($con, $dest, sub {
       my ($version, $error) = @_;
+      $in_cnt++;
 
       if ($error) {
          warn "$dest: DISCO VERSION ERROR $dest: " . $error->string . "\n";
+         append_failed ("$dest\t".$error->string."\n");
       } else {
          my $from = $version->{jid};
          my $name = $version->{name};
@@ -36,7 +58,7 @@ sub version_req {
 }
 
 my $j = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new (debug => 1);
+my $cl = Net::XMPP2::Client->new;# (debug => 1);
 my $vers = Net::XMPP2::Ext::Version->new;
 $cl->add_extension ($vers);
 my $t = undef;
@@ -49,24 +71,20 @@ sub mkti {
          if ($j) {
             version_req ($vers, $con, $j);
          } else {
-            print "no more jids to query...\n";
+            print "no more jids to query ($out_cnt/$in_cnt)...\n";
             last;
          }
       }
       mkti ($con);
    });
 }
-$cl->add_account ('net_xmpp2@jabber.org', 'test', undef, undef, { disable_ssl => 1 });
+$cl->add_account ($jid, $pass);#, undef, undef, { disable_ssl => 1 });
 $cl->reg_cb (
    session_ready => sub {
       my ($cl, $acc) = @_;
-      $acc->connection->set_default_iq_timeout (800);
+      $acc->connection->set_default_iq_timeout (300);
       warn "session ready!\n";
-      if (@ARGV) {
-         version_req ($vers, $acc->connection, $ARGV[0]);
-      } else {
-         mkti ($acc->connection);
-      }
+      mkti ($acc->connection);
       $cl->unreg_me
    },
    disconnect => sub {

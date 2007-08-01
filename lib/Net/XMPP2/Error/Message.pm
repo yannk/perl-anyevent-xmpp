@@ -1,4 +1,6 @@
 package Net::XMPP2::Error::Message;
+use strict;
+no warnings;
 use Net::XMPP2::Error::Stanza;
 our @ISA = qw/Net::XMPP2::Error::Stanza/;
 
