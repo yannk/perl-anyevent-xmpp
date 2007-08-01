@@ -1,10 +1,13 @@
 #!/opt/perl/bin/perl
 
 my %versions;
+my %from;
 
 while (<STDIN>) {
    chomp;
-   my ($from, $name, $version) = split /\t/, $_;
+   my ($from, $name, $version, $os) = split /\t/, $_;
+   next if $from{$from};
+   $from{$from} = 1;
    $versions{$name .": " . $version}++;
 }
 
