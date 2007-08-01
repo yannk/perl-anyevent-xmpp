@@ -55,7 +55,11 @@ $C->reg_cb (
 
 $cl->wait;
 
-is ($recv_error->condition (), 'service-unavailable', 'service unavailable error');
+if ($recv_error) {
+   is ($recv_error->condition (), 'service-unavailable', 'service unavailable error');
+} else {
+   fail ('service unavailable error');
+}
 is ($recv_vers_error         , ''                   , 'no software version error');
 is ($recv_vers,
     "($dest) Net::XMPP2/$Net::XMPP2::VERSION/GNU/Virtual 0.23 x86_128",
