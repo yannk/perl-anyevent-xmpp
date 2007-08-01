@@ -483,18 +483,27 @@ sub send_iq {
 This method will generate a result reply to the iq request C<Net::XMPP2::Node>
 in C<$req_iq_node>.
 
-Please take a look at the documentation for C<send_iq> in Net::XMPP2::Writer
+Please take a look at the documentation for C<send_iq> in L<Net::XMPP2::Writer>
 about the meaning C<$create_cb> and C<%attrs>.
 
 Use C<$create_cb> to create the XML for the result.
 
 The type for this iq reply is 'result'.
 
+The C<to> attribute of the reply stanza will be set to the C<from>
+attribute of the C<$req_iq_node>. If C<$req_iq_node> had no C<from>
+node it won't be set. If you want to overwrite the C<to> field just
+pass it via C<%attrs>.
+
 =cut
 
 sub reply_iq_result {
    my ($self, $iqnode, $create_cb, %attrs) = @_;
-   $self->{writer}->send_iq ($iqnode->attr ('id'), 'result', $create_cb, %attrs);
+   $self->{writer}->send_iq (
+      $iqnode->attr ('id'), 'result', $create_cb,
+      (defined $iqnode->attr ('from') ? (to => $iqnode->attr ('from')) : ()),
+      %attrs
+   );
 }
 
 =item B<reply_iq_error ($req_iq_node, $error_type, $error, %attrs)>
@@ -511,6 +520,11 @@ about the meaning of C<%attrs>.
 
 The type for this iq reply is 'error'.
 
+The C<to> attribute of the reply stanza will be set to the C<from>
+attribute of the C<$req_iq_node>. If C<$req_iq_node> had no C<from>
+node it won't be set. If you want to overwrite the C<to> field just
+pass it via C<%attrs>.
+
 =cut
 
 sub reply_iq_error {
@@ -519,6 +533,7 @@ sub reply_iq_error {
    $self->{writer}->send_iq (
       $iqnode->attr ('id'), 'error',
       sub { $self->{writer}->write_error_tag ($iqnode, $errtype, $error) },
+      (defined $iqnode->attr ('from') ? (to => $iqnode->attr ('from')) : ()),
       %attrs
    );
 }
@@ -552,13 +567,8 @@ sub handle_iq {
 
    } else {
       my (@r) = $self->event ("iq_${type}_request_xml" => $node);
-      @r = grep { $_ } @r;
-
-      my @from;
-      push @from, (to => $node->attr ('from')) if $node->attr ('from');
-
-      unless (@r) {
-         $self->reply_iq_error ($node, undef, 'service-unavailable', @from);
+      unless (grep { $_ } @r) {
+         $self->reply_iq_error ($node, undef, 'service-unavailable');
       }
    }
 }

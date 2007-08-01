@@ -81,6 +81,22 @@ This extension will enable sending of the old error codes when generating a stan
 error with for example the C<write_error_tag> method of L<Net::XMPP2::Writer>.
 
 =item XEP-0091 - Delayed Delivery
+
+See also XEP-0203 below.
+
+=item XEP-0092 - Software Version
+
+The ability to answer to software version, name and operating system requests
+and being able to send such requests is implemented in L<Net::XMPP2::Ext::Version>.
+
+=item XEP-0114 - Jabber Component Protocol
+
+This extension allows you to connect to a server as a component
+and makes it possible to implement services like pubsub, muc, or
+whatever you can imagine (even gateways).
+See documentation of L<Net::XMPP2::Component> and the example
+C<samples/simple_component>.
+
 =item XEP-0203 - Delayed Delivery
 
 Both delayed delivery XEPs are supported and are implemented by
@@ -94,13 +110,6 @@ L<Net::XMPP2::Node>.
 Use the functions described above in the XEP-0082 item to decode the timestamps
 of delays.
 
-=item XEP-0114 - Jabber Component Protocol
-
-This extension allows you to connect to a server as a component
-and makes it possible to implement services like pubsub, muc, or
-whatever you can imagine (even gateways).
-See documentation of L<Net::XMPP2::Component> and the example
-C<samples/simple_component>.
 
 =back
 

@@ -164,13 +164,9 @@ sub reply_failure {
    my ($self, $con, $node, $type) = @_;
 
    if ($type eq 'reject') {
-      $con->reply_iq_error (
-         $node, 'cancel', 'item-not-found', to => $node->attr ('from')
-      );
+      $con->reply_iq_error ($node, 'cancel', 'item-not-found');
    } else {
-      $con->reply_iq_error (
-         $node, 'modify', 'not-acceptable', to => $node->attr ('from')
-      );
+      $con->reply_iq_error ($node, 'modify', 'not-acceptable');
    }
 }
 

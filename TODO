@@ -70,6 +70,8 @@
       - 10.8 Modifying the Admin List
       - 10.9 Destroying a Room
 
+- read into SSL and improve the SSL/TLS handling
+
 - make more tests
    - oob
    - data forms
@@ -94,14 +96,12 @@
     are in multiple account's roster.
 
 - Net::XMPP2 missing functionality to be RFC 3920 conform:
-   - improve error handling for SASL to 
+   - improve error handling for SASL to
      support retries as specified in RFC 3920.
      (eg. by supporting a method sasl_retry() which takes
       the changed credentials)
-   - SRV record lookup
+   x SRV record lookup
       - weight handling!
-   later:
-      - make dns resolution async!
 
 - Net::XMPP2::IM missing functionality to be RFC 3921 conform:
    - 7.2.  Business Rules
@@ -110,14 +110,7 @@
 
 - Implement XEP-0190: Best Practice for Closing Idle Streams
 
-- Maybe implemente XEP-0146: Remote Controlling Clients
-
-- keep an eye on:
-   - TLS: implemented, just do some extensive testing WRT blocking,
-          i don't trust the current way the watchers are handled,
-          i'm in fear of deadlocks...
-
-- Implement XEP-0030: Service Discovery
+x Implement XEP-0030: Service Discovery
    - see also: XEP-0128: Service Discovery Extensions
    - missing feature: building up a item tree for discovery
 
@@ -131,3 +124,13 @@ long term?
 x Implement XEP-0082: XMPP Date and Time Profiles
    - provide maybe _to functions for the old format,
      it's still in use out there
+
+- make dns resolution async!
+
+- Maybe implement XEP-0146: Remote Controlling Clients
+
+x keep an eye on:
+   - TLS: implemented, just do some extensive testing WRT blocking,
+          i don't trust the current way the watchers are handled,
+          i'm in fear of deadlocks...
+

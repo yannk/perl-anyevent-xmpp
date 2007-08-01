@@ -304,7 +304,8 @@ Example:
 
 C<%attrs> should have further attributes for the IQ stanza tag.
 For example 'to' or 'from'. If the C<%attrs> contain a 'lang' attribute
-it will be put into the 'xml' namespace.
+it will be put into the 'xml' namespace. If the 'to' attribute contains
+an undef it will be omitted.
 
 C<$id> is the id to give this IQ stanza and is mandatory in this API.
 
@@ -322,6 +323,11 @@ sub send_iq {
    if ($attrs{lang}) {
       push @from, ([ xmpp_ns ('xml'), 'lang' ] => delete $attrs{leng})
    }
+
+   unless (defined $attrs{to}) {
+      delete $attrs{to};
+   }
+
    push @from, (id => $id) if defined $id;
    if (defined $create_cb) {
       $w->startTag ('iq', type => $type, @from, %attrs);

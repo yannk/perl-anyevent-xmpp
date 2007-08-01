@@ -201,8 +201,7 @@ sub handle_disco_query {
                   }
                $w->endTag;
             }
-         },
-         to => $node->attr ('from')
+         }
       );
 
       return 1
@@ -225,8 +224,7 @@ sub handle_disco_query {
                   name => 'query'
                });
             }
-         },
-         to => $node->attr ('from')
+         }
       );
 
       return 1
@@ -246,11 +244,14 @@ sub DESTROY {
 This method does send a items request to the JID entity C<$from>.
 C<$node> is the optional node to send the request to, which can be
 undef.
+
 C<$con> must be an instance of L<Net::XMPP2::Connection> or a subclass of it.
 The callback C<$cb> will be called when the request returns with 3 arguments:
 the disco handle, an L<Net::XMPP2::Ext::Disco::Items> object (or undef)
 and an L<Net::XMPP2::Error::IQ> object when an error occured and no items
 were received.
+
+The timeout of the request is the IQ timeout of the connection C<$con>.
 
    $disco->request_items ($con, 'a@b.com', undef, sub {
       my ($disco, $items, $error) = @_;
@@ -296,11 +297,14 @@ sub request_items {
 This method does send a info request to the JID entity C<$from>.
 C<$node> is the optional node to send the request to, which can be
 undef.
+
 C<$con> must be an instance of L<Net::XMPP2::Connection> or a subclass of it.
 The callback C<$cb> will be called when the request returns with 3 arguments:
 the disco handle, an L<Net::XMPP2::Ext::Disco::Info> object (or undef)
 and an L<Net::XMPP2::Error::IQ> object when an error occured and no items
 were received.
+
+The timeout of the request is the IQ timeout of the connection C<$con>.
 
    $disco->request_info ($con, 'a@b.com', undef, sub {
       my ($disco, $info, $error) = @_;
