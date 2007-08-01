@@ -70,6 +70,7 @@
       - 10.8 Modifying the Admin List
       - 10.9 Destroying a Room
 
+- implement connection timeout if the server sucks...
 - read into SSL and improve the SSL/TLS handling
 - make more tests
    - oob

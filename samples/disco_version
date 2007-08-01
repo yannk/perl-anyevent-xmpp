@@ -4,6 +4,7 @@ use utf8;
 use Event;
 use AnyEvent;
 use Net::XMPP2::Client;
+use Net::XMPP2::Ext::Version;
 
 sub append_outputfile {
    open OUT, ">>disco_version.output"
@@ -13,39 +14,31 @@ sub append_outputfile {
 }
 
 sub version_req {
-   my ($con, $dest) = @_;
+   my ($vers, $con, $dest) = @_;
 
-   $con->send_iq (
-      get => { 
-         defns => 'version',
-         node => { name => 'query', ns => 'version' }
-      },
-      sub {
-         my ($node, $error) = @_;
-         if ($error) {
-            warn "$dest: DISCO VERSION ERROR $dest: " . $error->string . "\n";
-         } else {
-            my (@name) = $node->find_all ([qw/version query/], [qw/version name/]);
-            my (@ver)  = $node->find_all ([qw/version query/], [qw/version version/]);
-            if (@name and @ver) {
-               my $from = $node->attr ('from');
-               my $name = $name[0]->text;
-               my $ver  =  $ver[0]->text;
-               $ver  =~ s/[\n\t]//g;
-               $name =~ s/[\n\t]//g;
-               print "$dest: $from: name: $name version: $ver\n";
-               append_outputfile ("$from\t$name\t$ver\n");
-            } else {
-               print "$dest: no version\n";
-            }
-         }
-      },
-      to => $dest
-   );
+   $vers->request_version ($con, $dest, sub {
+      my ($version, $error) = @_;
+
+      if ($error) {
+         warn "$dest: DISCO VERSION ERROR $dest: " . $error->string . "\n";
+      } else {
+         my $from = $version->{jid};
+         my $name = $version->{name};
+         my $ver  = $version->{version};
+         my $os   = $version->{os};
+         $ver  =~ s/[\n\t]//g;
+         $name =~ s/[\n\t]//g;
+         $os   =~ s/[\n\t]//g;
+         print "$dest: $from: name: $name version: $ver os: $os\n";
+         append_outputfile ("$from\t$name\t$ver\t$os\n");
+      }
+   });
 }
 
 my $j = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new;
+my $cl = Net::XMPP2::Client->new (debug => 1);
+my $vers = Net::XMPP2::Ext::Version->new;
+$cl->add_extension ($vers);
 my $t = undef;
 my @jids = map { chomp; $_ } <STDIN>;
 sub mkti {
@@ -54,7 +47,7 @@ sub mkti {
       for (1..50) {
          my $j = pop @jids;
          if ($j) {
-            version_req ($con, $j);
+            version_req ($vers, $con, $j);
          } else {
             print "no more jids to query...\n";
             last;
@@ -63,12 +56,14 @@ sub mkti {
       mkti ($con);
    });
 }
-$cl->add_account ('net_xmpp2@jabber.org', 'test');
+$cl->add_account ('net_xmpp2@jabber.org', 'test', undef, undef, { disable_ssl => 1 });
 $cl->reg_cb (
    session_ready => sub {
       my ($cl, $acc) = @_;
+      $acc->connection->set_default_iq_timeout (800);
+      warn "session ready!\n";
       if (@ARGV) {
-         version_req ($acc->connection, $ARGV[0]);
+         version_req ($vers, $acc->connection, $ARGV[0]);
       } else {
          mkti ($acc->connection);
       }
