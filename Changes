@@ -1,11 +1,12 @@
 Revision history for Net-XMPP2
 
-0.06
+0.06 Wed Aug  1 15:53:56 CEST 2007
+         - reply_iq_result and reply_iq_error now attach a from attribute themselves.
          - added general instructions for the test suite which also seems to be
            useful to test servers :-)
          - implemented XEP-0092
          - reviewed the message API a bit, take care
-         - started implementation of interfaces for MUC (XEP-0045).
+         - started implementation of MUC (XEP-0045).
          - added support for:
             - XEP-0082 - XMPP Date and Time Profiles
             - XEP-0091 - Delayed Delivery (legacy)
