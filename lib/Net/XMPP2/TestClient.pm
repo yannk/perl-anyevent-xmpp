@@ -24,6 +24,38 @@ variable C<NET_XMPP2_TEST> to something like this:
 Most tests will try to connect two accounts, so please take a server
 that allows two connections from the same IP.
 
+If you also want to run the MUC tests (see L<Net::XMPP2::Ext::MUC>)
+you also need to setup the environment variable C<NET_XMPP2_TEST_MUC>
+to contain the domain of a MUC service:
+
+   NET_XMPP2_TEST_MUC="conference.your_xmpp_server.tld"
+
+If you see some tests fail and want to know more about the protocol flow
+you can enable the protocol debugging output by setting C<NET_XMPP2_TEST_DEBUG>
+to '1':
+
+   NET_XMPP2_TEST_DEBUG=1
+
+(NOTE: You will only see the output of this by running a single test)
+
+=head1 CLEANING UP
+
+If the tests went wrong somewhere or you interrupted the tests you might
+want to delete the accounts from the server manually, then run:
+
+   perl t/z_*_unregister.t
+
+=head1 MANUAL TESTING
+
+If you just want to run a single test yourself, just execute the register
+test before doing so:
+
+   perl t/z_00_register.t
+
+And then you could eg. run:
+
+   perl t/z_03_iq_auth.t
+
 =head1 METHODS
 
 =head2 new (%args)

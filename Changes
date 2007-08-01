@@ -1,6 +1,8 @@
 Revision history for Net-XMPP2
 
 0.06
+         - added general instructions for the test suite which also seems to be
+           useful to test servers :-)
          - implemented XEP-0092
          - reviewed the message API a bit, take care
          - started implementation of interfaces for MUC (XEP-0045).
@@ -8,15 +10,13 @@ Revision history for Net-XMPP2
             - XEP-0082 - XMPP Date and Time Profiles
             - XEP-0091 - Delayed Delivery (legacy)
             - XEP-0203 - Delayed Delivery (new)
-         - reworked subscription system a bit, now you
-           have to subscribe manually by calling the contact's
-           methods yourself.
+         - reworked subscription system a bit, now you have to subscribe
+           manually by calling the contact's methods yourself.
          - fixed weirdties with JID prepping
          - removed to attribute from iq auth get
          - implemented iq auth (XEP-0078)
          - fixed some bugs and improved the API a bit
-         - implemented the possibility of intercepting events
-           from the library.
+         - implemented the possibility of intercepting events from the library.
 
 0.05 Fri Jul 27 17:45:16 CEST 2007
          - fixed destructor problem in disco
