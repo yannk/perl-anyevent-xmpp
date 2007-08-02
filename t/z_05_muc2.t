@@ -19,7 +19,7 @@ my $ROOM = "test@".$MUC;
 
 my $cl =
    Net::XMPP2::TestClient->new_or_exit (
-      tests => 10, two_accounts => 1, finish_count => 1
+      tests => 26, two_accounts => 1, finish_count => 1
    );
 my $C     = $cl->client;
 my $disco = $cl->instance_ext ('Net::XMPP2::Ext::Disco');
@@ -150,12 +150,75 @@ sub step_join_occupant_password {
    $muc2->join_room ($ROOM, "test2user", sub {
       my ($room, $user, $error) = @_;
       if ($error) {
-         $sjop_error = $error->string
+         $sjop_error = $error->string;
+         $cl->finish;
       } else {
          $sjop_join++;
+         step_change_nick ($C, $mucs, $jid1, $jid2, $room1, $user1, $room, $user);
       }
-      $cl->finish;
    }, password => 'abc123');
+}
+
+my $nick_info = {};
+
+sub step_change_nick {
+   my ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2, $second) = @_;
+
+   my $ni = $nick_info;
+   if ($second == 1) {
+      $ni = $nick_info->{second} = {};
+   }
+
+   my $cnt = 0;
+
+   $room1->reg_cb (
+      nick_change => sub {
+         my ($room1, $user, $oldnick, $newnick) = @_;
+
+         $ni->{user1}->{own}      = $user1->jid;
+         $ni->{user1}->{other}    = $user2->jid;
+         $ni->{user1}->{old_nick} = $oldnick;
+         $ni->{user1}->{new_nick} = $newnick;
+         $room1->unreg_me;
+      },
+      after_nick_change => sub {
+         my ($room1) = @_;
+
+         if (not $second) {
+            $cnt++;
+            step_change_nick ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2, 1)
+               if $cnt >= 2;
+         }
+         $room1->unreg_me;
+      }
+   );
+
+   $room2->reg_cb (
+      nick_change => sub {
+         my ($room2, $user, $oldnick, $newnick) = @_;
+         $ni->{user2}->{own}      = $user2->jid;
+         $ni->{user2}->{other}    = $user1->jid;
+         $ni->{user2}->{old_nick} = $oldnick;
+         $ni->{user2}->{new_nick} = $newnick;
+         $room2->unreg_me;
+      },
+      after_nick_change => sub {
+         my ($room2) = @_;
+
+         if (not $second) {
+            $cnt++;
+            step_change_nick ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2, 1)
+               if $cnt >= 2;
+         }
+         $room2->unreg_me;
+      }
+   );
+
+   if ($second == 1) {
+      $room2->change_nick ("test2nd");
+   } else {
+      $room2->change_nick ("test2");
+   }
 }
 
 $cl->wait;
@@ -170,3 +233,21 @@ ok ($sr_config_ok                , "configuration form was successfully sent");
 is ($sjo_join_error_type, 'password_required', "occupant joined without error");
 is ($sjop_error       ,        '', "rejoin with password no error");
 is ($sjop_join        ,         1, "joined successfully with password");
+
+is ($nick_info->{user1}->{own}     , "$ROOM/test1owner", 'observed own JID of user1');
+is ($nick_info->{user1}->{other}   , "$ROOM/test2"     , 'observed other JID of user1');
+is ($nick_info->{user1}->{old_nick}, "test2user"       , 'observed old nick of user1');
+is ($nick_info->{user1}->{new_nick}, "test2"           , 'observed new nick of user1');
+is ($nick_info->{user2}->{own}     , "$ROOM/test2"     , 'observed own JID of user2');
+is ($nick_info->{user2}->{other}   , "$ROOM/test1owner", 'observed other JID of user2');
+is ($nick_info->{user2}->{old_nick}, "test2user"       , 'observed old nick of user2');
+is ($nick_info->{user2}->{new_nick}, "test2"           , 'observed new nick of user2');
+$nick_info = $nick_info->{second};
+is ($nick_info->{user1}->{own}     , "$ROOM/test1owner", '2nd observed own JID of user1');
+is ($nick_info->{user1}->{other}   , "$ROOM/test2nd"   , '2nd observed other JID of user1');
+is ($nick_info->{user1}->{old_nick}, "test2"           , '2nd observed old nick of user1');
+is ($nick_info->{user1}->{new_nick}, "test2nd"         , '2nd observed new nick of user1');
+is ($nick_info->{user2}->{own}     , "$ROOM/test2nd"   , '2nd observed own JID of user2');
+is ($nick_info->{user2}->{other}   , "$ROOM/test1owner", '2nd observed other JID of user2');
+is ($nick_info->{user2}->{old_nick}, "test2"           , '2nd observed old nick of user2');
+is ($nick_info->{user2}->{new_nick}, "test2nd"         , '2nd observed new nick of user2');

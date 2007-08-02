@@ -73,56 +73,62 @@ $C->reg_cb (
 sub step_join_rooms {
    my ($C, $mucs, $jid1, $jid2) = @_;
 
+   my @jobs;
+
    for (keys %$mucs) {
       my ($node) = split_jid $_;
       my $muc = $mucs->{$_};
+      push @jobs, sub {
+         $muc->reg_cb (
+            enter_room => sub {
+               my ($muc, $con, $room, $user) = @_;
 
-      $muc->reg_cb (
-         enter_room => sub {
-            my ($muc, $con, $room, $user) = @_;
+               $muc_joined_ev++;
 
-            $muc_joined_ev++;
+               $room->make_message (body => "made it (".$user->jid.")!")->send;
 
-            $room->make_message (body => "made it (".$user->jid.")!")->send;
+               if ($muc_joined_ev == 2) {
+                 $mucs->{prep_bare_jid $jid1}
+                    ->get_room ($ROOM)
+                       ->send_part ("parting for tests");
+               }
+            },
+            message_room => sub {
+               my ($muc, $con, $room, $msg) = @_;
 
-            if ($muc_joined_ev == 2) {
-              $mucs->{prep_bare_jid $jid1}
-                 ->get_room ($ROOM)
-                    ->send_part ("parting for tests");
+               if ($msg->is_delayed) {
+                  $muc_got_delayed_message++;
+                  $muc->unreg_me;
+               }
+            },
+            leave_room => sub {
+               my ($muc, $con, $room) = @_;
+
+               if (prep_bare_jid ($room->jid) eq prep_bare_jid ($ROOM)) {
+                  $muc_left_once++;
+                  $muc->join_room ($ROOM, $node, sub {
+                     unless ($_[2]) {
+                        $muc_joined_after_leave_cb++;
+                        step_check_status ($C, $mucs, $jid1, $jid2);
+                     }
+                  });
+               }
             }
-         },
-         message_room => sub {
-            my ($muc, $con, $room, $msg) = @_;
+         );
 
-            if ($msg->is_delayed) {
-               $muc_got_delayed_message++;
-               $muc->unreg_me;
+         $muc->join_room ($ROOM, $node, sub {
+            my ($room, $user, $error) = @_;
+            if ($error) {
+               $muc_join_error = $error->string;
+            } else {
+               $muc_joined_cb++;
+               (pop @jobs)->();
             }
-         },
-         leave_room => sub {
-            my ($muc, $con, $room) = @_;
-
-            if (prep_bare_jid ($room->jid) eq prep_bare_jid ($ROOM)) {
-               $muc_left_once++;
-               $muc->join_room ($ROOM, $node, sub {
-                  unless ($_[2]) {
-                     $muc_joined_after_leave_cb++;
-                     step_check_status ($C, $mucs, $jid1, $jid2);
-                  }
-               });
-            }
-         }
-      );
-
-      $muc->join_room ($ROOM, $node, sub {
-         my ($room, $user, $error) = @_;
-         if ($error) {
-            $muc_join_error = $error->string;
-         } else {
-            $muc_joined_cb++;
-         }
-      });
+         });
+      };
    }
+
+   (pop @jobs)->();
 }
 
 sub step_check_status {

@@ -43,15 +43,18 @@ sub update {
    my $from = $node->attr ('from');
    my ($room, $srv, $nick) = split_jid ($from);
 
-   my ($aff, $role, $stati, $jid);
+   my ($aff, $role, $stati, $jid, $new_nick);
    $self->{stati} ||= {};
    $stati = $self->{stati};
 
+   delete $self->{stati}->{'303'}; # nick change
+
    if ($xuser) {
       if (my ($item) = $xuser->find_all ([qw/muc_user item/])) {
-         $aff  = $item->attr ('affiliation');
-         $role = $item->attr ('role');
-         $jid  = $item->attr ('jid');
+         $aff      = $item->attr ('affiliation');
+         $role     = $item->attr ('role');
+         $jid      = $item->attr ('jid');
+         $new_nick = $item->attr ('nick');
       }
 
       for ($xuser->find_all ([qw/muc_user status/])) {
@@ -59,10 +62,16 @@ sub update {
       }
    }
 
+   $self->{jid}         = $from;
    $self->{nick}        = $nick;
    $self->{affiliation} = $aff;
    $self->{real_jid}    = $jid if defined $jid && $jid ne '';
    $self->{role}        = $role;
+
+   if ($self->is_in_nick_change) {
+      $self->{old_nick} = $self->{nick};
+      $self->{nick} = $new_nick;
+   }
 }
 
 sub init {
@@ -146,6 +155,14 @@ sub make_message {
       to         => $self->jid,
       %args
    );
+}
+
+sub is_in_nick_change {
+   $_[0]->{stati}->{'303'}
+}
+
+sub nick_change_old_nick {
+   $_[0]->{old_nick}
 }
 
 =back

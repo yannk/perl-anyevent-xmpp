@@ -4,7 +4,7 @@ no warnings;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Util qw/
    bare_jid prep_bare_jid cmp_jid split_jid join_jid is_bare_jid
-   prep_res_jid prep_join_jid
+   prep_res_jid prep_join_jid resourceprep
 /;
 use Net::XMPP2::Event;
 use Net::XMPP2::Ext::MUC::User;
@@ -72,13 +72,28 @@ sub handle_presence {
 
    my $s = $self->{status};
 
-   my $from    = $node->attr ('from');
-   my $type    = $node->attr ('type');
+   my $from = $node->attr ('from');
+   my $type = $node->attr ('type');
 
    my $error;
    if ($node->attr ('type') eq 'error') {
       $error = Net::XMPP2::Error::Presence->new (node => $node);
    }
+
+   my $stati = {};
+   my $new_nick;
+
+   if (my ($x) = $node->find_all ([qw/muc_user x/])) {
+      for ($x->find_all ([qw/muc_user status/])) {
+         $stati->{$_->attr ('code')}++;
+      }
+
+      if (my ($i) = $x->find_all ([qw/muc_user item/])) {
+         $new_nick = $i->attr ('nick');
+      }
+   }
+
+   my $nick_change = $stati->{'303'};
 
    if ($s == JOIN_SENT) {
       if ($error) {
@@ -89,7 +104,6 @@ sub handle_presence {
          $self->event (join_error => $muce);
 
       } else {
-
          if (cmp_jid ($from, $self->nick_jid)) {
             my $user = $self->add_user_xml ($node);
             $self->{status} = JOINED;
@@ -100,8 +114,8 @@ sub handle_presence {
             $self->add_user_xml ($node);
          }
       }
-   } elsif ($s == JOINED) { # nick changes?
 
+   } elsif ($s == JOINED) { # nick changes?
       if ($error) {
          my $muce = Net::XMPP2::Error::MUC->new (
             presence_error => $error,
@@ -109,8 +123,7 @@ sub handle_presence {
          );
          $self->event (error => $muce);
 
-      } elsif ($type eq 'unavailable') {
-
+      } elsif (!$nick_change && $type eq 'unavailable') {
          if (cmp_jid ($from, $self->nick_jid)) {
             $self->event ('leave');
             $self->we_left_room ();
@@ -126,12 +139,31 @@ sub handle_presence {
                warn "User with '$nick' not found in room $self->{jid}!\n";
             }
          }
+
+      } elsif ($nick_change && $type eq 'unavailable') {
+         my $nick = prep_res_jid ($from);
+         my $nnick = resourceprep ($new_nick);
+
+         my $user = $self->{users}->{$nnick} = delete $self->{users}->{$nick};
+         if ($user) {
+            $user->update ($node);
+            $self->event (nick_change_leave => $user, $nick, $new_nick);
+         } else {
+            warn "User with '$nick' not found in room $self->{jid} for nickchange!\n";
+         }
+
       } else {
          my $nick = prep_res_jid $from;
          my $pre  = $self->{users}->{$nick};
+         my $in_nick_change = $pre ? $pre->is_in_nick_change : undef;
          my $user = $self->add_user_xml ($node);
+
          if ($pre) {
-            $self->event (presence => $user);
+            if ($in_nick_change) {
+               $self->event (nick_change => $user, $user->{old_nick}, $user->nick);
+            } else {
+               $self->event (presence => $user);
+            }
          } else {
             $self->event (join     => $user);
          }
@@ -193,7 +225,7 @@ sub add_user_xml {
    my $user = $self->{users}->{$nick};
    unless ($user) {
       $user = $self->{users}->{$nick} =
-         Net::XMPP2::Ext::MUC::User->new (room => $self, jid => $from);
+         Net::XMPP2::Ext::MUC::User->new (room => $self);
    }
 
    $user->update ($node);
@@ -441,6 +473,20 @@ sub is_joined {
    my ($self) = @_;
    $self->is_connected
    && $self->{status} == JOINED
+}
+
+=item B<change_nick ($newnick)>
+
+This method lets you change your nickname in this room.
+
+=cut
+
+sub change_nick {
+   my ($self, $newnick) = @_;
+   my ($room, $srv) = split_jid $self->jid;
+   $self->{muc}->{connection}->send_presence (
+      undef, undef, to => join_jid ($room, $srv, $newnick)
+   );
 }
 
 =back

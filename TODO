@@ -26,9 +26,9 @@
          - 11.2 Status Codes
    - managing of discussion history when entering
       - maxchars, maxstanzas, seconds, since
-   - nickname changes
-      - make own possible
-      - log changes of other people nicknames
+   x nickname changes
+      x make own possible
+      x log changes of other people nicknames
       - according errors
    - test changing of presence of a user
    - invitations
