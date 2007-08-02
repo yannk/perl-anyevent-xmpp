@@ -7,24 +7,23 @@
       - to mark history of room
    x 7.8 Sending a Private Message
    x 7.9 Sending a Message to All Occupants
-     - vissitor error (when room not allow without voice to chat)
+     - visitor error (when room not allow without voice to chat)
    - improve room info handler class to retrieve interesting information eaasier
       - room occupant query
    - implement status code mappings
       - that room logged
       - non anonymous
-   - look over error reporting (more conclusive errors!)
-      - change presenceerror to something more clear
-      - entering members only
-      - banned
-      - nickname conflict
+   x look over error reporting (more conclusive errors!)
+      x change presenceerror to something more clear
+      x entering members only
+      x banned
+      x nickname conflict
          - with resolution
-      - max users
-      - locked
-      - 11. Error and Status Codes
-         - 11.1 Error Codes
+      x max users
+      x locked
+      x 11. Error and Status Codes
+         x 11.1 Error Codes
          - 11.2 Status Codes
-   - entering password protected rooms
    - managing of discussion history when entering
       - maxchars, maxstanzas, seconds, since
    - nickname changes
@@ -33,8 +32,6 @@
       - according errors
    - test changing of presence of a user
    - invitations
-   - 7.6 Converting a One-to-One Chat Into a Conference
-   - 7.7 Occupant Modification of the Room Subject
    - 7.10 Registering with a Room
    - 7.11 Discovering Reserved Room Nickname
    - 7.12 Requesting Voice
@@ -56,9 +53,11 @@
       - 9.8 Modifying the Moderator List
       - 9.9 Approving Registration Requests
    - 10. Owner Use Cases
-      - 10.1.1 General Considerations
-      - 10.1.2 Creating an Instant Room
-      - 10.1.3 Creating a Reserved Room
+      x 10.1.1 General Considerations
+      x 10.1.2 Creating an Instant Room
+      x 10.1.3 Creating a Reserved Room
+         x entering password protected rooms
+         - 7.7 Occupant Modification of the Room Subject
       - 10.1.4 Requesting a Unique Room Name
       - 10.2 Subsequent Room Configuration
       - 10.2.1 Notification of Configuration Changes
@@ -69,7 +68,9 @@
       - 10.7 Revoking Administrative Privileges
       - 10.8 Modifying the Admin List
       - 10.9 Destroying a Room
+   - 7.6 Converting a One-to-One Chat Into a Conference
 
+- write a tutorial for simxml
 - implement connection timeout if the server sucks...
 - read into SSL and improve the SSL/TLS handling
 - make more tests

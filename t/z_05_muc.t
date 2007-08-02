@@ -105,7 +105,7 @@ sub step_join_rooms {
             if (prep_bare_jid ($room->jid) eq prep_bare_jid ($ROOM)) {
                $muc_left_once++;
                $muc->join_room ($ROOM, $node, sub {
-                  unless ($_[0]) {
+                  unless ($_[2]) {
                      $muc_joined_after_leave_cb++;
                      step_check_status ($C, $mucs, $jid1, $jid2);
                   }
@@ -115,7 +115,7 @@ sub step_join_rooms {
       );
 
       $muc->join_room ($ROOM, $node, sub {
-         my ($error) = @_;
+         my ($room, $user, $error) = @_;
          if ($error) {
             $muc_join_error = $error->string;
          } else {

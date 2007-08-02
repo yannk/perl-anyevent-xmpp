@@ -12,29 +12,138 @@ Subclass of L<Net::XMPP2::Error>
 
 =over 4
 
+=cut
+
+sub init {
+   my ($self) = @_;
+   if ($self->{presence_error}) {
+      my %mapping = (
+         'not-authorized' => 'password_required',
+         'forbidden'      => 'banned',
+         'item-not-found' => 'room_locked',
+         'not-allowed'    => 'room_not_creatable',
+         'not-acceptable' => 'use_reserved_nick',
+         'registration-required' => 'not_on_memberlist',
+         'conflict'              => 'nickname_in_use',
+         'service-unavailable'   => 'room_full',
+      );
+      my $cond = $self->{presence_error}->{error_cond};
+      $self->{type} = $mapping{$cond};
+   }
+}
+
 =item B<type>
 
 This method returns either:
 
-C<join_timeout>
+=over 4
 
-C<presence_error>
+=item join_timeout
+
+If the joining of the room took too long this error is generated.
+
+=back
+
+If we got a presence error the method C<presence_error> returns a
+L<Net::XMPP2::Error::Presence> object with further details. However, this class
+tries to provide a mapping for you (the developer) to ease the load of figuring
+out which error means what. To make identification of the errors with XEP-0045
+more clear I included the error codes and condition names.
+
+Here are the more descriptive types:
+
+=over 4
+
+=item password_required
+
+Entering a room Inform user that a password is required.
+
+(Condition: not-authorized, Code: 401)
+
+=item banned
+
+Entering a room Inform user that he or she is banned from the room
+
+(Condition: forbidden, Code: 403)
+
+=item room_locked
+
+Entering a room Inform user that the room does not exist and someone
+is currently creating it.
+
+(Condition: item-not-found, Code: 404)
+
+=item room_not_creatable
+
+Entering a room Inform user that room creation is restricted
+
+(Condition: not-allowed, Code: 405)
+
+=item use_reserved_nick
+
+Entering a room Inform user that the reserved roomnick must be used
+
+(Condition: not-acceptable, Code: 406)
+
+=item not_on_memberlist
+
+Entering a room Inform user that he or she is not on the member list
+
+(Condition: registration-required, Code: 407)
+
+=item nickname_in_use
+
+Entering a room Inform user that his or her desired room nickname is in use or registered by another user
+
+(Condition: conflict, Code: 409)
+
+=item room_full
+
+Entering a room Inform user that the maximum number of users has been reached
+
+(Condition: service-unavailable, Code: 503)
+
+=back
+
+The condition and code are also available through the L<Net::XMPP2::Error::Presence>
+object returned by C<presence_error>, see below.
 
 =cut
 
 sub type { $_[0]->{type} }
 
-sub text { $_[0]->{text} }
+=item B<text>
+
+This method returns a human readable text
+if one is available.
+
+=cut
+
+sub text {
+   my ($self) = @_;
+   if (my $p = $self->presence_error) {
+      return $p->text;
+   } else {
+      return $self->{text}
+   }
+}
+
+=item B<presence_error>
+
+Returns a L<Net::XMPP2::Error::Presence> object if this error
+origins to such an error and not some internal error.
+
+=cut
 
 sub presence_error { $_[0]->{presence_error} }
 
 sub string {
    my ($self) = @_;
 
-   sprintf "muc error: '%s' %s",
+   sprintf "muc error: '%s': %s",
       $self->type,
       (
-         $self->type eq 'presence_error'
+         $self->presence_error
             ? $self->presence_error ()->string
             : $self->text
       )

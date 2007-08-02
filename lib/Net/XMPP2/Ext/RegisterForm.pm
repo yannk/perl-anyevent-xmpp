@@ -256,7 +256,6 @@ sub answer_form_to_simxml {
 
    if ($self->{data_form}) {
       my $sxl = $self->{data_form}->to_simxml;
-      $sxl->{dns} = $sxl->{ns};
       return $sxl;
 
    } else {

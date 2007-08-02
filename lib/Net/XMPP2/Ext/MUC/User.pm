@@ -44,7 +44,8 @@ sub update {
    my ($room, $srv, $nick) = split_jid ($from);
 
    my ($aff, $role, $stati, $jid);
-   $stati = {};
+   $self->{stati} ||= {};
+   $stati = $self->{stati};
 
    if ($xuser) {
       if (my ($item) = $xuser->find_all ([qw/muc_user item/])) {
@@ -52,7 +53,12 @@ sub update {
          $role = $item->attr ('role');
          $jid  = $item->attr ('jid');
       }
+
+      for ($xuser->find_all ([qw/muc_user status/])) {
+         $stati->{$_->attr ('code')}++;
+      }
    }
+
    $self->{nick}        = $nick;
    $self->{affiliation} = $aff;
    $self->{real_jid}    = $jid if defined $jid && $jid ne '';
@@ -124,6 +130,15 @@ C<%args> are further arguments to the constructor of the message.
 
 sub message_class { 'Net::XMPP2::Ext::MUC::Message' }
 
+
+=item B<did_create_room>
+
+This method returns true if the user created a room.
+
+=cut
+
+sub did_create_room { $_[0]->{stati}->{'201'} }
+
 sub make_message {
    my ($self, %args) = @_;
    $self->message_class ()->new (
@@ -132,7 +147,6 @@ sub make_message {
       %args
    );
 }
-
 
 =back
 

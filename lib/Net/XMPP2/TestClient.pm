@@ -38,6 +38,11 @@ to '1':
 
 (NOTE: You will only see the output of this by running a single test)
 
+If one of the tests takes longer than the preconfigured 20 seconds default
+timeout in your setup you can set C<NET_XMPP2_TEST_TIMEOUT>:
+
+   NET_XMPP2_TEST_TIMEOUT=60  # for a 1 minute timeout
+
 =head1 CLEANING UP
 
 If the tests went wrong somewhere or you interrupted the tests you might
@@ -72,13 +77,17 @@ sub new_or_exit {
    my $this = shift;
    my $class = ref($this) || $this;
    my $self = {
-      timeout => 10,
-      finish_count => 1,
+      timeout      => 20,
+      finish_count =>  1,
       @_
    };
 
    if ($ENV{NET_XMPP2_TEST_DEBUG}) {
       $self->{debug} = 1;
+   }
+
+   if ($ENV{NET_XMPP2_TEST_TIMEOUT}) {
+      $self->{timeout} = $ENV{NET_XMPP2_TEST_TIMEOUT};
    }
 
    $self->{tests};

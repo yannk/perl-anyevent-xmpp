@@ -332,6 +332,9 @@ Example call might be:
    my $node = $form->to_simxml;
    simxml ($w, defns => $node->{ns}, node => $node);
 
+B<NOTE:> The returned simxml node has the C<dns> field set
+so that no prefixes are generated for the namespace it is in.
+
 =cut
 
 sub _field_to_simxml {
@@ -339,27 +342,21 @@ sub _field_to_simxml {
 
    my $ofa = [];
    my $ofc = [];
-   my $of = {
-      ns   => 'data_form',
-      name => 'field',
-      attrs  => $ofa,
-      childs => $ofc,
-   };
+   my $of = { name => 'field', attrs  => $ofa, childs => $ofc };
 
    push @$ofa, (label => $f->{label}) if defined $f->{label};
    push @$ofa, (var   => $f->{var})   if defined $f->{var};
    push @$ofa, (type  => $f->{type})  if defined $f->{type};
 
    for (@{$f->{values}}) {
-      push @$ofc, { ns => 'data_form', name => 'value', childs => [ $_ ] }
+      push @$ofc, { name => 'value', childs => [ $_ ] }
    }
 
    for (@{$f->{options}}) {
       my $at = [];
       my $chlds = [];
       push @$ofc, {
-         ns => 'data_form', name => 'option',
-         attrs => $at, childs => $chlds
+         name => 'option', attrs => $at, childs => $chlds
       };
       for (@{$_->[1]}) {
          push @$chlds, { name => 'value', childs => [ $_ ] }
@@ -368,11 +365,11 @@ sub _field_to_simxml {
    }
 
    if ($f->{desc}) {
-      push @$ofc, { ns => 'data_form', name => 'desc', childs => [ $f->{desc} ] }
+      push @$ofc, { name => 'desc', childs => [ $f->{desc} ] }
    }
 
    if ($f->{required}) {
-      push @$ofc, { ns => 'data_form', name => 'required' }
+      push @$ofc, { name => 'required' }
    }
 
    $of
@@ -384,6 +381,7 @@ sub to_simxml {
    my $fields = [];
    my $top = {
       ns     => 'data_form',
+      dns    => 'data_form',
       name   => 'x',
       attrs  => [],
       childs => $fields,

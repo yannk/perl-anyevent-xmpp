@@ -1,5 +1,17 @@
 Revision history for Net-XMPP2
 
+0.07
+         - further todo items killed for MUC support
+         - implemented mapping of old error codes to the new condition strings
+           and the other way around too in Net::XMPP2::Error::Stanza
+         - fallback namespace function for simxml() is now enabled all the time,
+           now default namespaces are nearly always generated an the namespace of a
+           node fallsback to the parent node if none was supplied.
+         - increased test timeout to 20 secs and offered an environment variable
+           to override it.
+         - the XML writer doesn't write a encoding declaration anymore, for the sake
+           of XMPP.
+
 0.06 Wed Aug  1 15:53:56 CEST 2007
          - reply_iq_result and reply_iq_error now attach a from attribute themselves.
          - added general instructions for the test suite which also seems to be

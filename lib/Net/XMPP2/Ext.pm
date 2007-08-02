@@ -80,6 +80,9 @@ stuff and such yourself.
 This extension will enable sending of the old error codes when generating a stanza
 error with for example the C<write_error_tag> method of L<Net::XMPP2::Writer>.
 
+Also if only the old numeric codes are supplied the L<Net::XMPP2::Error::Stanza>
+class tries to map the numeric codes to the new error conditions if possible.
+
 =item XEP-0091 - Delayed Delivery (Version 1.3)
 
 See also XEP-0203 below.

@@ -212,14 +212,13 @@ sub is_bare_jid {
 
 =item B<simxml ($w, %xmlstruct)>
 
-This method takes a L<XML::Writer> as first argument (C<$w>) and the
+This function takes a L<XML::Writer> as first argument (C<$w>) and the
 rest key value pairs:
 
    simxml ($w,
-      defns => '<xmlnamespace>',
-      node => <node>,
+      defns    => '<xmlnamespace>',
+      node     => <node>,
       prefixes => { prefix => namespace, ... },
-      fb_ns => '<fallbackxmlnamespace for all elementes without ns or dns field>',
    );
 
 Where node is:
@@ -231,7 +230,8 @@ Where node is:
                 childs => [ <node>, ... ]
              }
            | {
-                dns => '<xmlnamespace>',  # dns will set that namespace to the default namespace before using it.
+                dns => '<xmlnamespace>',  # this will set that namespace to
+                                          # the default namespace before using it.
                 name => 'tagname',
                 attrs => [ ['name', 'value'], ... ],
                 childs => [ <node>, ... ]
@@ -240,6 +240,16 @@ Where node is:
 
 Please note: C<childs> stands for C<child sequence> :-)
 
+Also note that if you omit the C<ns> key for nodes there is a fallback
+to the namespace of the parent element or the last default namespace.
+This makes it easier to write things like this:
+
+   {
+      defns => 'muc_owner,
+      node => { name => 'query' }
+   }
+
+(Without having to include C<ns> in the node.)
 
 =cut
 
@@ -248,6 +258,9 @@ sub simxml {
 
    if (my $n = $desc{defns}) {
       $w->addPrefix (xmpp_ns_maybe ($n), '');
+   }
+   unless (exists $desc{fb_ns}) {
+      $desc{fb_ns} = $desc{defns};
    }
 
    if (my $p = $desc{prefixes}) {
@@ -263,26 +276,27 @@ sub simxml {
 
    } elsif (ref ($node)) {
       my $ns = $node->{dns} ? $node->{dns} : $node->{ns};
-      $ns = $ns ? $ns : $desc{fb_ns};
-      $ns = xmpp_ns_maybe ($ns);
+      $ns    = $ns          ? $ns          : $desc{fb_ns};
+      $ns    = xmpp_ns_maybe ($ns);
+
       my $tag = $ns ? [$ns, $node->{name}] : $node->{name};
 
       if (@{$node->{childs} || []}) {
 
          $w->startTag ($tag, @{$node->{attrs} || []});
 
-            my (@args);
-            if ($node->{defns}) { @args = (defns => $node->{defns}) }
+         my (@args);
+         if ($node->{defns}) { @args = (defns => $node->{defns}) }
 
-            for (@{$node->{childs}}) {
-               if (ref ($_) && $_->{dns}) { push @args, (defns => $_->{dns}) }
-               if (ref ($_) && $_->{ns})  {
-                  push @args, (fb_ns => $_->{ns})
-               } else {
-                  push @args, (fb_ns => $desc{fb_ns})
-               }
-               simxml ($w, node => $_, @args)
+         for (@{$node->{childs}}) {
+            if (ref ($_) && $_->{dns}) { push @args, (defns => $_->{dns}) }
+            if (ref ($_) && $_->{ns})  {
+               push @args, (fb_ns => $_->{ns})
+            } else {
+               push @args, (fb_ns => $desc{fb_ns})
             }
+            simxml ($w, node => $_, @args)
+         }
 
          $w->endTag;
 

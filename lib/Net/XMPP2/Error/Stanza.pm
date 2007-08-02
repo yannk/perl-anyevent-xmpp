@@ -51,6 +51,22 @@ sub init {
          last;
       }
    }
+
+   if (not ($self->{error_cond}) && defined $self->{error_code}) {
+      for my $er (keys %Net::XMPP2::Writer::STANZA_ERRORS) {
+         my $ern = $Net::XMPP2::Writer::STANZA_ERRORS{$er};
+         if ($ern->[1] == $self->{error_code} && $ern->[0] eq $self->{error_type}) {
+            $self->{error_cond} = $er;
+            last;
+         }
+      }
+   }
+
+   if (!(defined $self->{error_code}) && $self->{error_cond}) {
+      my $ern = $Net::XMPP2::Writer::STANZA_ERRORS{$self->{error_cond}};
+      $self->{error_type} = $ern->[0];
+      $self->{error_code} = $ern->[1];
+   }
 }
 
 =head2 METHODS

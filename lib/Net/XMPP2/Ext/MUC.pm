@@ -140,25 +140,58 @@ C<$jid> should be the bare jid of the room.
 C<$nick> should be your desired nickname in the room.
 
 C<$cb> is called upon successful entering the room or
-if an error occured. If a error occured the first argument
-is a L<Net::XMPP2::Error::MUC> object. If the join
-was successful the first argument is undef.
+if an error occured. If no error occured the first
+argument is a L<Net::XMPP2::Ext::MUC::Room> object (the
+one of the joined room) and the second is a L<Net::XMPP2::Ext::MUC::User>
+object, the one of yourself. And the third argument is undef.
+
+If an error occured and we couldn't join the room, the first two arguments are
+undef and the third is a L<Net::XMPP2::Error::MUC> object signalling the error.
 
 C<%args> hash can contain one of the following keys:
 
-   timeout => $timeout_in_secs
+=over 4
 
+=item timeout => $timeout_in_secs
+
+This is the timeout for joining the room.
 The default timeout is 60 seconds if the timeout is not specified.
+
+=item create_instant => $bool
+
+If you set C<$bool> to a true value we try to establish an instant room
+on joining if it doesn't already exist.
+
+The default for this flag is true! So if you want to creat an reserved room
+with custom creation in the beginning you have to pass a false value as C<$bool>.
+
+B<PLEASE NOTE:> If you set C<$bool> to a B<false> value you have to check the
+C<did_create_room> statusflag on your own instance of
+L<Net::XMPP2::Ext::MUC::User> (provided as the second argument to the callback)
+to see whether you need to finish room creation! If you don't do this the room
+B<may stay LOCKED for ever>.
+
+See also the C<make_instant> and C<request_configuration> methods of L<Net::XMPP2::Ext::MUC>.
+
+=item password => $password
+
+The password for the room.
+
+=back
 
 =cut
 
 sub join_room {
    my ($self, $jid, $nick, $cb, %args) = @_;
+
+   unless (exists $args{create_instant}) {
+      $args{create_instant} = 1;
+   }
+   my $timeout = $args{timeout} || $self->{join_timeout};
+
    my $room = $self->install_room ($jid);
 
    my $pbj = prep_bare_jid $jid;
-
-   my $timeout = $args{timeout} || $self->{join_timeout};
 
    $self->{room_join_timer}->{$pbj} =
       AnyEvent->timer (after => $timeout, cb => sub{
@@ -177,19 +210,33 @@ sub join_room {
          my ($room, $error) = @_;
 
          delete $self->{room_join_timer}->{$pbj};
+         $self->uninstall_room ($room);
          $room->unreg_cb ($rcb_id);
-         $cb->($error);
+         $cb->(undef, undef, $error);
       },
       enter => sub {
-         my ($room) = @_;
+         my ($room, $user) = @_;
 
          delete $self->{room_join_timer}->{$pbj};
          $room->unreg_cb ($rcb_id);
-         $cb->(undef);
+
+         if ($user->did_create_room && $args{create_instant}) {
+            $room->make_instant (sub {
+               my ($room, $error) = @_;
+               if ($error) {
+                  $cb->(undef, undef, $error);
+               } else {
+                  $cb->($room, $user, undef);
+               }
+            });
+
+         } else {
+            $cb->($room, $user, undef);
+         }
       }
    );
 
-   $room->send_join ($nick);
+   $room->send_join ($nick, $args{password});
 }
 
 sub install_room {
