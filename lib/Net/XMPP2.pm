@@ -97,7 +97,7 @@ For SRV RR lookups.
 
 =item L<Digest::SHA1>
 
-For component authentication.
+For component authentication and old-style authentication.
 
 =back
 
