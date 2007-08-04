@@ -1,0 +1,6 @@
+http://www.jabber.org/servers.xml
+for i in `seq 0 14`; do wget --no-check-certificate "http://www.xmpp.net/servers?page=$i"; done
+cat * | perl -ne '/<a href="\/servers\/\S+">(\S+)<\/a>/ and print "$1\n"' | sort | uniq
+
+
+http://www.xmpp.org.ru/serverlist/?viewdomain=alldomains

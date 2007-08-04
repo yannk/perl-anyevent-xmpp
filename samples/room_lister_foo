@@ -1,0 +1,5 @@
+#!/opt/perl/bin/perl
+use Storable;
+use Data::Dumper;
+my $sd = retrieve 'room_data.stor';
+print "FO".Data::Dumper->Dump ([$sd])."\n";

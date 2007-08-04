@@ -1,0 +1,76 @@
+#!/opt/perl/bin/perl
+use strict;
+use utf8;
+use Event;
+use AnyEvent;
+use Net::XMPP2::Client;
+
+
+my %ACCOUNTS = (qw/
+   stpeter\20@jabber.org            hagel123/);
+#  \20stpeter\20@jabber.org         hagel123
+#  \20\20stpeter\20\20@jabber.org   hagel123
+#  \20\20stpeter@jabber.org         hagel123
+#  \20stpeter\20\20@jabber.org      hagel123
+#  \20\20stpeter\20@jabber.org      hagel123
+#  \20hildjj@jabber.org             hagel123
+#  hildjj\20@jabber.org             hagel123
+#  hildjj\20\20@jabber.org          hagel123
+#  \20\20hildjj@jabber.org          hagel123
+#  \20\20hildjj\20\20@jabber.org    hagel123
+#  \20\20hildjj\20@jabber.org       hagel123
+#  20hildjj\20\20@jabber.org        hagel123
+#  20hildjj\20@jabber.org           hagel123
+#/);
+
+my %CONNECTED;
+
+my $j = AnyEvent->condvar;
+my $cl = Net::XMPP2::Client->new (debug => 1);
+for (keys %ACCOUNTS) {
+   my ($jid, $pass) = ($_, $ACCOUNTS{$_});
+   $cl->add_account ($jid, $pass);
+}
+$cl->reg_cb (
+   session_ready => sub {
+      my ($cl, $acc) = @_;
+      $CONNECTED{$acc->bare_jid} = $acc;
+      my @onl = values %CONNECTED;
+      print "online accounts: " . scalar (@onl) . " of: " . (scalar keys %ACCOUNTS) . "\n";
+
+      if (scalar (@onl) >= scalar keys %ACCOUNTS) {
+         print "all connected, sending subscriptions...\n";
+         for my $from (@onl) {
+            for my $to (@onl) {
+               next if $from->bare_jid eq $to->bare_jid;
+               my $con = $from->connection ();
+               my $ros = $con->get_roster ();
+               $ros->new_contact ($to->bare_jid, undef, ["Friends"], sub {
+                  my ($con, $e) = @_;
+                  if ($e) {
+                     print "*** " . $from->bare_jid
+                         . ": roster add error: " . $e->string . "\n";
+                  } else {
+                     $con->send_subscribe;
+                  }
+               });
+            }
+         }
+      }
+   },
+   contact_request_subscribe => sub {
+      my ($cl, $acc, $roster, $contact) = @_;
+      $contact->send_subscribe;
+      1
+   },
+   disconnect => sub {
+      my ($cl, $acc, $h, $p, $reas) = @_;
+      print "disconnect ($h:$p): $reas\n";
+   },
+   error => sub {
+      my ($cl, $acc, $err) = @_;
+      print "ERROR: " . $err->string . "\n";
+   }
+);
+$cl->start;
+$j->wait;
