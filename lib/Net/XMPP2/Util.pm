@@ -121,10 +121,25 @@ sub split_jid {
 }
 
 =item B<node_jid ($jid)>
+
+See C<prep_res_jid> below.
+
 =item B<domain_jid ($jid)>
+
+See C<prep_res_jid> below.
+
 =item B<res_jid ($jid)>
+
+See C<prep_res_jid> below.
+
 =item B<prep_node_jid ($jid)>
+
+See C<prep_res_jid> below.
+
 =item B<prep_domain_jid ($jid)>
+
+See C<prep_res_jid> below.
+
 =item B<prep_res_jid ($jid)>
 
 These functions return the corresponding parts of a JID.
