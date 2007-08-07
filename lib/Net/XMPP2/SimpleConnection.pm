@@ -150,7 +150,7 @@ sub try_ssl_write {
 
             $self->disconnect (
                sprintf (
-                  "Error while writing from server '$self->{host}:$self->{port}': (%d|%s|%s)",
+                  "Error while writing to server '$self->{host}:$self->{port}': (%d|%s|%s)",
                $err2, (Net::SSLeay::ERR_error_string $err), "$!")
             );
             return;
