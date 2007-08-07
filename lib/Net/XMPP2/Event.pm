@@ -1,5 +1,6 @@
 package Net::XMPP2::Event;
 use strict;
+use Scalar::Util qw/weaken/;
 
 =head1 NAME
 
@@ -25,6 +26,17 @@ and client classes.
 You may only derive from this package.
 
 =head1 METHODS
+
+=cut
+
+sub new {
+   my $this  = shift;
+   my $class = ref($this) || $this;
+   my $self  = { @_ };
+   bless $self, $class;
+
+   return $self
+}
 
 =over 4
 
@@ -74,18 +86,47 @@ C<"ext_before_$eventname"> and C<"ext_after_$eventname">. If you are
 writing an extension you should use these events to ensure that
 users of L<Net::XMPP2> can still intercept everything.)
 
+If you give reg_cb a special argument called C<_while_referenced>
+you can prevent callbacks from being executed once the reference in the
+second argument becomes undef. This works by converting the internal
+reference of the argument to C<_while_referenced> to a weak reference
+and looking whether that reference becomes undef.
+
+It works like this:
+
+   Scalar::Util::weaken $window;
+   $event_source->reg_cb (
+      _while_referenced => $window,
+      disconnect => sub { $window->destroy }
+   );
+
+Whenever the C<disconnect> event is emitted now and C<$window> doesn't
+exist anymore the callback will be removed;
+
 =cut
 
 sub reg_cb {
    my ($self, %regs) = @_;
 
-   $self->{id}++;
+   $self->{_ev_id}++;
+
+   my $while_ref = delete $regs{_while_referenced};
 
    for my $cmd (keys %regs) {
-      push @{$self->{events}->{$cmd}}, [$self->{id}, $regs{$cmd}]
+      my $arg = [$self->{_ev_id}, $regs{$cmd}];
+
+      if (defined $while_ref) {
+         push @$arg, (1, $while_ref);
+      }
+
+      push @{$self->{events}->{$cmd}}, $arg;
+
+      if ($arg->[2]) {
+         weaken $arg->[3];
+      }
    }
 
-   $self->{id}
+   $self->{_ev_id}
 }
 
 =item B<unreg_cb ($id)>
@@ -97,8 +138,6 @@ return value of a C<reg_cb> call.
 
 sub unreg_cb {
    my ($self, $id) = @_;
-
-   my $set = delete $self->{ids}->{$id};
 
    for my $key (keys %{$self->{events}}) {
       @{$self->{events}->{$key}} =
@@ -167,20 +206,29 @@ sub _event {
    for my $rev (@{$self->{events}->{$ev}}) {
       my $state = $self->{cb_state} = {};
 
-      eval {
-         push @res, $rev->[1]->($self, @arg);
-      };
-      if ($@) {
-         if ($self->{exception_cb}) {
-            $self->{exception_cb}->($@);
-         } else {
-            warn "unhandled callback exception: $@";
+      if ($rev->[2] && not defined $rev->[3]) {
+         $state->{remove} = 1;
+
+      } else {
+         eval {
+            push @res, $rev->[1]->($self, @arg);
+         };
+         if ($@) {
+            if ($self->{exception_cb}) {
+               $self->{exception_cb}->($@);
+            } else {
+               warn "unhandled callback exception (object: $self, event: $ev): $@";
+            }
          }
       }
 
       push @$nxt, $rev unless $state->{remove};
    }
-   $self->{events}->{$ev} = $nxt;
+   if (!@$nxt) {
+      delete $self->{events}->{$ev}
+   } else {
+      $self->{events}->{$ev} = $nxt;
+   }
 
    for my $ev_frwd (keys %{$self->{event_forwards}}) {
       my $rev = $self->{event_forwards}->{$ev_frwd};
@@ -268,6 +316,13 @@ sub remove_forward {
    delete $self->{event_forwards}->{$obj};
 }
 
+=item B<remove_all_callbacks>
+
+This method removes all registered event callbacks and forwards
+from this object.
+
+=cut
+
 sub remove_all_callbacks {
    my ($self) = @_;
    $self->{events} = {};
@@ -275,6 +330,16 @@ sub remove_all_callbacks {
    delete $self->{exception_cb};
    delete $self->{cb_state};
    delete $self->{stop_event};
+}
+
+sub events_as_string_dump {
+   my ($self) = @_;
+   my $str = '';
+   for my $ev (keys %{$self->{events}}) {
+      my $evr = $self->{events}->{$ev};
+      $str .= "$ev: " . scalar @{$evr} . "\n";
+   }
+   $str
 }
 
 =back
