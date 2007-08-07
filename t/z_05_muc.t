@@ -122,7 +122,8 @@ sub step_join_rooms {
                $muc_join_error = $error->string;
             } else {
                $muc_joined_cb++;
-               (pop @jobs)->();
+               my $J = pop @jobs;
+               $J->() if $J;
             }
          });
       };

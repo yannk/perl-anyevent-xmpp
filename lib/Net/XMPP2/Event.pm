@@ -82,7 +82,7 @@ sub reg_cb {
    $self->{id}++;
 
    for my $cmd (keys %regs) {
-      push @{$self->{events}->{lc $cmd}}, [$self->{id}, $regs{$cmd}]
+      push @{$self->{events}->{$cmd}}, [$self->{id}, $regs{$cmd}]
    }
 
    $self->{id}
@@ -164,7 +164,7 @@ sub _event {
    my @res;
    my $nxt = [];
 
-   for my $rev (@{$self->{events}->{lc $ev}}) {
+   for my $rev (@{$self->{events}->{$ev}}) {
       my $state = $self->{cb_state} = {};
 
       eval {
@@ -180,7 +180,7 @@ sub _event {
 
       push @$nxt, $rev unless $state->{remove};
    }
-   $self->{events}->{lc $ev} = $nxt;
+   $self->{events}->{$ev} = $nxt;
 
    for my $ev_frwd (keys %{$self->{event_forwards}}) {
       my $rev = $self->{event_forwards}->{$ev_frwd};
@@ -266,6 +266,15 @@ object that was given C<add_forward> as the C<$obj> argument.
 sub remove_forward {
    my ($self, $obj) = @_;
    delete $self->{event_forwards}->{$obj};
+}
+
+sub remove_all_callbacks {
+   my ($self) = @_;
+   $self->{events} = {};
+   $self->{event_forwards} = {};
+   delete $self->{exception_cb};
+   delete $self->{cb_state};
+   delete $self->{stop_event};
 }
 
 =back
