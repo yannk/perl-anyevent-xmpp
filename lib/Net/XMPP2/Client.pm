@@ -111,9 +111,16 @@ sub add_account {
    my ($self, $jid, $password, $host, $port, $connection_args) = @_;
    my $bj = prep_bare_jid $jid;
 
-   return if exists $self->{accounts}->{$bj};
+   my $acc = $self->{accounts}->{$bj};
+   if ($acc) {
+      $acc->{password} = $password;
+      $acc->{host}     = $host;
+      $acc->{port}     = $port;
+      $acc->{args}     = $connection_args;
+      return;
+   }
 
-   my $acc =
+   $acc =
       $self->{accounts}->{$bj} =
          Net::XMPP2::IM::Account->new (
             jid      => $jid,
