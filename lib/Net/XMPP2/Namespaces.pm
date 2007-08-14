@@ -33,6 +33,7 @@ our %NAMESPACES = (
    search      => 'jabber:iq:search',
    x_delay     => 'jabber:x:delay',
    delay       => 'urn:xmpp:delay',
+   ping        => 'urn:xmpp:ping',
 );
 
 =head1 NAME
@@ -80,6 +81,8 @@ which make handling of namepsaces a bit easier:
    register    => http://jabber.org/features/iq-register
    iqauth      => http://jabber.org/features/iq-auth
    data_form   => jabber:x:data
+
+   ping        => urn:xmpp:ping
 
 =head1 FUNCTIONS
 

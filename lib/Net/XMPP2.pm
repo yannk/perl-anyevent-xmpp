@@ -127,7 +127,7 @@ L<Net::XMPP2::Ext> for some notes about it.
 Some bugs with JID preps have been fixed and some functions for JID handling
 have been added to L<Net::XMPP2::Util>.
 
-Reworked the subscription system a bit, you know have to reply with 'subscribed'
+Reworked the subscription system a bit, you now have to reply with 'subscribed'
 yourself, etc. (See also L<Net::XMPP2::IM::Connection> about subscriptions).
 
 Implemented following new XEPs:

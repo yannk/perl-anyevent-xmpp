@@ -353,7 +353,9 @@ sub handle_stanza {
       return;
    }
 
-   $self->event (recv_stanza_xml => $node);
+   my (@res) = $self->event (recv_stanza_xml => $node);
+   @res = grep $_, @res;
+   return if @res;
 
    if ($node->eq (stream => 'features')) {
       $self->event (stream_features => $node);
@@ -476,6 +478,16 @@ sub send_iq {
 
    $self->{writer}->send_iq ($id, $type, $create_cb, %attrs);
    $id
+}
+
+=item B<next_iq_id>
+
+This method returns the next IQ id that will be used.
+
+=cut
+
+sub next_iq_id {
+   $_[0]->{iq_id};
 }
 
 =item B<reply_iq_result ($req_iq_node, $create_cb, %attrs)>
@@ -987,6 +999,11 @@ C<$node> is the node of the stanza that is being processed, it's of
 type L<Net::XMPP2::Node>.
 
 This method might not be as handy for debuggin purposes as C<debug_recv>.
+
+If you want to handle the stanza yourself and don't want this module
+to take care of it return a true value from your registered callback.
+
+If any of the event callbacks return a true value this stanza will be ignored.
 
 =item send_stanza_data => $data
 

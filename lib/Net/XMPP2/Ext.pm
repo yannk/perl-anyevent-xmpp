@@ -100,6 +100,12 @@ whatever you can imagine (even gateways).
 See documentation of L<Net::XMPP2::Component> and the example
 C<samples/simple_component>.
 
+=item XEP-0199 - XMPP Ping (Version 1.0)
+
+You can send ping requests to other entities and also are
+able to reply to them. On top of that the L<Net::XMPP2::Ext::Ping>
+extension implements a connection timeout mechanism based on this.
+
 =item XEP-0203 - Delayed Delivery (Version 1.0)
 
 Both delayed delivery XEPs are supported and are implemented by
