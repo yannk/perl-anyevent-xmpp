@@ -38,7 +38,8 @@ Net::XMPP2::Ext::Ping - Implementation of XMPP Ping XEP-0199
 
 This extension implements XEP-0199: XMPP Ping.
 It allows you to define a automatic ping timeouter that will disconnect
-dead connections (which didn't reply to a ping after N seconds).
+dead connections (which didn't reply to a ping after N seconds). See also
+the documentation of the C<enable_timeout> method below.
 
 It also allows you to send pings to any XMPP entity you like and
 will measure the time it took if you got L<Time::HiRes>.
@@ -101,6 +102,14 @@ C<$timeout> must be the seconds that the ping intervals last.
 
 If the server which is connected via C<$con> didn't respond within C<$timeout>
 seconds the connection C<$con> will be disconnected.
+
+Please note that there already is a basic timeout mechanism
+for dead TCP connections in L<Net::XMPP2::Connection>, see also
+the C<whitespace_ping_interval> configuration variable for a connection
+there. It then will depend on TCP timeouts to disconnect the connection.
+
+Use C<enable_timeout> and C<auto_timeout> only if you really feel
+like you need an explicit timeout for your connections.
 
 =cut
 

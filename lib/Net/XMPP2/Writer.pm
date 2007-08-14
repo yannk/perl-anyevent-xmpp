@@ -177,6 +177,18 @@ sub send_init_stream {
    $self->flush;
 }
 
+=item B<send_whitespace_ping>
+
+This method sends a single space to the server.
+
+=cut
+
+sub send_whitespace_ping {
+   my ($self) = @_;
+   $self->{writer}->raw (' ');
+   $self->flush;
+}
+
 =item B<send_handshake ($streamid, $secret)>
 
 This method sends a component handshake. Please note that C<$secret>

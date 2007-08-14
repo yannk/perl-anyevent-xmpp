@@ -133,6 +133,12 @@ This enables the anal iq auth mechanism that will first look in the stream
 features before trying to start iq authentication. Yes, servers don't always
 advertise what they can. I only implemented this option for my test suite.
 
+=item whitespace_ping_interval => $interval
+
+This will set the whitespace ping interval (in seconds). The default interval
+are 60 seconds.  You can disable the whitespace ping by setting C<$interval> to
+0.
+
 =back
 
 =cut
@@ -144,6 +150,7 @@ sub new {
       $class->SUPER::new (
          language         => 'en',
          stream_namespace => 'client',
+         whitespace_ping_interval => 60,
          @_
       );
 
@@ -169,10 +176,12 @@ sub new {
    });
    $self->{parser}->set_error_cb (sub {
       my ($ex, $data, $type) = @_;
+
       if ($type eq 'xml') {
          my $pe = Net::XMPP2::Error::Parser->new (exception => $_[0], data => $_[1]);
          $self->event (xml_parser_error => $pe);
          $self->disconnect ("xml error: $_[0], $_[1]");
+
       } else {
          my $pe = Net::XMPP2::Error->new (
             text => "uncaught exception in stanza handling: $ex"
@@ -230,6 +239,16 @@ sub new {
          );
       },
    );
+
+   if ($self->{whitespace_ping_interval} > 0) {
+      $self->reg_cb (
+         stream_ready => sub {
+            my ($self) = @_;
+            $self->_start_whitespace_ping;
+            $self->unreg_me;
+         }
+      );
+   }
 
    $self->set_exception_cb (sub {
       my ($ex) = @_;
@@ -863,6 +882,19 @@ sub do_rebind {
             }
          }
    );
+}
+
+
+sub _start_whitespace_ping {
+   my ($self) = @_;
+
+   return unless $self->{whitespace_ping_interval} > 0;
+
+   $self->{_ws_ping} =
+      AnyEvent->timer (after => $self->{whitespace_ping_interval}, cb => sub {
+         $self->{writer}->send_whitespace_ping;
+         $self->_start_whitespace_ping;
+      });
 }
 
 

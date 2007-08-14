@@ -119,7 +119,6 @@ L<Net::XMPP2::Node>.
 Use the functions described above in the XEP-0082 item to decode the timestamps
 of delays.
 
-
 =back
 
 =head1 AUTHOR
