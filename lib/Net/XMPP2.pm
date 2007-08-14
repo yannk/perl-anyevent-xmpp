@@ -386,7 +386,7 @@ You can also look for information at:
 
 =item * Net::XMPP2 Project Site
 
-L<http://www.ta-sa.org/>
+L<http://www.ta-sa.org/net_xmpp2>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
