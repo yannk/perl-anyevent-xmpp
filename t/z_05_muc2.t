@@ -174,15 +174,18 @@ sub step_change_nick {
    $room1->reg_cb (
       nick_change => sub {
          my ($room1, $user, $oldnick, $newnick) = @_;
+         my (@other) = grep $_->jid ne $room1->get_me->jid, $room1->users;
 
          $ni->{user1}->{own}      = $user1->jid;
-         $ni->{user1}->{other}    = $user2->jid;
+         $ni->{user1}->{other}    = $other[0]->jid;
+         warn "user1 otherXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n";
          $ni->{user1}->{old_nick} = $oldnick;
          $ni->{user1}->{new_nick} = $newnick;
          $room1->unreg_me;
       },
       after_nick_change => sub {
          my ($room1) = @_;
+         warn "AFTE\n";
 
          if (not $second) {
             $cnt++;
@@ -196,8 +199,10 @@ sub step_change_nick {
    $room2->reg_cb (
       nick_change => sub {
          my ($room2, $user, $oldnick, $newnick) = @_;
+         my (@other) = grep $_->jid ne $room2->get_me->jid, $room2->users;
+
          $ni->{user2}->{own}      = $user2->jid;
-         $ni->{user2}->{other}    = $user1->jid;
+         $ni->{user2}->{other}    = $other[0]->jid;
          $ni->{user2}->{old_nick} = $oldnick;
          $ni->{user2}->{new_nick} = $newnick;
          $room2->unreg_me;
