@@ -178,14 +178,12 @@ sub step_change_nick {
 
          $ni->{user1}->{own}      = $user1->jid;
          $ni->{user1}->{other}    = $other[0]->jid;
-         warn "user1 otherXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n";
          $ni->{user1}->{old_nick} = $oldnick;
          $ni->{user1}->{new_nick} = $newnick;
          $room1->unreg_me;
       },
       after_nick_change => sub {
          my ($room1) = @_;
-         warn "AFTE\n";
 
          if (not $second) {
             $cnt++;
