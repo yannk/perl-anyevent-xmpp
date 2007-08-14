@@ -13,7 +13,9 @@ t/z_02_disco.t
 t/z_03_iq_auth.t
 t/z_04_presence.t
 t/z_05_muc.t
-t/z_06_iq.t
+t/z_06_iq_ping.t
+t/z_06_iq_ping_timeout.t
+t/z_06_iq_version.t
 t/z_20_unregister.t
 samples/devcl/DevCL/Browser.pm
 samples/devcl/DevCL/TreeView.pm
@@ -46,6 +48,7 @@ lib/Net/XMPP2/Ext/Registration.pm
 lib/Net/XMPP2/Ext/Disco.pm
 lib/Net/XMPP2/Ext/RegisterForm.pm
 lib/Net/XMPP2/Ext/OOB.pm
+lib/Net/XMPP2/Ext/Ping.pm
 lib/Net/XMPP2/Ext/Version.pm
 lib/Net/XMPP2/Namespaces.pm
 lib/Net/XMPP2/Util.pm

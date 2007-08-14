@@ -1,6 +1,12 @@
 Revision history for Net-XMPP2
 
-0.07
+0.07 Tue Aug 14 19:22:11 CEST 2007
+         - implemented whitespace ping and:
+            - XEP-0199 - XMPP Ping
+         - added next_iq_id() method to Net::XMPP2::Connection
+         - additions to Net::XMPP2::Event, you can now implement guards
+           for unregistration of registered event callbacks. You can also
+           remove all callbacks now and event names are case sensitive now.
          - Net::XMPP2::Client adding already existing accounts
            now updates them.
          - further todo items killed for MUC support
