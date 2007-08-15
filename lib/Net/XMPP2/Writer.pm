@@ -321,6 +321,9 @@ an undef it will be omitted.
 
 C<$id> is the id to give this IQ stanza and is mandatory in this API.
 
+Please note that all attribute values and character data will be filtered
+by C<filter_xml_chars> (see also L<Net::XMPP2::Util).
+
 =cut
 
 sub send_iq {
@@ -385,6 +388,9 @@ with the value as content, which must be a number between -128 and +127.
 
 Note: If C<$create_cb> is undefined and one of the above attributes (show,
 status or priority) were given, the generates presence tag won't be empty.
+
+Please note that all attribute values and character data will be filtered
+by C<filter_xml_chars> (see also L<Net::XMPP2::Util).
 
 =cut
 
@@ -510,6 +516,9 @@ will be generated for it. The values will be the character content of the subjec
 
 If C<%attrs> contains a 'thread' key: a child xml tag with that name will be generated
 and the value will be the character content.
+
+Please note that all attribute values and character data will be filtered
+by C<filter_xml_chars> (see also L<Net::XMPP2::Util).
 
 =cut
 

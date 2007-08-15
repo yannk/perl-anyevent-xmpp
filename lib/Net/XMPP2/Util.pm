@@ -293,6 +293,9 @@ This makes it easier to write things like this:
 
 (Without having to include C<ns> in the node.)
 
+Please note that all attribute values and character data will be filtered
+by C<filter_xml_chars>.
+
 =cut
 
 sub simxml {
