@@ -322,7 +322,7 @@ an undef it will be omitted.
 C<$id> is the id to give this IQ stanza and is mandatory in this API.
 
 Please note that all attribute values and character data will be filtered
-by C<filter_xml_chars> (see also L<Net::XMPP2::Util).
+by C<filter_xml_chars> (see also L<Net::XMPP2::Util>).
 
 =cut
 
@@ -390,7 +390,7 @@ Note: If C<$create_cb> is undefined and one of the above attributes (show,
 status or priority) were given, the generates presence tag won't be empty.
 
 Please note that all attribute values and character data will be filtered
-by C<filter_xml_chars> (see also L<Net::XMPP2::Util).
+by C<filter_xml_chars> (see also L<Net::XMPP2::Util>).
 
 =cut
 
@@ -518,7 +518,7 @@ If C<%attrs> contains a 'thread' key: a child xml tag with that name will be gen
 and the value will be the character content.
 
 Please note that all attribute values and character data will be filtered
-by C<filter_xml_chars> (see also L<Net::XMPP2::Util).
+by C<filter_xml_chars> (see also L<Net::XMPP2::Util>).
 
 =cut
 
