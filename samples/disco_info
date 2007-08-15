@@ -53,6 +53,7 @@ $cl->reg_cb (
          my ($disco, $info, $error) = @_;
          if ($error) {
             warn "DISCO INFO ERROR: " . $error->string . "\n";
+            $cnt++; $j->broadcast if $cnt > 1;
          } else {
             $ginfo = $info;
 
