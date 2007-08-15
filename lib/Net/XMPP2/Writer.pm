@@ -4,7 +4,7 @@ use XML::Writer;
 use Authen::SASL qw/Perl/;
 use MIME::Base64;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
-use Net::XMPP2::Util qw/simxml/;
+use Net::XMPP2::Util qw/simxml filter_xml_chars filter_xml_attr_hash_chars/;
 use Digest::SHA1 qw/sha1_hex/;
 use Encode;
 
@@ -340,7 +340,10 @@ sub send_iq {
       delete $attrs{to};
    }
 
-   push @from, (id => $id) if defined $id;
+   push @from, (id => filter_xml_chars $id) if defined $id;
+
+   filter_xml_attr_hash_chars \%attrs;
+
    if (defined $create_cb) {
       $w->startTag ('iq', type => $type, @from, %attrs);
       $create_cb->($w);
@@ -388,7 +391,7 @@ status or priority) were given, the generates presence tag won't be empty.
 sub _generate_key_xml {
    my ($w, $key, $value) = @_;
    $w->startTag ($key);
-   $w->characters ($value);
+   $w->characters (filter_xml_chars $value);
    $w->endTag;
 }
 
@@ -397,12 +400,12 @@ sub _generate_key_xmls {
    if (ref ($value) eq 'HASH') {
       for (keys %$value) {
          $w->startTag ($key, ($_ ne '' ? ([xmpp_ns ('xml'), 'lang'] => $_) : ()));
-         $w->characters ($value->{$_});
+         $w->characters (filter_xml_chars $value->{$_});
          $w->endTag;
       }
    } else {
       $w->startTag ($key);
-      $w->characters ($value);
+      $w->characters (filter_xml_chars $value);
       $w->endTag;
    }
 }
@@ -454,6 +457,8 @@ sub send_presence {
       map { $_ => $attrs{$_} }
          grep { my $k = $_; not grep { $k eq $_ } qw/show priority status/ }
             keys %attrs;
+
+   filter_xml_attr_hash_chars \%fattrs;
 
    if (defined $create_cb) {
       $w->startTag ('presence', @add, %fattrs);
@@ -610,10 +615,13 @@ sub write_error_tag {
 
    push @add, (code => $STANZA_ERRORS{$error}->[1]);
 
+   my %add = @add;
+   filter_xml_attr_hash_chars \%add;
+
    $w->addPrefix (xmpp_ns ('client'), '');
-   $w->startTag ([xmpp_ns ('client') => 'error'], type => $type, @add);
+   $w->startTag ([xmpp_ns ('client') => 'error'], type => $type, %add);
       $w->addPrefix (xmpp_ns ('stanzas'), '');
-      $w->emptyTag ([xmpp_ns ('stanzas') => $error]);
+      $w->emptyTag ([xmpp_ns ('stanzas') => filter_xml_chars $error]);
    $w->endTag;
 }
 

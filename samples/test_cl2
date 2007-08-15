@@ -1,0 +1,56 @@
+#!/opt/perl/bin/perl
+use strict;
+use utf8;
+use Event;
+use AnyEvent;
+use XML::Twig;
+use Net::XMPP2::Client;
+use Net::XMPP2::Ext::Disco;
+use Net::XMPP2::Ext::Version;
+use Net::XMPP2::Namespaces qw/xmpp_ns/;
+
+binmode STDOUT, ":utf8";
+
+my ($jid, $pw) = @ARGV;
+
+unless (@ARGV >= 2) {
+   warn "usage: test_cl2 <jid> <password>\n";
+   exit;
+}
+
+my $j     = AnyEvent->condvar;
+my $cl    = Net::XMPP2::Client->new (debug => 1);
+my $disco = Net::XMPP2::Ext::Disco->new;
+my $version = Net::XMPP2::Ext::Version->new;
+$cl->add_extension ($disco);
+$cl->add_extension ($version);
+
+$cl->set_presence ('away', 'I\'m a bot now.', -1);
+
+$cl->add_account ($jid, $pw);
+warn "connecting to $jid...\n";
+
+my ($gitems, $ginfo, $gvers);
+
+$cl->reg_cb (
+   session_ready => sub {
+      my ($cl, $acc) = @_;
+      my $con = $acc->connection;
+      $con->send_message ('elmex@jabber.org', 'chat', sub {
+         $_[0]->raw ('<body>HI!!!&#xA;THERE!</body>');
+      });
+   },
+   error => sub {
+      my ($cl, $acc, $error) = @_;
+      warn "ERROR: ".$error->string."\n";
+      $j->broadcast;
+   },
+   disconnect => sub {
+      warn "DISCON[@_]\n";
+      $j->broadcast;
+   },
+);
+
+$cl->start;
+
+$j->wait;

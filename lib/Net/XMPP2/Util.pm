@@ -12,6 +12,7 @@ our @EXPORT_OK = qw/resourceprep nodeprep prep_join_jid join_jid
                     node_jid domain_jid res_jid
                     prep_node_jid prep_domain_jid prep_res_jid
                     from_xmpp_datetime to_xmpp_datetime to_xmpp_time
+                    filter_xml_chars filter_xml_attr_hash_chars
                     /;
 our @ISA = qw/Exporter/;
 
@@ -225,6 +226,32 @@ sub is_bare_jid {
    not defined $res
 }
 
+=item B<filter_xml_chars ($string)>
+
+This function removes all characters from C<$string> which
+are not allowed in XML and returns the new string.
+
+=cut
+
+sub filter_xml_chars($) {
+   my ($string) = @_;
+   $string =~ s/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFFFF}]+//g;
+   $string
+}
+
+=item B<filter_xml_attr_hash_chars ($hashref)>
+
+This runs all values of the C<$hashref> through C<filter_xml_chars> (see above)
+and changes them in-place!
+
+=cut
+
+sub filter_xml_attr_hash_chars {
+   my ($hash) = @_;
+   $hash->{$_} = filter_xml_chars $hash->{$_} for keys %$hash
+}
+
+
 =item B<simxml ($w, %xmlstruct)>
 
 This function takes a L<XML::Writer> as first argument (C<$w>) and the
@@ -296,9 +323,12 @@ sub simxml {
 
       my $tag = $ns ? [$ns, $node->{name}] : $node->{name};
 
+      my %attrs = @{$node->{attrs} || []};
+      filter_xml_attr_hash_chars \%attrs;
+
       if (@{$node->{childs} || []}) {
 
-         $w->startTag ($tag, @{$node->{attrs} || []});
+         $w->startTag ($tag, %attrs);
 
          my (@args);
          if ($node->{defns}) { @args = (defns => $node->{defns}) }
@@ -316,10 +346,10 @@ sub simxml {
          $w->endTag;
 
       } else {
-         $w->emptyTag ($tag, @{$node->{attrs} || []});
+         $w->emptyTag ($tag, %attrs);
       }
    } else {
-      $w->characters ($node);
+      $w->characters (filter_xml_chars $node);
    }
 }
 
