@@ -246,6 +246,10 @@ sub new {
             my ($self) = @_;
             $self->_start_whitespace_ping;
             $self->unreg_me;
+         },
+         disconnect => sub {
+            $self->_stop_whitespace_ping;
+            $self->unreg_me;
          }
       );
    }
@@ -895,6 +899,10 @@ sub _start_whitespace_ping {
          $self->{writer}->send_whitespace_ping;
          $self->_start_whitespace_ping;
       });
+}
+
+sub _stop_whitespace_ping {
+   delete $_[0]->{_ws_ping};
 }
 
 

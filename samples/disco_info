@@ -19,7 +19,7 @@ unless (@ARGV >= 3) {
 }
 
 my $j     = AnyEvent->condvar;
-my $cl    = Net::XMPP2::Client->new;
+my $cl    = Net::XMPP2::Client->new (debug => 1);
 my $disco = Net::XMPP2::Ext::Disco->new;
 my $version = Net::XMPP2::Ext::Version->new;
 $cl->add_extension ($disco);
@@ -102,6 +102,13 @@ if ($ginfo) {
    for (sort keys %{$ginfo->features}) {
       print "feature: $_\n";
    }
+
+   if (my ($f) = $ginfo->xml_node->find_all ([qw/data_form x/])) {
+      my $form = Net::XMPP2::Ext::DataForm->new;
+      $form->from_node ($f);
+      print "form: " . $form->as_debug_string . "\n";
+   }
+
 }
 if ($gitems) {
    print "items: " . $gitems->jid . "\n";
