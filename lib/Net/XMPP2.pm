@@ -334,6 +334,11 @@ someone who sends the bot a 'send <filename>' message.
 This is a example script which allows you to register, unregister and change
 your password for accounts. Execute it without arguments for more details.
 
+=item B<smaples/disco_info>
+
+This is a small example tool that allows you to fetch the software version,
+disco info and disco items information about a JID.
+
 =back
 
 For others, which the author might forgot or didn't want to

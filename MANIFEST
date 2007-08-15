@@ -30,6 +30,7 @@ samples/test_client
 samples/room_lister
 samples/find_servers
 samples/disco_version
+samples/disco_info
 samples/simple_oob_retriever
 samples/simple_register_example
 samples/simple_component
