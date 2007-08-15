@@ -7,6 +7,7 @@ use XML::Twig;
 use Net::XMPP2::Client;
 use Net::XMPP2::Ext::Disco;
 use Net::XMPP2::Ext::Version;
+use Net::XMPP2::Namespaces qw/xmpp_ns/;
 
 binmode STDOUT, ":utf8";
 
@@ -45,7 +46,7 @@ $cl->reg_cb (
          } else {
             $gitems = $items;
          }
-         $cnt++; $j->broadcast if $cnt > 2;
+         $cnt++; $j->broadcast if $cnt > 1;
       });
 
       $disco->request_info ($con, $discodest, $disconode, sub {
@@ -54,17 +55,20 @@ $cl->reg_cb (
             warn "DISCO INFO ERROR: " . $error->string . "\n";
          } else {
             $ginfo = $info;
-         }
-         $cnt++; $j->broadcast if $cnt > 2;
-      });
 
-      $version->request_version ($con, $discodest, sub {
-         my ($vers, $err) = @_;
-         $gvers = $vers;
-         if ($err) {
-            warn "VERSION ERROR: " . $err->string . "\n";
+            if ($info->features->{xmpp_ns ('version')}) {
+               $version->request_version ($con, $discodest, sub {
+                  my ($vers, $err) = @_;
+                  $gvers = $vers;
+                  if ($err) {
+                     warn "VERSION ERROR: " . $err->string . "\n";
+                  }
+                  $cnt++; $j->broadcast if $cnt > 1;
+               });
+            } else {
+               $cnt++; $j->broadcast if $cnt > 1;
+            }
          }
-         $cnt++; $j->broadcast if $cnt > 2;
       });
    },
    error => sub {
