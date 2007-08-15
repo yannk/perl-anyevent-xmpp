@@ -133,9 +133,11 @@ sub _start_cust_timeout {
 
    $self->{cust_timeouts}->{$con} =
       AnyEvent->timer (after => $$rtimeout, cb => sub {
+         delete $self->{cust_timeouts}->{$con};
+         return unless $con->is_connected;
+
          $self->ping ($con, undef, sub {
             my ($t, $e) = @_;
-            delete $self->{cust_timeouts}->{$con};
 
             if ($e->condition eq 'client-timeout') {
                $con->disconnect ("exceeded ping timeout of $$rtimeout seconds");
