@@ -7,7 +7,9 @@ use XML::Twig;
 use Net::XMPP2::Client;
 use Net::XMPP2::Ext::Disco;
 use Net::XMPP2::Ext::Version;
+use Net::XMPP2::Ext::MUC;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Util qw/node_jid res_jid/;
 
 my @msgs;
 
@@ -19,12 +21,18 @@ sub read_messages {
    close $f;
 }
 
+sub answer_to {
+   my ($msg) = @_;
+   my $talkmsg = $msgs[int (rand (@msgs))];
+   "You said '$msg' but... " . $talkmsg;
+}
+
 binmode STDOUT, ":utf8";
 
-my ($jid, $pw, $inputfile) = @ARGV;
+my ($jid, $pw, $inputfile, $room) = @ARGV;
 
 unless (@ARGV >= 3) {
-   warn "usage: talkbot <jid> <password> <talkfile>\n";
+   warn "usage: talkbot <jid> <password> <talkfile> [<conference room jid>]\n";
    exit;
 }
 
@@ -41,18 +49,46 @@ $cl->add_extension ($version);
 $cl->set_presence (undef, 'I\'m a talking bot.', 1);
 
 $cl->add_account ($jid, $pw);
+
+my $muc;
+my $roomhdl;
 warn "connecting to $jid...\n";
 
 $cl->reg_cb (
    session_ready => sub {
       my ($cl, $acc) = @_;
+      my $con = $acc->connection;
+      $muc = Net::XMPP2::Ext::MUC->new (disco => $disco, connection => $con);
+      $con->add_extension ($muc);
+      $muc->join_room ($room, node_jid ($acc->jid), sub {
+         my ($rhdl, $me, $err) = @_;
+         if ($err) {
+            warn "Couldn't join $room: " . $err->string . "\n";
+         } else {
+            $roomhdl = $rhdl;
+            $rhdl->reg_cb (
+               message => sub {
+                  my ($rhdl, $msg, $is_echo) = @_;
+                  return if $is_echo;
+                  return if $msg->is_delayed;
+                  my $mynick = res_jid ($rhdl->nick_jid);
+                  if ($msg->any_body =~ /^\s*\Q$mynick\E:\s+(.*?)\s*$/) {
+                     my $ans = answer_to ($1);
+                     my $repl = $msg->make_reply;
+                     $repl->add_body ($ans);
+                     $repl->send;
+                  }
+               }
+            );
+         }
+      });
       warn "connected!\n";
    },
    message => sub {
       my ($cl, $acc, $msg) = @_;
       my $talkmsg = $msgs[int (rand (@msgs))];
       my $repl = $msg->make_reply;
-      $repl->add_body ("You said '".$msg->any_body."' but... " . $talkmsg);
+      $repl->add_body (answer_to ($msg->any_body));
       warn "Got message: '".$msg->any_body."' from ".$msg->from."\n";
       warn "Answered: $talkmsg\n";
       $repl->send;

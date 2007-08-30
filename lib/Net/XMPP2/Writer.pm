@@ -348,11 +348,11 @@ sub send_iq {
    filter_xml_attr_hash_chars \%attrs;
 
    if (defined $create_cb) {
-      $w->startTag ('iq', type => $type, @from, %attrs);
+      $w->startTag ([xmpp_ns ('bind'), 'iq'], type => $type, @from, %attrs);
       $create_cb->($w);
       $w->endTag;
    } else {
-      $w->emptyTag ('iq', type => $type, @from, %attrs);
+      $w->emptyTag ([xmpp_ns ('bind'), 'iq'], type => $type, @from, %attrs);
    }
    $self->flush;
 }
@@ -467,7 +467,7 @@ sub send_presence {
    filter_xml_attr_hash_chars \%fattrs;
 
    if (defined $create_cb) {
-      $w->startTag ('presence', @add, %fattrs);
+      $w->startTag ([xmpp_ns ('client'), 'presence'], @add, %fattrs);
       _generate_key_xml ($w, show => $attrs{show})         if defined $attrs{show};
       _generate_key_xml ($w, priority => $attrs{priority}) if defined $attrs{priority};
       _generate_key_xmls ($w, status => $attrs{status})    if defined $attrs{status};
@@ -475,13 +475,13 @@ sub send_presence {
       $w->endTag;
    } else {
       if (exists $attrs{show} or $attrs{priority} or $attrs{status}) {
-         $w->startTag ('presence', @add, %fattrs);
+         $w->startTag ([xmpp_ns ('client'), 'presence'], @add, %fattrs);
          _generate_key_xml ($w, show => $attrs{show})         if defined $attrs{show};
          _generate_key_xml ($w, priority => $attrs{priority}) if defined $attrs{priority};
          _generate_key_xmls ($w, status => $attrs{status})    if defined $attrs{status};
          $w->endTag;
       } else {
-         $w->emptyTag ('presence', @add, %fattrs);
+         $w->emptyTag ([xmpp_ns ('client'), 'presence'], @add, %fattrs);
       }
    }
 
@@ -542,7 +542,7 @@ sub send_message {
             keys %attrs;
 
    if (defined $create_cb) {
-      $w->startTag ('message', @add, to => $to, type => $type, %fattrs);
+      $w->startTag ([xmpp_ns ('client'), 'message'], @add, to => $to, type => $type, %fattrs);
       _generate_key_xmls ($w, subject => $attrs{subject})    if defined $attrs{subject};
       _generate_key_xmls ($w, body => $attrs{body})          if defined $attrs{body};
       _generate_key_xml ($w, thread => $attrs{thread})       if defined $attrs{thread};
@@ -550,13 +550,13 @@ sub send_message {
       $w->endTag;
    } else {
       if (exists $attrs{subject} or $attrs{body} or $attrs{thread}) {
-         $w->startTag ('message', @add, to => $to, type => $type, %fattrs);
+         $w->startTag ([xmpp_ns ('client'), 'message'], @add, to => $to, type => $type, %fattrs);
          _generate_key_xmls ($w, subject => $attrs{subject})    if defined $attrs{subject};
          _generate_key_xmls ($w, body => $attrs{body})          if defined $attrs{body};
          _generate_key_xml ($w, thread => $attrs{thread})       if defined $attrs{thread};
          $w->endTag;
       } else {
-         $w->emptyTag ('message', @add, to => $to, type => $type, %fattrs);
+         $w->emptyTag ([xmpp_ns ('client'), 'message'], @add, to => $to, type => $type, %fattrs);
       }
    }
 
