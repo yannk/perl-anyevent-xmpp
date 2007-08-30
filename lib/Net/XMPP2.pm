@@ -334,10 +334,16 @@ someone who sends the bot a 'send <filename>' message.
 This is a example script which allows you to register, unregister and change
 your password for accounts. Execute it without arguments for more details.
 
-=item B<smaples/disco_info>
+=item B<samples/disco_info>
 
 This is a small example tool that allows you to fetch the software version,
 disco info and disco items information about a JID.
+
+=item B<samples/talkbot>
+
+This is a simple bot that will read lines from a file and recite them
+when you send it a message. It will also automatically allow you to subscribe
+to it. Start it without commandline arguments to be informed about the usage.
 
 =back
 
