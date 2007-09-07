@@ -47,8 +47,7 @@ See also L<Net::XMPP2::Ext::OOB>.
 =item XEP-0077 - In-Band Registration (Version 2.2)
 
 This extension lets you register new accounts "in-band".
-To use this look at the description of the C<register> option to the C<new>
-method of L<Net::XMPP2::Connection>.
+For details please take a look at L<Net::XMPP2::Ext::Registration>.
 
 =item XEP-0078 - Non-SASL Authentication (Version 2.3)
 
