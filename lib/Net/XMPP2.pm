@@ -345,6 +345,13 @@ This is a simple bot that will read lines from a file and recite them
 when you send it a message. It will also automatically allow you to subscribe
 to it. Start it without commandline arguments to be informed about the usage.
 
+=item B<samples/retrieve_roster>
+
+This is a simple example script that will retrieve the roster
+for an account and print it to stdout. You start it like this:
+
+   samples/# ./retrieve_roster <jid> <password>
+
 =back
 
 For others, which the author might forgot or didn't want to

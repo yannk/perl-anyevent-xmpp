@@ -89,7 +89,8 @@ RELEASE NOTES
     top):
 
   Version
-    * 0.07
+    *   0.07
+
         Many small changes in Net::XMPP2::Event. Implemented XEP-0199 (XMPP
         Ping) and also whitespace pings in Net::XMPP2::Connection.
 
@@ -97,7 +98,8 @@ RELEASE NOTES
 
         For further details look in the "Changes" file.
 
-    * 0.06
+    *   0.06
+
         The event API has been changed a bit, it's possible to intercept
         events now, see Net::XMPP2::Event.
 
@@ -136,7 +138,8 @@ RELEASE NOTES
         And another API change: "reply_iq_result" and "reply_iq_error" now
         attach a from attribute themselves (see Net::XMPP2::Connection).
 
-    * 0.05
+    *   0.05
+
         I added some unit tests and fixed a lot of bugs. The unit tests are
         mostly for me (the AUTHOR) to not accidentally release a buggy
         version with too ugly show stopper bugs.
@@ -146,7 +149,8 @@ RELEASE NOTES
         these tests yourself you might want to take a look at
         Net::XMPP2::TestClient.
 
-    * 0.04
+    *   0.04
+
         After realizing that in band registration in Net::XMPP2::Ext was
         already in in version 0.03 I finally had to implement it.
 
@@ -156,7 +160,8 @@ RELEASE NOTES
 
         I also fixed some bugs in Net::XMPP2::Ext::Disco.
 
-    * older
+    *   older
+
         For older release notes please have a look at the Changes file or
         CPAN.
 
@@ -298,6 +303,16 @@ EXAMPLES
         and change your password for accounts. Execute it without arguments
         for more details.
 
+    samples/disco_info
+        This is a small example tool that allows you to fetch the software
+        version, disco info and disco items information about a JID.
+
+    samples/talkbot
+        This is a simple bot that will read lines from a file and recite
+        them when you send it a message. It will also automatically allow
+        you to subscribe to it. Start it without commandline arguments to be
+        informed about the usage.
+
     For others, which the author might forgot or didn't want to list here
     see the "samples/" directory.
 
@@ -334,26 +349,32 @@ SUPPORT
 
     You can also look for information at:
 
-    * IRC: Net::XMPP2 IRC Channel
+    *   IRC: Net::XMPP2 IRC Channel
+
           IRC Network: http://freenode.net/
           Server     : chat.freenode.net
           Channel    : #net_xmpp2
 
           Feel free to join and ask questions!
 
-    * Net::XMPP2 Project Site
-        <http://www.ta-sa.org/>
+    *   Net::XMPP2 Project Site
 
-    * AnnoCPAN: Annotated CPAN documentation
+        <http://www.ta-sa.org/net_xmpp2>
+
+    *   AnnoCPAN: Annotated CPAN documentation
+
         <http://annocpan.org/dist/Net-XMPP2>
 
-    * CPAN Ratings
+    *   CPAN Ratings
+
         <http://cpanratings.perl.org/d/Net-XMPP2>
 
-    * RT: CPAN's request tracker
+    *   RT: CPAN's request tracker
+
         <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-XMPP2>
 
-    * Search CPAN
+    *   Search CPAN
+
         <http://search.cpan.org/dist/Net-XMPP2>
 
 ACKNOWLEDGEMENTS
@@ -366,7 +387,8 @@ ACKNOWLEDGEMENTS
 
     Thanks to:
 
-    * Carlo von Loesch (aka lynX) <http://www.psyced.org/>
+    *   Carlo von Loesch (aka lynX) <http://www.psyced.org/>
+
         For pointing out some typos.
 
 COPYRIGHT & LICENSE
