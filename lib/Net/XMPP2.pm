@@ -116,6 +116,16 @@ Here are some notes to the last releases (release of this version is at top):
 
 =over 4
 
+=item * 0.08
+
+Lots of bugfixes and minor changes you might want to read about in the C<Changes>
+file. Added some examples which might be useful.
+
+Introduced a character filter on the low XML writer level which will filter out
+not allowed XML characters to prevent unexpected disconnects. Arguably this is the
+programmers fault but I hope noone is confuses if this module tries everything to
+be as reliable as possible.
+
 =item * 0.07
 
 Many small changes in L<Net::XMPP2::Event>. Implemented XEP-0199 (XMPP Ping)
