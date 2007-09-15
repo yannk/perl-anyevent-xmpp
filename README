@@ -2,7 +2,7 @@ NAME
     Net::XMPP2 - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.07
+    Version 0.08
 
 SYNOPSIS
        use Net::XMPP2::Connection;
@@ -298,6 +298,16 @@ EXAMPLES
         and change your password for accounts. Execute it without arguments
         for more details.
 
+    samples/disco_info
+        This is a small example tool that allows you to fetch the software
+        version, disco info and disco items information about a JID.
+
+    samples/talkbot
+        This is a simple bot that will read lines from a file and recite
+        them when you send it a message. It will also automatically allow
+        you to subscribe to it. Start it without commandline arguments to be
+        informed about the usage.
+
     For others, which the author might forgot or didn't want to list here
     see the "samples/" directory.
 
@@ -342,7 +352,7 @@ SUPPORT
           Feel free to join and ask questions!
 
     * Net::XMPP2 Project Site
-        <http://www.ta-sa.org/>
+        <http://www.ta-sa.org/net_xmpp2>
 
     * AnnoCPAN: Annotated CPAN documentation
         <http://annocpan.org/dist/Net-XMPP2>

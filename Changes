@@ -1,5 +1,19 @@
 Revision history for Net-XMPP2
 
+0.08 Sat Sep 15 10:50:00 CEST 2007
+         - fixed glitches in tests
+         - added disco_info example
+         - updated disco_info example, added data form retrieval in disco_info
+         - fixed bug in whitespace ping
+         - added character filter functions for filtering out not-allowed XML
+           chars before sending them to the server. Even though this might be
+           a programmer error and shouldn't probably be handled by Net::XMPP2
+           I added it for convenience. Hopefully noone is confused.
+         - fixed potential bug in ping extension
+         - added a sample bot samples/talkbot
+         - fixed small issue in Writer.pm
+         - added other sample bot samples/talkbot_channel
+
 0.07 Tue Aug 14 19:22:11 CEST 2007
          - implemented whitespace ping and:
             - XEP-0199 - XMPP Ping
