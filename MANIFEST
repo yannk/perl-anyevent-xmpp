@@ -7,6 +7,8 @@ t/00-load.t
 t/boilerplate.t
 t/pod.t
 t/datetime.t
+t/events.t
+t/xml_filter_chars.t
 t/z_00_register.t
 t/z_01_message.t
 t/z_02_disco.t
@@ -34,6 +36,9 @@ samples/disco_info
 samples/simple_oob_retriever
 samples/simple_register_example
 samples/simple_component
+samples/talkbot
+samples/talkbot_channel
+samples/retrieve_roster
 lib/Net/XMPP2/IM/Contact.pm
 lib/Net/XMPP2/IM/Roster.pm
 lib/Net/XMPP2/IM/Connection.pm

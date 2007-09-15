@@ -13,6 +13,7 @@ Revision history for Net-XMPP2
          - added a sample bot samples/talkbot
          - fixed small issue in Writer.pm
          - added other sample bot samples/talkbot_channel
+         - added sample script to retrieve roster: samples/retrieve_roster
 
 0.07 Tue Aug 14 19:22:11 CEST 2007
          - implemented whitespace ping and:

@@ -332,8 +332,6 @@ sub send_iq {
    $create_cb = _trans_create_cb ($create_cb);
    $create_cb = $self->_fetch_cb_additions (send_iq_cb => $create_cb, $id, $type, \%attrs);
 
-   my $w = $self->{writer};
-   $w->addPrefix (xmpp_ns ('bind'), '');
    my (@from) = ($self->{jid} ? (from => $self->{jid}) : ());
    if ($attrs{lang}) {
       push @from, ([ xmpp_ns ('xml'), 'lang' ] => delete $attrs{leng})
@@ -347,12 +345,15 @@ sub send_iq {
 
    filter_xml_attr_hash_chars \%attrs;
 
+   my $w = $self->{writer};
+   $w->addPrefix (xmpp_ns ('client'), '');
+
    if (defined $create_cb) {
-      $w->startTag ([xmpp_ns ('bind'), 'iq'], type => $type, @from, %attrs);
+      $w->startTag ([xmpp_ns ('client'), 'iq'], type => $type, @from, %attrs);
       $create_cb->($w);
       $w->endTag;
    } else {
-      $w->emptyTag ([xmpp_ns ('bind'), 'iq'], type => $type, @from, %attrs);
+      $w->emptyTag ([xmpp_ns ('client'), 'iq'], type => $type, @from, %attrs);
    }
    $self->flush;
 }
