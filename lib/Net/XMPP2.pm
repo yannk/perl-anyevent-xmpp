@@ -8,11 +8,11 @@ Net::XMPP2 - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.08
+Version 0.09
 
 =cut
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 SYNOPSIS
 
@@ -115,6 +115,11 @@ Here are some notes to the last releases (release of this version is at top):
 =head2 Version
 
 =over 4
+
+=item * 0.09
+
+Just a bugfix release. Last change before the last release introduced a bug
+with namespace handling in resource binding.
 
 =item * 0.08
 

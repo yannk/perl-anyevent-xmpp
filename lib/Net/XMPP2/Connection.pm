@@ -4,7 +4,7 @@ use AnyEvent;
 use IO::Socket::INET;
 use Net::XMPP2::Parser;
 use Net::XMPP2::Writer;
-use Net::XMPP2::Util qw/split_jid join_jid/;
+use Net::XMPP2::Util qw/split_jid join_jid simxml/;
 use Net::XMPP2::Event;
 use Net::XMPP2::SimpleConnection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
@@ -855,13 +855,15 @@ sub do_rebind {
          sub {
             my ($w) = @_;
             if ($self->{resource}) {
-               $w->startTag ([xmpp_ns ('bind'), 'bind']);
-                  $w->startTag ([xmpp_ns ('bind'), 'resource']);
-                  $w->characters ($self->{resource});
-                  $w->endTag;
-               $w->endTag;
+               simxml ($w,
+                  defns => 'bind',
+                  node => {
+                     name => 'bind',
+                     childs => [ { name => 'resource', childs => [ $self->{resource} ] } ]
+                  }
+               )
             } else {
-               $w->emptyTag ([xmpp_ns ('bind'), 'bind'])
+               simxml ($w, defns => 'bind', node => { name => 'bind' })
             }
          },
          sub {

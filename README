@@ -2,7 +2,7 @@ NAME
     Net::XMPP2 - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.08
+    Version 0.09
 
 SYNOPSIS
        use Net::XMPP2::Connection;
@@ -89,8 +89,21 @@ RELEASE NOTES
     top):
 
   Version
-    *   0.07
+    * 0.09
+        Just a bugfix release. Last change before the last release
+        introduced a bug with namespace handling in resource binding.
 
+    * 0.08
+        Lots of bugfixes and minor changes you might want to read about in
+        the "Changes" file. Added some examples which might be useful.
+
+        Introduced a character filter on the low XML writer level which will
+        filter out not allowed XML characters to prevent unexpected
+        disconnects. Arguably this is the programmers fault but I hope noone
+        is confuses if this module tries everything to be as reliable as
+        possible.
+
+    * 0.07
         Many small changes in Net::XMPP2::Event. Implemented XEP-0199 (XMPP
         Ping) and also whitespace pings in Net::XMPP2::Connection.
 
@@ -98,8 +111,7 @@ RELEASE NOTES
 
         For further details look in the "Changes" file.
 
-    *   0.06
-
+    * 0.06
         The event API has been changed a bit, it's possible to intercept
         events now, see Net::XMPP2::Event.
 
@@ -138,8 +150,7 @@ RELEASE NOTES
         And another API change: "reply_iq_result" and "reply_iq_error" now
         attach a from attribute themselves (see Net::XMPP2::Connection).
 
-    *   0.05
-
+    * 0.05
         I added some unit tests and fixed a lot of bugs. The unit tests are
         mostly for me (the AUTHOR) to not accidentally release a buggy
         version with too ugly show stopper bugs.
@@ -149,8 +160,7 @@ RELEASE NOTES
         these tests yourself you might want to take a look at
         Net::XMPP2::TestClient.
 
-    *   0.04
-
+    * 0.04
         After realizing that in band registration in Net::XMPP2::Ext was
         already in in version 0.03 I finally had to implement it.
 
@@ -160,8 +170,7 @@ RELEASE NOTES
 
         I also fixed some bugs in Net::XMPP2::Ext::Disco.
 
-    *   older
-
+    * older
         For older release notes please have a look at the Changes file or
         CPAN.
 
@@ -313,6 +322,12 @@ EXAMPLES
         you to subscribe to it. Start it without commandline arguments to be
         informed about the usage.
 
+    samples/retrieve_roster
+        This is a simple example script that will retrieve the roster for an
+        account and print it to stdout. You start it like this:
+
+           samples/# ./retrieve_roster <jid> <password>
+
     For others, which the author might forgot or didn't want to list here
     see the "samples/" directory.
 
@@ -349,32 +364,26 @@ SUPPORT
 
     You can also look for information at:
 
-    *   IRC: Net::XMPP2 IRC Channel
-
+    * IRC: Net::XMPP2 IRC Channel
           IRC Network: http://freenode.net/
           Server     : chat.freenode.net
           Channel    : #net_xmpp2
 
           Feel free to join and ask questions!
 
-    *   Net::XMPP2 Project Site
-
+    * Net::XMPP2 Project Site
         <http://www.ta-sa.org/net_xmpp2>
 
-    *   AnnoCPAN: Annotated CPAN documentation
-
+    * AnnoCPAN: Annotated CPAN documentation
         <http://annocpan.org/dist/Net-XMPP2>
 
-    *   CPAN Ratings
-
+    * CPAN Ratings
         <http://cpanratings.perl.org/d/Net-XMPP2>
 
-    *   RT: CPAN's request tracker
-
+    * RT: CPAN's request tracker
         <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-XMPP2>
 
-    *   Search CPAN
-
+    * Search CPAN
         <http://search.cpan.org/dist/Net-XMPP2>
 
 ACKNOWLEDGEMENTS
@@ -387,8 +396,7 @@ ACKNOWLEDGEMENTS
 
     Thanks to:
 
-    *   Carlo von Loesch (aka lynX) <http://www.psyced.org/>
-
+    * Carlo von Loesch (aka lynX) <http://www.psyced.org/>
         For pointing out some typos.
 
 COPYRIGHT & LICENSE
