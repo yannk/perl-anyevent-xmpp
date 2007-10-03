@@ -1,5 +1,9 @@
 Revision history for Net-XMPP2
 
+0.10
+         - fixed cpan bug #29724 (unpacking the tarball on os x works now
+           after renaming devcl -> dev_client).
+
 0.09 Sun Sep 16 09:25:25 CEST 2007
          - fixed a small bug important bug in namespace setting when binding
            a resource. this was a showstopper for eg. jabber.org.
