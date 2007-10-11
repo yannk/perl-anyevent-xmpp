@@ -307,6 +307,36 @@ sub make_instant {
    );
 }
 
+=item B<request_configuration ($cb)>
+
+This method requests the room configuration. When the configuration
+form or an error arrives C<$cb> will be called.
+The first argument to the callback will be a L<Net::XMPP2::Ext::DataForm>
+with the room configuration form or undef in case of an error.
+The second argument will be a L<Net::XMPP2::Error::MUC> error object if an
+error occured or undef if no error occured.
+
+If you made an answer form you can send it via the C<send_configuration>
+method below.
+
+Here is an example:
+
+   $room->request_configuration (sub {
+      my ($form, $err) = @_;
+      $form or return;
+
+      my $af = Net::XMPP2::Ext::DataForm->new;
+      $af->make_answer_form ($form);
+      $af->set_field_value ('muc#roomconfig_maxusers', 20);
+      $af->clear_empty_fields;
+
+      $roomhdl->send_configuration ($af, sub {
+         # ...
+      });
+   });
+
+=cut
+
 sub request_configuration {
    my ($self, $cb) = @_;
    $self->check_online or return;
@@ -335,6 +365,18 @@ sub request_configuration {
       to => $self->jid
    );
 }
+
+=item C<send_configuration ($answer_form, $cb)>
+
+This method sends the answer form to a configuration request to the room.
+C<$answer_form> should be a L<Net::XMPP2::Ext::DataForm> object containig the
+answer form with the changed configuration.
+
+The first argument of C<$cb> will be a true value if the configuration change
+was successful. The second argument of C<$cb> will be a C<Net::XMPP2::Error::IQ>
+object if the configuration change was not successful.
+
+=cut
 
 sub send_configuration {
    my ($self, $form, $cb) = @_;
