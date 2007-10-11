@@ -32,7 +32,7 @@ sub init {
    my ($self) = @_;
    my $info = $self->{disco_info};
    my $df;
-   if (my ($xdata) = $info->node ()->find_all ([qw/data_form x/])) {
+   if (my ($xdata) = $info->xml_node ()->find_all ([qw/data_form x/])) {
       $df = Net::XMPP2::Ext::DataForm->new;
       $df->from_node ($xdata);
    }
