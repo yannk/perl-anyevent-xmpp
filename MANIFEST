@@ -22,7 +22,7 @@ t/z_20_unregister.t
 samples/devcl/DevCL/Browser.pm
 samples/devcl/DevCL/TreeView.pm
 samples/devcl/DevCL/Main.pm
-samples/devcl/devcl
+samples/devcl/dev_client
 samples/EVQ.pm
 samples/simple_example_1
 samples/conference_lister
