@@ -123,7 +123,8 @@ sub is_room {
 
    $self->{disco}->request_info ($self->{connection}, $jid, undef, sub {
       my ($disco, $info, $error) = @_;
-      if (!$info->features ()->{xmpp_ns ('muc')} || $error) {
+
+      if ($error || !$info->features ()->{xmpp_ns ('muc')}) {
          $cb->(undef, $error);
       } else {
          my $rinfo = Net::XMPP2::Ext::MUC::RoomInfo->new (disco_info => $info);
