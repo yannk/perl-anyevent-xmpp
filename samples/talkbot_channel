@@ -66,22 +66,6 @@ $cl->reg_cb (
             warn "Couldn't join $room: " . $err->string . "\n";
          } else {
             $roomhdl = $rhdl;
-
-            $roomhdl->request_configuration (sub {
-               my ($form, $err) = @_;
-               if ($err) { warn "ERROR: " . $err->string . "\n" }
-               else {
-                  my $af = Net::XMPP2::Ext::DataForm->new;
-                  $af->make_answer_form ($form);
-                  $af->set_field_value ('muc#roomconfig_maxusers', 20);
-                  $af->clear_empty_fields;
-                  $roomhdl->send_configuration ($af, sub {
-                     my ($ok, $err) = @_;
-                     if ($err) { warn "Couldn't send config: ". $err->string . "\n" }
-                  });
-               }
-            });
-
             $rhdl->reg_cb (
                message => sub {
                   my ($rhdl, $msg, $is_echo) = @_;
