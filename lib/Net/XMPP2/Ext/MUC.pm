@@ -96,7 +96,7 @@ sub is_conference {
 
    $self->{disco}->request_info ($self->{connection}, $jid, undef, sub {
       my ($disco, $info, $error) = @_;
-      if (!$info->features ()->{xmpp_ns ('muc')} || $error) {
+      if ($error || !$info->features ()->{xmpp_ns ('muc')}) {
          $cb->(undef, $error);
       } else {
          $cb->($info, undef);

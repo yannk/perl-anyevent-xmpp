@@ -55,16 +55,42 @@ sub init {
    };
 
    $self->reg_cb (
-      join_error => $proxy,
+      join_error           => $proxy,
+      subject_change_error => $proxy,
+      message_error        => $proxy,
    );
 }
 
 sub handle_message {
    my ($self, $node) = @_;
+
    my $msg = Net::XMPP2::Ext::MUC::Message->new (room => $self);
-   $msg->from_node ($node);
-   my $is_echo = cmp_jid ($msg->from, $self->nick_jid);
-   $self->event (message => $msg, $is_echo);
+
+   if ($node->attr ('type') eq 'error') {
+      my $error =
+         Net::XMPP2::Error::MUC->new (
+            message_node => $node,
+            message      => $msg
+         );
+
+      if ($error->type eq 'subject_change_forbidden') {
+         $self->event (subject_change_error => $error);
+      } else {
+         $self->event (message_error => $error);
+      }
+
+   } else {
+      $msg->from_node ($node);
+      my $is_echo = cmp_jid ($msg->from, $self->nick_jid);
+
+      if (not (defined $msg->any_body)
+          && defined $msg->any_subject) { # subject change
+         $self->event (subject_change => $msg, $is_echo);
+         return;
+      }
+
+      $self->event (message => $msg, $is_echo);
+   }
 }
 
 sub handle_presence {
@@ -531,6 +557,18 @@ sub change_nick {
    );
 }
 
+=item B<change_subject ($newsubject)>
+
+This methods changes the subject of the room.
+
+=cut
+
+sub change_subject {
+   my ($self, $newsubject) = @_;
+   my $msg = $self->make_message (subject => $newsubject);
+   $msg->send;
+}
+
 =back
 
 =head1 EVENTS
@@ -544,6 +582,20 @@ These events can be registered on with C<reg_cb>:
 This event is emitted when a message was received from the room.
 C<$msg> is a L<Net::XMPP2::Ext::MUC::Message> object and C<$is_echo>
 is true if the message is an echo.
+
+=item subject_change => $msg, $is_echo
+
+This event is emitted when a user changes the room subject.
+C<$msg> is a L<Net::XMPP2::Ext::MUC::Message> object and C<$is_echo>
+is true if the message is an echo.
+
+The room subject is the subject of that C<$msg>.
+
+=item subject_change_error => $error
+
+If you weren't allowed to change the subject or some other error
+occured you will receive this event.
+C<$error> is a L<Net::XMPP2::Error::MUC> object.
 
 =item error => $error
 
@@ -564,13 +616,19 @@ the user handle for ourself.
 =item join => $user
 
 This event is emitted when a new user joins the room.
-C<$user> is the L<Net::XMPP2::Ext::MUC::User> of that user.
+C<$user> is the L<Net::XMPP2::Ext::MUC::User> object of that user.
+
+=item nick_change => $user, $oldnick, $newnick
+
+This event is emitted when a user changed his nickname.
+C<$user> is the L<Net::XMPP2::Ext::MUC::User> object of that user.
+C<$oldnick> is the old nickname and C<$newnick> is the new nickname.
 
 =item presence => $user
 
 This event is emitted when a user changes it's presence status
 (eg. affiliation or role, or away status).
-C<$user> is the L<Net::XMPP2::Ext::MUC::User> of that user.
+C<$user> is the L<Net::XMPP2::Ext::MUC::User> object of that user.
 
 =item part => $user
 

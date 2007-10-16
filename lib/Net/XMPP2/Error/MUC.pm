@@ -30,6 +30,17 @@ sub init {
       my $cond = $self->{presence_error}->{error_cond};
       $self->{type} = $mapping{$cond};
    }
+   if ($self->{message_node}) {
+      my $error = Net::XMPP2::Error::Message->new (node => $self->{message_node});
+
+      if ($self->{message}->any_subject && not defined $self->{message}->any_body) {
+         $self->{type} = 'subject_change_forbidden';
+      } else {
+         $self->{type} = 'message_error';
+      }
+
+      $self->{message_error} = $error;
+   }
 }
 
 =item B<type>
@@ -40,7 +51,20 @@ This method returns either:
 
 =item join_timeout
 
-If the joining of the room took too long this error is generated.
+If the joining of the room took too long.
+
+=item no_config_form
+
+If the room we requested the configuration from didn't provide a
+data form.
+
+=item subject_change_forbidden
+
+If changing the subject of a room is not allowed.
+
+=item message_error
+
+If this is an unidentified message error.
 
 =back
 
@@ -123,6 +147,8 @@ sub text {
    my ($self) = @_;
    if (my $p = $self->presence_error) {
       return $p->text;
+   } elsif (my $m = $self->message_error) {
+      return $m->text;
    } else {
       return $self->{text}
    }
@@ -136,6 +162,15 @@ origins to such an error and not some internal error.
 =cut
 
 sub presence_error { $_[0]->{presence_error} }
+
+=item B<message_error>
+
+Returns a L<Net::XMPP2::Error::Message> object if this error
+origins to such an error and not some internal error.
+
+=cut
+
+sub message_error { $_[0]->{message_error} }
 
 sub string {
    my ($self) = @_;

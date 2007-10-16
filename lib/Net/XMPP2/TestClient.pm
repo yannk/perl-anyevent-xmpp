@@ -92,12 +92,18 @@ sub new_or_exit {
 
    $self->{tests};
 
+   if ($self->{muc_test} && not $ENV{NET_XMPP2_TEST_MUC}) {
+      plan skip_all => "environment var NET_XMPP2_TEST_MUC not set! Set it to a conference!";
+      exit;
+   }
+
    if ($ENV{NET_XMPP2_TEST}) {
       plan tests => $self->{tests} + 1
    } else {
       plan skip_all => "environment var NET_XMPP2_TEST not set! (see also Net::XMPP2::TestClient)!";
       exit;
    }
+
    bless $self, $class;
    $self->init;
    $self
@@ -122,7 +128,6 @@ sub init {
    $cl->add_account ($jid, $password, undef, undef, $self->{connection_args});
 
    if ($self->{two_accounts}) {
-      $cl->add_account ("2nd_".$jid, $password, undef, undef, $self->{connection_args});
       $self->{connected_accounts} = {};
 
       $cl->reg_cb (session_ready => sub {
@@ -134,7 +139,58 @@ sub init {
             $cl->event (two_accounts_ready => $acc, @jids);
          }
       });
+
+      $cl->add_account ("2nd_".$jid, $password, undef, undef, $self->{connection_args});
    }
+
+
+   if ($self->{muc_test} && $ENV{NET_XMPP2_TEST_MUC}) {
+      $self->{muc_room} = "test@" . $ENV{NET_XMPP2_TEST_MUC};
+
+      my $disco = $self->instance_ext ('Net::XMPP2::Ext::Disco');
+      $self->{disco} = $disco;
+
+      $cl->reg_cb (
+         before_session_ready => sub {
+            my ($cl, $acc) = @_;
+            my $con = $acc->connection;
+            $con->add_extension (
+               $self->{mucs}->{$acc->bare_jid}
+                  = Net::XMPP2::Ext::MUC->new (disco => $disco, connection => $con)
+            );
+         },
+         two_accounts_ready => sub {
+            my ($cl, $acc, $jid1, $jid2) = @_;
+            my $cnt = 0;
+            my ($room1, $room2);
+            my $muc = $self->{muc1} = $self->{mucs}->{prep_bare_jid $jid1};
+
+            $muc->join_room ($self->{muc_room}, "test1", sub {
+               my ($room, $user, $error) = @_;
+               $room1 = $room;
+               if ($error) {
+                  $self->{error} .= "Error: Couldn't join $self->{muc_room} as 'test1'\n";
+                  $self->{condvar}->broadcast;
+               } else {
+                  my $muc = $self->{muc2} = $self->{mucs}->{prep_bare_jid $jid2};
+                  $muc->join_room ($self->{muc_room}, "test2", sub {
+                     my ($room, $user, $error) = @_;
+                     my $room2 = $room;
+                     if ($error) {
+                        $self->{error} .= "Error: Couldn't join $self->{muc_room} as 'test2'\n";
+                        $self->{condvar}->broadcast;
+                     } else {
+                        $cl->event (two_rooms_joined => $acc, $jid1, $jid2, $room1, $room2)
+                     }
+                  });
+               }
+            });
+
+
+         }
+      );
+   }
+
 
    $cl->reg_cb (error => sub {
       my ($cl, $acc, $error) = @_;

@@ -19,7 +19,7 @@ my $ROOM = "test@".$MUC;
 
 my $cl =
    Net::XMPP2::TestClient->new_or_exit (
-      tests => 26, two_accounts => 1, finish_count => 1
+      tests => 26, two_accounts => 1, finish_count => 2
    );
 my $C     = $cl->client;
 my $disco = $cl->instance_ext ('Net::XMPP2::Ext::Disco');
@@ -160,9 +160,10 @@ sub step_join_occupant_password {
 }
 
 my $nick_info = {};
+my $second = 0;
 
 sub step_change_nick {
-   my ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2, $second) = @_;
+   my ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2) = @_;
 
    my $ni = $nick_info;
    if ($second == 1) {
@@ -181,18 +182,23 @@ sub step_change_nick {
          $ni->{user1}->{old_nick} = $oldnick;
          $ni->{user1}->{new_nick} = $newnick;
          $room1->unreg_me;
-      },
+      }
+   );
+   $room1->reg_cb (
       after_nick_change => sub {
          my ($room1) = @_;
 
          if (not $second) {
             $cnt++;
-            step_change_nick ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2, 1)
-               if $cnt >= 2;
+            if ($cnt >= 2) {
+               $second = 1;
+               step_change_nick ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2, 1);
+            }
+         } else {
+            $cl->finish;
          }
-         $room1->unreg_me;
       }
-   );
+   ) if not $second;
 
    $room2->reg_cb (
       nick_change => sub {
@@ -204,18 +210,24 @@ sub step_change_nick {
          $ni->{user2}->{old_nick} = $oldnick;
          $ni->{user2}->{new_nick} = $newnick;
          $room2->unreg_me;
-      },
+      }
+   );
+
+   $room2->reg_cb (
       after_nick_change => sub {
          my ($room2) = @_;
 
          if (not $second) {
             $cnt++;
-            step_change_nick ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2, 1)
-               if $cnt >= 2;
+            if ($cnt >= 2) {
+               $second = 1;
+               step_change_nick ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2, 1);
+            }
+         } else {
+            $cl->finish;
          }
-         $room2->unreg_me;
       }
-   );
+   ) if not $second;;
 
    if ($second == 1) {
       $room2->change_nick ("test2nd");
