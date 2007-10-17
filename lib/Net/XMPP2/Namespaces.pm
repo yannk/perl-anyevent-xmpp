@@ -117,7 +117,7 @@ Sets an C<$alias> for the C<$namespace_uri>.
 
 =cut
 
-sub set_xmpp_ns_alias { return $NAMESPACES{$_[0]} }
+sub set_xmpp_ns_alias { $NAMESPACES{$_[0]} = $_[1] }
 
 =back
 
