@@ -127,11 +127,28 @@ to exclude it because it's deprecated and insecure. (However, I want to reach a
 maximum in compatibility with L<Net::XMPP2> so I'm not disabling this by
 default.
 
+See also C<disable_old_jabber_authentication> below.
+
 =item anal_iq_auth => $bool
 
 This enables the anal iq auth mechanism that will first look in the stream
 features before trying to start iq authentication. Yes, servers don't always
 advertise what they can. I only implemented this option for my test suite.
+
+=item disable_old_jabber_authentication => $bool
+
+If C<$bool> is a true value, then the B<VERY> old style authentication method
+with B<VERY> old jabber server won't be used when a <stream> start tag from the server
+without version attribute is received.
+
+The B<VERY> old style authentication method is per default enabled to ensure
+maximum compatibility with old jabber implementations. The old method works as
+follows: When a <stream> start tag is received from the server with no
+'version' attribute IQ Auth (XEP-0078) will be initiated to authenticate with
+the server.
+
+Please note that the old authentication method will fail if C<disable_iq_auth>
+is true.
 
 =item whitespace_ping_interval => $interval
 
@@ -193,6 +210,14 @@ sub new {
 
    $self->{parser}->set_stream_cb (sub {
       $self->{stream_id} = $_[0]->attr ('id');
+
+      # This is some very bad "hack" for _very_ old jabber
+      # servers to work with Net::XMPP2
+      if (not defined $_[0]->attr ('version')) {
+         $self->start_old_style_authentication
+            if (not $self->{disable_iq_auth})
+               && (not $self->{disable_old_jabber_authentication})
+      }
    });
 
 
@@ -709,6 +734,23 @@ sub handle_error {
 
    $self->event (stream_error => $error);
    $self->{writer}->send_end_of_stream;
+}
+
+# This is a hack for jabberd 1.4.2, VERY OLD Jabber stuff.
+sub start_old_style_authentication {
+   my ($self) = @_;
+
+   $self->{features}
+      = Net::XMPP2::Node->new (
+          'http://etherx.jabber.org/streams', 'features', [], $self->{parser}
+        );
+
+   my $continue = 1;
+   my (@ret) = $self->event (stream_pre_authentication => \$continue);
+   $continue = pop @ret if @ret;
+   if ($continue) {
+      $self->do_iq_auth;
+   }
 }
 
 sub do_iq_auth {

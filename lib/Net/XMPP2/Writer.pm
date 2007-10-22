@@ -164,13 +164,13 @@ sub send_init_stream {
    $ns ||= 'client';
 
    my $w = $self->{writer};
-   # $w->xmlDecl ('UTF-8'); # no, we don't do this, because server knows this already
+   $w->xmlDecl ();
    $w->addPrefix (xmpp_ns ('stream'), 'stream');
    $w->addPrefix (xmpp_ns ($ns), '');
    $w->forceNSDecl (xmpp_ns ($ns));
    $w->startTag (
       [xmpp_ns ('stream'), 'stream'],
-      to => $domain,
+      to      => $domain,
       version => '1.0',
       [xmpp_ns ('xml'), 'lang'] => $language
    );

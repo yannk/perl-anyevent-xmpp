@@ -1,6 +1,11 @@
 Revision history for Net-XMPP2
 
 0.10
+         - also fixed a small bug in stream initiation, Net::XMPP2 now
+           sends a xml declaration again.
+         - implemented a very old authentication method which makes Net::XMPP2
+           now also work with jabberd 1.4.2. See also the
+           'disable_old_jabber_authentication' option in Net::XMPP2::Connection
          - fixed cpan bug #29724 (unpacking the tarball on os x works now
            after renaming devcl -> dev_client).
          - fixed a bug with handling the is_room query in MUC

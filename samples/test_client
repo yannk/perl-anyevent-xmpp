@@ -13,7 +13,7 @@ binmode STDOUT, ":utf8";
 my $j = AnyEvent->condvar;
 my $cl = Net::XMPP2::Client->new (debug => 1);
 $cl->set_presence ('away', 'I\'m a bot now.', 1);
-$cl->add_account (@ARGV);
+$cl->add_account (@ARGV, undef, undef);
 $cl->reg_cb (
    connected => sub {
       $cl->send_message ("Hello!" => 'elmex@jabber.org');
