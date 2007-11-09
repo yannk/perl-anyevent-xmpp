@@ -158,7 +158,7 @@ sub update_connections {
    my ($self) = @_;
 
    for my $acc (values %{$self->{accounts}}) {
-      unless ($acc->is_connected) {
+      if (!$acc->is_connected && !$self->{prep_connections}) {
          my %args = (initial_presence => 10);
 
          if (defined $self->{presence}) {
@@ -168,6 +168,7 @@ sub update_connections {
          }
 
          my $con = $acc->spawn_connection (%args);
+         $self->{prep_connections}->{$acc->bare_jid} = $con;
 
          $con->add_forward ($self, sub {
             my ($con, $self, $ev, @arg) = @_;
@@ -177,6 +178,7 @@ sub update_connections {
          $con->reg_cb (
             session_ready => sub {
                my ($con) = @_;
+               delete $self->{prep_connections}->{$acc->bare_jid};
                $self->event (connected => $acc);
                if (defined $self->{presence}) {
                   $con->send_presence (undef, undef, %{$self->{presence} || {}});
@@ -185,6 +187,7 @@ sub update_connections {
             },
             disconnect => sub {
                delete $self->{accounts}->{$acc};
+               delete $self->{prep_connections}->{$acc->bare_jid};
                $_[0]->unreg_me
             }
          );
