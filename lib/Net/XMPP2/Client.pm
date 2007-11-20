@@ -158,7 +158,7 @@ sub update_connections {
    my ($self) = @_;
 
    for my $acc (values %{$self->{accounts}}) {
-      if (!$acc->is_connected && !$self->{prep_connections}) {
+      if (!$acc->is_connected && !$self->{prep_connections}->{$acc->bare_jid}) {
          my %args = (initial_presence => 10);
 
          if (defined $self->{presence}) {
