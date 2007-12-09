@@ -1,6 +1,8 @@
 Revision history for Net-XMPP2
 
 0.10
+         - messages are 'replied' to the bare JID now and also
+           Net::XMPP2::Client::send_message will take care of stripping the resource now.
          - fixed a race condition with the account adding routine
            of Net::XMPP2::Client.
          - also fixed a small bug in stream initiation, Net::XMPP2 now
