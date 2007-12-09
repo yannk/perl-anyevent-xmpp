@@ -197,7 +197,9 @@ sub make_reply {
    }
 
    $msg->{connection} = $self->{connection};
-   $msg->to ($self->from);
+   # the reply should go to the bare jid, leave
+   # routing up to the receiver, even though the RFC3921bis says different
+   $msg->to (bare_jid $self->from);
    $msg->type ($self->type);
 
    $msg
