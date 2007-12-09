@@ -1,6 +1,8 @@
 Revision history for Net-XMPP2
 
 0.10
+         - fixed a race condition with the account adding routine
+           of Net::XMPP2::Client.
          - also fixed a small bug in stream initiation, Net::XMPP2 now
            sends a xml declaration again.
          - implemented a very old authentication method which makes Net::XMPP2
