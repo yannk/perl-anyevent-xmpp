@@ -5,7 +5,7 @@ use Net::XMPP2::Connection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::IM::Roster;
 use Net::XMPP2::IM::Message;
-use Net::XMPP2::Util qw/cmp_jid/;
+use Net::XMPP2::Util qw/cmp_bare_jid/;
 our @ISA = qw/Net::XMPP2::Connection/;
 
 =head1 NAME
@@ -216,7 +216,7 @@ sub handle_iq_set {
 
 sub handle_presence {
    my ($self, $node) = @_;
-   if (defined ($node->attr ('to')) && !cmp_jid ($node->attr ('to'), $self->jid)) {
+   if (defined ($node->attr ('to')) && !cmp_bare_jid ($node->attr ('to'), $self->jid)) {
       return; # ignore presence that is not for us
    }
 

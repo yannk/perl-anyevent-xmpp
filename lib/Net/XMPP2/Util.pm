@@ -8,7 +8,7 @@ require Exporter;
 our @EXPORT_OK = qw/resourceprep nodeprep prep_join_jid join_jid
                     split_jid stringprep_jid prep_bare_jid bare_jid
                     is_bare_jid simxml dump_twig_xml install_default_debug_dump
-                    cmp_jid
+                    cmp_jid cmp_bare_jid
                     node_jid domain_jid res_jid
                     prep_node_jid prep_domain_jid prep_res_jid
                     from_xmpp_datetime to_xmpp_datetime to_xmpp_time
@@ -185,6 +185,18 @@ whether they are equal.
 sub cmp_jid {
    my ($jid1, $jid2) = @_;
    stringprep_jid ($jid1) eq stringprep_jid ($jid2)
+}
+
+=item B<cmp_bare_jid ($jid1, $jid2)>
+
+This function compares two jids C<$jid1> and C<$jid2> whether their
+bare part is equal.
+
+=cut
+
+sub cmp_bare_jid {
+   my ($jid1, $jid2) = @_;
+   cmp_jid (bare_jid ($jid1), bare_jid ($jid2))
 }
 
 =item B<prep_bare_jid ($jid)>

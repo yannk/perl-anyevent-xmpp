@@ -15,6 +15,7 @@ my $C = $cl->client;
 
 my ($src, $dest);
 
+my $roster_push = 0;
 my $received_subscribe = 0;
 my $mutual_subscribe = 0;
 my $subscriptions = 0;
@@ -35,7 +36,7 @@ $C->reg_cb (
 
       $con1->get_roster ()->new_contact ($jid2, undef, "friend", sub {
          my ($con, $err) = @_;
-         ok ($con, "roster push");
+         $roster_push = 1 if $con;
          if ($con) {
             $con->send_subscribe
          }
@@ -82,6 +83,7 @@ $C->reg_cb (
 
 $cl->wait;
 
+ok ($roster_push, "roster push");
 ok ($received_subscribe, "received subscription request");
 ok ($mutual_subscribe,   "mutual subscription ok");
 is ($subscriptions, 2, "got two subscriptions");
