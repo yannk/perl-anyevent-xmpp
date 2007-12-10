@@ -2,7 +2,7 @@ package Net::XMPP2::Client;
 use strict;
 use AnyEvent;
 use Net::XMPP2::IM::Connection;
-use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid dump_twig_xml/;
+use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid dump_twig_xml bare_jid/;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Event;
 use Net::XMPP2::Extendable;

@@ -4,6 +4,7 @@ use overload
   '""' => "to_string";
 
 use Net::XMPP2::IM::Delayed;
+use Net::XMPP2::Util qw/bare_jid/;
 
 our @ISA = qw/Net::XMPP2::IM::Delayed/;
 
