@@ -58,7 +58,9 @@ use utf8;
      user auf einem anderen server bauen die server untereinander verbindugen
      auf zum uebertragen der nachricht.
 
-   - Komponenten koennen funktionalitaet von Servern erweitern
+   - Komponenten koennen spezielle funktionalitaeten implementieren und
+     mit servern verbunden werden, und geniessen dabei etwas mehr rechte als
+     ein normaler client.
      Bestes beispiel hierfuer sind "Chatraeume" die bei XMPP/Jabber eher als
      after-thought dazu gehackt wurden.
 

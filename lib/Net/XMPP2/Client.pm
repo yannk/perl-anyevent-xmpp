@@ -250,10 +250,9 @@ C<$msg> can either be a string or a L<Net::XMPP2::IM::Message> object.
 If C<$msg> is such an object C<$dest_jid> is optional, but will, when
 passed, override the destination of the message.
 
-NOTE: C<$dest_jid> is transformed into a bare JID due to the fact
-that message routing to resources should be performed by the server
-and not the sending client. (Even though this contradicts RFC3921bis
-as time of this writing (2007-12-09).
+NOTE: C<$dest_jid> is transformed into a bare JID and the routing
+is done by the conversation tracking mechanism which keeps track of
+which resource should get the message.
 
 C<$src> is optional. It specifies which account to use
 to send the message. If it is not passed L<Net::XMPP2::Client> will try
@@ -283,7 +282,7 @@ sub send_message {
    if (defined $dest_jid) {
       my $jid = stringprep_jid $dest_jid
          or die "send_message: \$dest_jid is not a proper JID";
-      $msg->to (bare_jid $jid);
+      $msg->to ($jid);
    }
 
    $msg->type ($type) if defined $type;
@@ -301,7 +300,7 @@ sub send_message {
       die "send_message: Couldn't get connected account for sending"
    }
 
-   $msg->send ($srcacc->connection)
+   $srcacc->send_tracked_message ($msg);
 }
 
 =head2 get_account ($jid)

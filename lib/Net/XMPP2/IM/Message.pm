@@ -4,7 +4,6 @@ use overload
   '""' => "to_string";
 
 use Net::XMPP2::IM::Delayed;
-use Net::XMPP2::Util qw/bare_jid/;
 
 our @ISA = qw/Net::XMPP2::IM::Delayed/;
 
@@ -57,8 +56,7 @@ be used to send this message when the C<send> method is called.
 
 =item to => $jid
 
-This is the destination JID of this message. C<$jid> should
-be a bare JID when the message is sent out of a conversation 'context'.
+This is the destination JID of this message.
 C<$jid> should be full if this message is send within a conversation
 'context', for example when replying to a previous message.
 
@@ -198,9 +196,7 @@ sub make_reply {
    }
 
    $msg->{connection} = $self->{connection};
-   # the reply should go to the bare jid, leave
-   # routing up to the receiver, even though the RFC3921bis says different
-   $msg->to (bare_jid $self->from);
+   $msg->to ($self->from);
    $msg->type ($self->type);
 
    $msg

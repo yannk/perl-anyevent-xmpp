@@ -1,6 +1,6 @@
 package Net::XMPP2::IM::Account;
 use strict;
-use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid split_jid/;
+use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid split_jid bare_jid/;
 use Net::XMPP2::IM::Connection;
 
 =head1 NAME
@@ -45,7 +45,16 @@ sub spawn_connection {
       ($self->{port} ? (override_port => $self->{port}) : ()),
       %args,
       %{$self->{args} || {}},
-   )
+   );
+
+   $self->{con}->reg_cb (
+      ext_before_message => sub {
+         my ($con, $msg) = @_;
+         $self->{track}->{prep_bare_jid $msg->from} = $msg->from;
+      }
+   );
+
+   $self->{con}
 }
 
 =head1 METHODS
@@ -111,6 +120,22 @@ sub nickname {
    # eg. from the roster?
    my ($user, $host, $res) = split_jid ($self->bare_jid);
    $user
+}
+
+=item B<send_tracked_message ($msg)>
+
+This method sends the L<Net::XMPP2::IM::Message> object in C<$msg>.
+The C<to> attribute of the message is adjusted by the conversation tracking
+mechanism.
+
+=cut
+
+sub send_tracked_message {
+   my ($self, $msg) = @_;
+
+   my $bjid = prep_bare_jid $msg->to;
+   $msg->to ($self->{track}->{$bjid} || $bjid);
+   $msg->send ($self->connection)
 }
 
 =back
