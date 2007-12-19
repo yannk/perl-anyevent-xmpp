@@ -8,11 +8,11 @@ Net::XMPP2 - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.09
+Version 0.10
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 SYNOPSIS
 
@@ -115,6 +115,14 @@ Here are some notes to the last releases (release of this version is at top):
 =head2 Version
 
 =over 4
+
+=item * 0.10
+
+Fixed some bugs and implemented an old/ancient authentication method
+used by some very old (jabberd 1.4.2) servers. Also implemented a chat session
+tracking mechanism to help the users of L<Net::XMPP2::Client> to get their
+message to the right resource. (See also the method C<send_tracked_message>
+of L<Net::XMPP2::IM::Account>).
 
 =item * 0.09
 

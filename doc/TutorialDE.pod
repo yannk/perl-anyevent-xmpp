@@ -75,6 +75,7 @@ use utf8;
 
 =head2 Warum die 2 in Net::XMPP2?
 
+   - warum hab ichs geschrieben?
    - eingehen auf die alten CPAN module
    - Alternativen wie Net::XMPP, Net::Jabber und Jabber::Lite existieren,
      von denen ich jedoch abraten moechte:

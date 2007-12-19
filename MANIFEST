@@ -11,10 +11,13 @@ t/events.t
 t/xml_filter_chars.t
 t/z_00_register.t
 t/z_01_message.t
+t/z_01_message_tracking.t
 t/z_02_disco.t
 t/z_03_iq_auth.t
 t/z_04_presence.t
 t/z_05_muc.t
+t/z_05_muc2.t
+t/z_05_muc3.t
 t/z_06_iq_ping.t
 t/z_06_iq_ping_timeout.t
 t/z_06_iq_version.t

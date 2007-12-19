@@ -2,7 +2,7 @@ NAME
     Net::XMPP2 - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.09
+    Version 0.10
 
 SYNOPSIS
        use Net::XMPP2::Connection;
@@ -89,6 +89,13 @@ RELEASE NOTES
     top):
 
   Version
+    * 0.10
+        Fixed some bugs and implemented an old/ancient authentication method
+        used by some very old (jabberd 1.4.2) servers. Also implemented a
+        chat session tracking mechanism to help the users of
+        Net::XMPP2::Client to get their message to the right resource. (See
+        also the method "send_tracked_message" of Net::XMPP2::IM::Account).
+
     * 0.09
         Just a bugfix release. Last change before the last release
         introduced a bug with namespace handling in resource binding.

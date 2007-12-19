@@ -1,6 +1,6 @@
 package Net::XMPP2::IM::Account;
 use strict;
-use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid split_jid bare_jid/;
+use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid split_jid/;
 use Net::XMPP2::IM::Connection;
 
 =head1 NAME

@@ -289,7 +289,7 @@ sub stop_event {
 
 This method allows to forward or copy all events to an object.
 C<$forward_cb> will be called everytime an event is generated in C<$self>.
-The first argument to the callback C<$forward_cb> will be <$self>, the second
+The first argument to the callback C<$forward_cb> will be C<$self>, the second
 will be C<$obj>, the third will be the event name and the rest will be
 the event arguments. (For third and rest of argument also see description
 of C<event>).
