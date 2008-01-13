@@ -118,7 +118,7 @@ und deployments in der ganzen welt gibt. Sogar die US Navy soll XMPP einsetzen.
 
 =item *
 
-Net::XMPP2 ist ein Perl Modul zum entwickeln von XMPP clienten und componenten.
+L<Net::XMPP2> ist ein Perl Modul zum entwickeln von XMPP clienten und componenten.
 
 =item *
 
@@ -128,7 +128,7 @@ die kontakt liste (bei XMPP 'Roster' genannt) verwaltet.
 
 =item *
 
-Dazu implementiert Net::XMPP2 ein paar wichtige XEPs ohne die man keinen
+Dazu implementiert L<Net::XMPP2> ein paar wichtige XEPs ohne die man keinen
 ernsthaften IM Clienten der auf XMPP basiert schreiben koennte.
 
 =back
@@ -156,7 +156,7 @@ Man muss dann auf threads zurueck greifen.
 
 =item *
 
-Net::XMPP2 hab ich geschrieben um:
+L<Net::XMPP2> hab ich geschrieben um:
 
 =over 4
 
@@ -168,12 +168,264 @@ Ohne threads auszukommen und es einfacher zu haben Event-basiert zu arbeiten.
 
 Die Aktuellen XMPP RFCs umzusetzen.
 
-=back
+=item *
+
+Mit sovielen XMPP Servern interoperabel zu sein wie moeglich, welche die XMPP
+RFCs gerne mal anders auslegen. Vorallem aeltere XMPP server, unterstuezen
+teilweise nur alte, teilweise nicht spezifizierte, authentifizierungs
+protokolle.
 
 =back
 
-=head2 Einfuehrendes Beispiel
+=back
 
-Hier ein Code Beispiel:
+=head2 Dependencies von Net::XMPP2
 
+L<Net::XMPP2> hat einige dependencies um Standardkonform XMPP zu implementieren:
 
+  AnyEvent            - Um dem user von Net::XMPP2 die event-loop wahl zu ueberlassen
+  XML::Writer         - Um "XML" auszugeben
+  XML::Parser::Expat  - Um mit dem "XML" wie XMPP es definiert umzugehen
+  Net::SSLeay         - Um TLS verbindungen aufzubauen zu XMPP Servern
+  Net::DNS            - Um DNS SRV Records fuer XMPP Servern abzufragen
+  Net::LibIDN         - Um JIDs zu normalisieren (mit stringprep).
+  Authen::SASL        - Fuer die SASL authentifizierung mit dem XMPP Server
+
+Und noch ein paar andere wie: L<Digest::SHA1>, L<MIME::Base64>.
+
+Das sind leider ziemlich viele Dependencies die auch zum teil C bibliotheken
+brauchen, allerdings sind all diese technologien (TLS, SASL, LibIDN, DNS, ...)
+notwendig fuer eine brauchbare XMPP implementation.
+
+An dieser Stelle moechte ich auch nochmal auf die Verwendung von L<AnyEvent>
+hinweisen. L<AnyEvent> erlaubt dem benutzer von L<Net::XMPP2> die event-loop zu
+waehlen von der die I/O events kommen. Das heisst L<Net::XMPP2> ist einfach
+integrierbar in eine Applikation die bereits Gtk2, Tk, Glib, Event oder eine
+andere von AnyEvent unterstuetzte event-loop benutzt.
+
+=back
+
+=head2 Ueberblick ueber Net::XMPP2
+
+Die wichtigsten module in L<Net::XMPP2> sind:
+
+=over 4
+
+=item Net::XMPP2::Event
+
+Das Event-modell von L<Net::XMPP2>, auf welches ich im naechsten Abschnitt eingehen
+werde.
+
+=item Net::XMPP2::Connection
+
+Repraesentiert einen rohen "XML stream" ohne weitere "Instant Messaging" funktionalitaet.
+
+Meistens wird man allerdings L<Net::XMPP2::IM::Connection> oder L<Net::XMPP2::Client>
+verwenden wollen, die in den naechsten zwei Punkten beschrieben werden.
+
+=item Net::XMPP2::IM::Connection
+
+Ist von L<Net::XMPP2::Connection> abgeleitet und erweitert diese um "Instant Messaging"
+funktionalitaet wie z.b. presenz-status setzen, presenz von kontakten empfangen
+sowie kontakt-listen (roster) management.
+
+=item Net::XMPP2::Client
+
+Implementiert einen einfachen XMPP Client der zu mehreren Accounts gleichzeitig connecten
+kann und die L<Net::XMPP2::IM::Connection> objekte fuer einen verwaltet.
+
+=item Net::XMPP2::IM::Message
+
+Ein objekt dieser Klasse repraesentiert eine XMPP Nachricht. Die wohl wichtigsten
+methoden sind C<to>, C<from> und C<any_body> um auf absender, empfaenger und den
+Inhalt der Nachricht zugreifen zu koennen.
+
+=back
+
+Fuer naehere Information zu den Modulen bitte ich die jeweilige POD dokumentation
+aufzusuchen.
+
+=head2 Events in Net::XMPP2
+
+Ich habe eine relativ einfaches Event-modell fuer L<Net::XMPP2> implementiert.
+L<Net::XMPP2::Connection> ist von L<Net::XMPP2::Event> abgeleitet und erbt
+vom dem unter anderem die folgenden Methoden:
+
+=over 4
+
+=item reg_cb ($event1, $cb1, ...)
+
+Um bestimmte events die in der Dokumentation beschrieben sind zu empfangen
+muss man einen Callback mit C<reg_cb> registrieren. Wenn man zum beispiel den
+C<session_ready> event von L<Net::XMPP2::IM::Connection> bekommen moechte
+(der geschickt wird wenn man authentifiziert ist und nachrichten verschicken kann)
+macht man ungefaehr dies:
+
+   my $con = Net::XMPP2::IM::Connection->new (...);
+   ...
+   $con->reg_cb (session_ready => sub {
+      my ($con) = @_;
+      ...
+   });
+
+Oder, fuer Leute die closures nicht so moegen:
+
+   sub session_ready_cb {
+      my ($con) = @_;
+   }
+   ...
+   $con->reg_cb (session_ready => \&session_ready_cb);
+
+Man kann sich ueberigends mehrere callbacks fuer einen Event registrieren,
+diese werden dann in der Reihenfolge in der sie Registriert wurden aufgerufen
+wenn der Event ausgeloest wird.
+
+=item unreg_cb ($regid)
+
+Das Returnvalue von C<reg_cb> ist ueberigends eine ID die man fuer die C<unreg_cb>
+methode braucht um die events wieder abzubestellen:
+
+   my $regid =
+      $con->reg_cb (
+         eventname1 => sub { ... },
+         eventname2 => sub { ... },
+         ...
+      );
+   ...
+   $con->unreg_cb ($regid); # unregistriert die vom obigen reg_cb registrierten
+                            # event callbacks.
+
+=item unreg_me
+
+Wenn man sich innerhalb eines Callbacks befindet und beschliesst das man diesen
+unregistrieren will kann man folgendes machen:
+
+   $con->reg_cb (
+      event_xyz => sub {
+         my ($con) = @_;
+         ...
+         $con->unreg_me;
+         ...
+      }
+   );
+
+Die methode C<unreg_me> sorgt dafuer das der registrierte callback entfernt wird.
+
+=item event ($eventname, @args)
+
+Diese methode kann man benutzen um eigene events auszuloesen. Dabei sollte man allerdings
+vermeiden von L<Net::XMPP2> verwendete events zu benutzen, da dies zu fehlern fuehren
+koennte. Das erste argument ist der name des events den man ausloesen moechte
+und die C<@args> werden spaeter den callbacks uebergeben.
+
+Das ganze sieht ca. so aus:
+
+   $con->reg_cb (
+      mein_test_event => sub {
+         my ($con, $str) = @_;
+         print "mein_test_event ausgeloest mit erstem argument: $str\n";
+      }
+   );
+   $con->event (mein_test_event => "argument1");
+
+Gibt folgendes aus:
+
+   mein_test_event ausgeloest mit erstem argument: argument1
+
+=item set_exception_cb ($cb)
+
+Wenn man einmal in einer methode einen fehler macht und eine exception
+geworfen wird, dann wird diese von L<Net::XMPP2::Event> abgefangen und ausgegeben.
+Die ausgabe kann man dann mit C<set_exception_cb> abfangen und selbst machen:
+
+   $con->set_exception_cb (sub {
+      my ($exception) = @_;
+      warn "Exception in event processing: $exception\n";
+   });
+
+=back
+
+Es gibt noch eine Reihe weiterer interessanter methoden die ich bitte in
+der Dokumentation von L<Net::XMPP2::Event> nachzulesen.
+
+=head2 Beispiel
+
+Als Abschluss moechte ich noch ein ausfuehrlich dokumentiertes
+Beispiel bringen, welches eine nachricht an jemanden verschickt:
+
+   #!/opt/perl/bin/perl
+   use strict;
+   use AnyEvent;
+   use Net::XMPP2::IM::Connection;
+
+   unless (@ARGV >= 3) { die "sendmsg <account jid> <password> <destination jid>\n" }
+
+   my $msg  = do { local $/; <STDIN> };  # Die nachricht zum schicken
+   my $dest = $ARGV[2];                  # Das ziel der nachricht
+
+   my $j = AnyEvent->condvar; # Wird spaeter fuer die Event-loop gebraucht
+
+   # Wir erzeugen erstmal ein neues Verbindungsobjekt:
+   my $con =
+      Net::XMPP2::IM::Connection->new (
+         jid      => $ARGV[0],    # Die JID von _unserem_ account
+         password => $ARGV[1],    # Das Passwort fuer _unseren_ account
+         initial_presence => -10, # Die initialie praesenz prioritaet, eine negative
+                                  # prioritaet heisst das wir keinerlei auf dem Server
+                                  # gespeicherten nachrichten empfangen wollen.
+      );
+
+   # Dann registrieren wir ein paar callbacks:
+   $con->reg_cb (
+      # Dieser event wird ausgeloest wenn wir erfolgreich mit dem XMPP
+      # Server verbunden wurden:
+      session_ready => sub {
+         my ($con) = @_;
+         print "Connected as " . $con->jid . "\n"; # Gibt die JID fuer diese session aus
+         print "Sending message to $dest:\n$msg\n";
+
+         # Wir verpacken die nachricht die wich schicken wollen:
+         my $immsg = Net::XMPP2::IM::Message->new (to => $dest, body => $msg);
+
+         # Und schicken sie ueber die verbindung zum server:
+         $immsg->send ($con);
+      },
+
+      # Wenn uns jemand ne nachricht schreibt wird dieser callback aufgerufen:
+      message => sub {
+         my ($con, $msg) = @_;
+
+         # $msg ist ein Net::XMPP2::IM::Message objekt, von welchem wir hier
+         # das wissenswerte ausgeben:
+         print "Message from " . $msg->from . ":\n" . $msg->any_body . "\n---\n";
+      },
+
+      # Wenn irgendein fehler auftritt wird dieser event aufgerufen
+      # mit einem Fehler-objekt welches uns mehr ueber den Fehler sagen kann:
+      error => sub {
+         my ($con, $error) = @_;
+         warn "Error: " . $error->string . "\n"; # Die ->string methode gibt einen
+                                                 # human-readable string zurueck
+      },
+
+      # Sollte es aus irgendeinem Grund zum verbindungsabbruch kommen wird dieser
+      # callback aufgerufen:
+      disconnect => sub {
+         my ($con, $h, $p, $reason) = @_;
+         warn "Disconnected from $h:$p: $reason\n";
+
+         $j->broadcast; # Hier wird die event-loop beendet damit sich das programm
+                        # beenden kann
+      }
+   );
+
+   # Und nach dem callback registrieren bauen wir die TCP verbindung auf
+   # und setzen die Authentifizierung in gang:
+   print "Trying to connect...\n";
+   $con->connect ();
+
+   # Nach dem initieren der Verbindung wollen wir nun auf I/O Events warten
+   # und starten die event-loop:
+   $j->wait;
+   # Hier gehts weiter wenn $j->broadcast aufgerufen wurde
+   # (siehe disconnect callback oben).

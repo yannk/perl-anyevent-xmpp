@@ -15,7 +15,7 @@ my $con =
    Net::XMPP2::IM::Connection->new (
       jid      => $ARGV[0],
       password => $ARGV[1],
-    #  initial_presence => -10,
+      initial_presence => -10,
       debug    => 1
    );
 
@@ -27,6 +27,10 @@ $con->reg_cb (
       my $immsg = Net::XMPP2::IM::Message->new (to => $dest, body => $msg);
       $immsg->send ($con);
    },
+   message => sub {
+      my ($con, $msg) = @_;
+      print "Message from " . $msg->from . ":\n" . $msg->any_body . "\n---\n";
+   },
    error => sub {
       my ($con, $error) = @_;
       warn "Error: " . $error->string . "\n";
@@ -35,9 +39,7 @@ $con->reg_cb (
       my ($con, $h, $p, $reason) = @_;
       warn "Disconnected from $h:$p: $reason\n";
       $j->broadcast;
-   },
-   debug_send => sub { warn "send: @_\n" },
-   debug_recv => sub { warn "recv: @_\n" },
+   }
 );
 
 print "Trying to connect...\n";
