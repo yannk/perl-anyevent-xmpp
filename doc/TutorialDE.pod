@@ -6,90 +6,174 @@ use utf8;
 
 =head2 Was ist "Instant Messaging"
 
-   Wikipedia: "Instant messaging (IM) is a form of real-time communication
-   between two or more people based on typed text. The text is conveyed via
-   computers connected over a network such as the Internet."
+Wikipedia: "Instant messaging (IM) is a form of real-time communication
+between two or more people based on typed text. The text is conveyed via
+computers connected over a network such as the Internet."
 
-   dh.:
-      - unix talk, IRC
+   Klassische Protokolle:
+      - UNIX talk, BITNET, IRC
 
    Proprieataere Protokolle:
       - ICQ, AIM, MSN
 
    Offene IM Protokolle:
       - PSYC
-      - SIMPLE (ein auf SIP basierendes IM protokoll, welches so garnicht einfach
-        ist (30 dokumente mit insges. mehr als 1000 seiten, 15 mehr als SMTP oder IRC).
+      - SIMPLE (ein von der IETF auf SIP basierendes Instant Messaging Protokoll)
       - XMPP
       - u.a.
 
 =head2 Was ist XMPP (aka Jabber)?
 
-   Historie:
-   - offener standard (RFC)
-   - Jabber wurde 1999 von jeremy miller "erfunden"
-   - spaeter (2002) wurde Jabber dann von der Jabber Software Foundation
-     (seit 2007 heisst diese XMPP Standards Foundation) als RFC in die IETF gepusht
-   - das Jabber Protokoll wurde umbenannt in XMPP
-     (Extensible Messaging and Presence Protocol) und in 2 RFCs aufgespalten:
-     RFC 3920 & 3921 (sowie die weniger relevanten RFCs 3922 und 3923).
+Historie:
 
-   Was es macht:
-   - XMPP ist ein protkoll zum austausch von presenz informationen
-     (bin da, bin kurz weg, bind garnicht da) sowie zum austausch
-     von (meist kurzen) nachrichten
-   - Es gibt viele kleine erweiterungs protokolle, die XEPs (XMPP Extension Protocols),
-     die beispielsweise weitere funktionalitaeten definieren wie z.b. chatraeume,
-     filetransfer, und andere kleine gimmicks wie z.b. avatare (kleine bildchen die in den
-     clicki-bunti-clients von andern auftauchen).
+=over 4
+
+=item *
+
+Jabber wurde 1999 von Jeremy Miller "erfunden".
+
+=item *
+
+Spaeter (2002) wurde Jabber dann von der Jabber Software Foundation
+(seit 2007 heisst diese XMPP Standards Foundation) als RFC in die IETF gepusht.
+
+=item *
+
+Das Jabber Protokoll wurde umbenannt in XMPP (Extensible Messaging and Presence
+Protocol) und in 2 RFCs aufgespalten: RFC 3920 & 3921 (sowie die weniger
+relevanten RFCs 3922 und 3923).
+
+=back
+
+Was es macht:
+
+=over 4
+
+=item *
+
+XMPP ist ein protkoll zum austausch von praesenz informationen
+(bin da, bin kurz weg, bind garnicht da) sowie zum austausch
+von (meist kurzen) Nachrichten.
+
+=item *
+
+Es gibt viele kleine erweiterungs protokolle, die XEPs (XMPP Extension Protocols),
+die beispielsweise weitere funktionalitaeten definieren wie z.b. chatraeume,
+filetransfer, und andere kleine gimmicks wie z.b. avatare (kleine bildchen die in den
+clicki-bunti-clients von andern auftauchen).
+
+=back
 
 =head2 Architektur von XMPP
 
-   - Eine JID wie eine E-Mail addresse
+=over 4
 
-   - Accounts liegen auf dem Server
-      elmex@jabber.org
-        - auf jabber.org liegen die account informationen fuer elmex@jabber.org,
-          dh. alle seine "kontakte" sind dort gespeichert
+=item *
 
-   - Client <-> Server <-> Server <-> Client
-     Clients connecten zum server zu einem bestimmten account (meist JID + passwort
-     fuer authentifizierung noetig), wenn client eine nachricht sendet an einen
-     user auf einem anderen server bauen die server untereinander verbindugen
-     auf zum uebertragen der nachricht.
+Kontakte im XMPP Netzwerk haben eine JID, die ca. so aussieht wie eine
+E-Mail addresse. z.B.: C<elmex@jabber.org>
 
-   - Komponenten koennen spezielle funktionalitaeten implementieren und
-     mit servern verbunden werden, und geniessen dabei etwas mehr rechte als
-     ein normaler client.
-     Bestes beispiel hierfuer sind "Chatraeume" die bei XMPP/Jabber eher als
-     after-thought dazu gehackt wurden.
+=item *
+
+Server koennen von jedermann aufgesetzt werden. Man kann also entweder
+seinen eigenens Server unterhalten oder man sucht sich einen kostenlosen
+Server raus (z.b. jabber.org).
+
+Die JID des Accounts ergibt sich dann aus C<name@domain.tld>. Also z.B. C<elmex@jabber.org>.
+
+Alle Daten die dann zum Account gehoeren (Kontaktlisten, etc.) werden
+auf dem Server gespeichert.
+
+=item *
+
+Nachrichten zwischen zwei Clients im XMPP Netzwerk legen folgenden weg zurueck:
+
+   Client <-> Server <-> Server <-> Client
+
+Also: Clients connecten zum server zu einem bestimmten account (meist JID + passwort
+fuer authentifizierung noetig). Wenn dann der Client eine nachricht sendet an einen
+user auf einem anderen server bauen die server untereinander verbindugen
+auf zum uebertragen der nachricht.
+
+=item *
+
+Komponenten koennen spezielle funktionalitaeten implementieren und
+mit servern verbunden werden, und geniessen dabei etwas mehr rechte als
+ein normaler client.
+Bestes beispiel hierfuer sind "Chatraeume" die bei XMPP/Jabber eher als
+after-thought dazu gehackt wurden.
+
+=item *
+
+Das Protokoll zwischen den Servern und zwischen Client und Server
+wird 'XML Stream' genannt. Es ist IMO eine etwas kaputte interpretation
+von XML, die aber schwer fixbar ist da es schon extrem viele implementationen
+und deployments in der ganzen welt gibt. Sogar die US Navy soll XMPP einsetzen.
+
+=back
 
 =head2 Was Net::XMPP2 macht/ist
 
-   - Perl Modul zum entwickeln von XMPP clienten und componenten
-   - Es nimmt einem die ganzen kopfschmerzen ab, z.b. wie man den 'XML stream'
-     zum server aufbaut, nachrichten verschickt und presenz informationen
-     sowie die kontakt liste (bei XMPP 'Roster' genannt) verwaltet.
-   - Dazu implementiert Net::XMPP2 ein paar wichtige XEPs ohne die man keinen
-     ernsthaften IM Clienten der auf XMPP basiert schreiben koennte.
+=over 4
+
+=item *
+
+Net::XMPP2 ist ein Perl Modul zum entwickeln von XMPP clienten und componenten.
+
+=item *
+
+Es nimmt einem die ganzen kopfschmerzen ab, z.b. wie man den 'XML stream'
+zum server aufbaut, nachrichten verschickt und presenz informationen und
+die kontakt liste (bei XMPP 'Roster' genannt) verwaltet.
+
+=item *
+
+Dazu implementiert Net::XMPP2 ein paar wichtige XEPs ohne die man keinen
+ernsthaften IM Clienten der auf XMPP basiert schreiben koennte.
+
+=back
 
 =head2 Warum die 2 in Net::XMPP2?
 
-   - warum hab ichs geschrieben?
-   - eingehen auf die alten CPAN module
-   - Alternativen wie Net::XMPP, Net::Jabber und Jabber::Lite existieren,
-     von denen ich jedoch abraten moechte:
-     - Jabber::Lite
-       - kein UTF-8 support
-       - nicht event basiert
-       - man muss das meiste selbst machen (roster verwaltung, etc.)
-     - Net::Jabber
-       - nicht event basiert, man braucht threads um noch dinge
-         ausser XMPP zu machen
-       - TODO: finde mehr!!
-     - Net::XMPP sehr aehnlich zu Net::Jabber und hat die selben
-       probleme
+=over 4
+
+=item *
+
+Alternativen wie L<Net::XMPP>, L<Net::Jabber> und L<Jabber::Lite> sind teilweise
+veraltet und erlauben auch oft nur schwer oder garkeine Event-basierte Programmierung.
+Man muss dann auf threads zurueck greifen.
+
+  - Jabber::Lite
+    - kein UTF-8 support
+    - nicht event basiert
+    - man muss das meiste selbst machen (roster verwaltung, etc.)
+  - Net::Jabber
+    - nicht event basiert, man braucht threads um noch dinge
+      ausser XMPP zu machen
+    - TODO: finde mehr!!
+  - Net::XMPP sehr aehnlich zu Net::Jabber und hat die selben
+    probleme
+
+=item *
+
+Net::XMPP2 hab ich geschrieben um:
+
+=over 4
+
+=item *
+
+Ohne threads auszukommen und es einfacher zu haben Event-basiert zu arbeiten.
+
+=item *
+
+Die Aktuellen XMPP RFCs umzusetzen.
+
+=back
+
+=back
 
 =head2 Einfuehrendes Beispiel
 
-   - beispiel code fuer ein nachrichten sende CLI
+Hier ein Code Beispiel:
+
+
