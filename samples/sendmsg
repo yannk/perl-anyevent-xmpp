@@ -4,43 +4,43 @@ use utf8;
 use AnyEvent;
 use Net::XMPP2::IM::Connection;
 
-my $con = Net::XMPP2::IM::Connection->new;
+unless (@ARGV >= 3) { die "sendmsg <account jid> <password> <destination jid>\n" }
 
-$con->reg_cb (
-);
+my $msg  = do { local $/; <STDIN> };
+my $dest = $ARGV[2];
 
 my $j = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new (debug => 1);
-$cl->add_account ('net_xmpp2@jabber.org', 'test');
-$cl->add_extension (my $disco = Net::XMPP2::Ext::Disco->new);
-my $muc;
-$cl->reg_cb (
+
+my $con =
+   Net::XMPP2::IM::Connection->new (
+      jid      => $ARGV[0],
+      password => $ARGV[1],
+    #  initial_presence => -10,
+      debug    => 1
+   );
+
+$con->reg_cb (
    session_ready => sub {
-      my ($cl, $acc) = @_;
-      $muc =
-         Net::XMPP2::Ext::MUC->new (connection => $acc->connection, disco => $disco);
-      $cl->add_extension ($muc);
-      $muc->join_room ('test@conference.ejabberd.ta-sa.org', "TestBot", sub {
-         my ($err) = @_;
-         if ($err) {
-            print "ERROR" . $err->string . "\n";
-         } else {
-            print "JOINED!\n";
-         }
-      });
-   },
-   disconnect => sub {
-      my ($cl, $acc, $h, $p, $reas) = @_;
-      print "disconnect ($h:$p): $reas\n";
+      my ($con) = @_;
+      print "Connected as " . $con->jid . "\n";
+      print "Sending message to $dest:\n$msg\n";
+      my $immsg = Net::XMPP2::IM::Message->new (to => $dest, body => $msg);
+      $immsg->send ($con);
    },
    error => sub {
-      my ($cl, $acc, $err) = @_;
-      print "ERROR: " . $err->string . "\n";
+      my ($con, $error) = @_;
+      warn "Error: " . $error->string . "\n";
    },
-   message => sub {
-      my ($cl, $acc, $msg) = @_;
-      print "message from: " . $msg->from . ": " . $msg->any_body . "\n";
-   }
+   disconnect => sub {
+      my ($con, $h, $p, $reason) = @_;
+      warn "Disconnected from $h:$p: $reason\n";
+      $j->broadcast;
+   },
+   debug_send => sub { warn "send: @_\n" },
+   debug_recv => sub { warn "recv: @_\n" },
 );
-$cl->start;
+
+print "Trying to connect...\n";
+$con->connect ();
+
 $j->wait;

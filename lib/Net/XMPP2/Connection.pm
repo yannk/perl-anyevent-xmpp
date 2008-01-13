@@ -32,7 +32,6 @@ Net::XMPP2::Connection - XML stream that implements the XMPP RFC 3920.
       );
 
    $con->connect or die "Couldn't connect to jabber.org: $!";
-   $con->init;
    $con->reg_cb (stream_ready => sub { print "XMPP stream ready!\n" });
 
 =head1 DESCRIPTION
@@ -314,6 +313,9 @@ successful (as SRV RR lookup may return multiple hosts) call C<may_try_connect>
 Note that an internal list will be kept of tried hosts.  Use
 C<reset_connect_tries> to reset the internal list of tried hosts.
 
+Also note that the "XML" stream initiation is sent when the connection
+was successfully connected.
+
 =cut
 
 sub connect {
@@ -341,6 +343,7 @@ sub connect {
    }
 
    if ($self->SUPER::connect ($host, $port)) {
+      $self->init;
       $self->event (connect => $host, $port);
       return 1;
    } else {
@@ -448,11 +451,7 @@ sub handle_stanza {
    }
 }
 
-=item B<init ()>
-
-Initiate the XML stream.
-
-=cut
+# This method is private
 
 sub init {
    my ($self) = @_;

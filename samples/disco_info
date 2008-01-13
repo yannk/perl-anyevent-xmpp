@@ -75,7 +75,6 @@ $cl->reg_cb (
    error => sub {
       my ($cl, $acc, $error) = @_;
       warn "ERROR: ".$error->string."\n";
-      $j->broadcast;
    },
    disconnect => sub {
       warn "DISCON[@_]\n";

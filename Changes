@@ -1,5 +1,9 @@
 Revision history for Net-XMPP2
 
+0.11
+         - removed the init method from the public interface and made
+           the stream initiation implicit on connect.
+
 0.10 Wed Dec 12 15:38:58 CET 2007
          - implemented conversation/chat session tracking,
            see Net::XMPP2::Client::send_message and
