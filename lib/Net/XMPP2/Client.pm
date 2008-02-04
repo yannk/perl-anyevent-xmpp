@@ -462,10 +462,14 @@ This event is sent when the C<$account> was successfully connected.
 This event is emitted when an error occured in the connection process for the
 account C<$account>.
 
-=item error => $account
+=item error => $account, $error
 
 This event is emitted when any error occured while communicating
 over the connection to the C<$account> - after a connection was established.
+
+C<$error> is an error object which is derived from L<Net::XMPP2::Error>.
+It will reveal human readable information about the error by calling the C<string ()>
+method (which returns a descriptive error string about the nature of the error).
 
 =back
 

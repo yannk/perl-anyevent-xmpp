@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.11
+         - fixed a minor documentation bug in Net::XMPP2::Client
          - removed the init method from the public interface and made
            the stream initiation implicit on connect.
 
