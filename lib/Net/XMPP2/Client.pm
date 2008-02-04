@@ -196,7 +196,6 @@ sub update_connections {
             $self->event (connect_error => "Couldn't connect to ".($acc->jid).": $!");
             next
          }
-         $con->init
       }
    }
 }
