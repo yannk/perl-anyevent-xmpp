@@ -1,28 +1,47 @@
-=cut
+=head1 Einführung in I<Instant Messaging> mit Net::XMPP2 (Jabber)
 
-use utf8;
+Eine Einführung in das Perl Modul L<Net::XMPP2> und wie man damit
+I<Instant Messages> verschickt und empfängt.
 
-=head1 EinfÃ¼hrung in "Instant Messaging" mit Net::XMPP2 (Jabber)
+=head2 Autor
 
-=head2 Was ist "Instant Messaging"
+Robin Redeker C<<elmex@ta-sa.org>>
 
-Wikipedia: "Instant messaging (IM) is a form of real-time communication
-between two or more people based on typed text. The text is conveyed via
-computers connected over a network such as the Internet."
+=head2 Bio Robin Redeker
 
-   Klassische Protokolle:
-      - UNIX talk, BITNET, IRC
+Ich Studiere Informatik an der Uni Karlsruhe im 7. Semester und
+arbeite seit ca. 6 Jahren mit Perl.
 
-   ProprieatÃ¤re Protokolle:
-      - ICQ, AIM, MSN
+=head2 Abstract
 
-   Offene IM Protokolle:
-      - PSYC
-      - SIMPLE (Ein von der IETF auf SIP basierendes Instant Messaging Protokoll)
-      - XMPP
-      - u.a.
+Dieser Artikel soll eine kurze Einführung in L<Net::XMPP2>
+geben. Angefangen bei einer kurzen Einführung in XMPP selbst,
+geht es weiter mit einem Überblick über das Perl Modul L<Net::XMPP2>.
+Danach wird kurz das Eventmodell erläutert und am Ende ist dann ein
+ausführlich kommentiertes Beispiel-Script zu finden.
 
-=head2 Was ist XMPP (aka Jabber)?
+=head2 Instant Messaging
+
+X<Instant Messaging>I<Instant Messaging> ist der Begriff für (nahezu)
+Echtzeit-Kommunikation in Form von Text-Nachrichten zwischen zwei oder mehr
+Personen. Dabei wird die Nachricht üblicherweise übers Internet verschickt.
+
+Hier ein Überblick über ein paar I<Instant Messaging> Protokolle:
+
+=over 4
+
+=item * Proprieatäre Protokolle:
+
+ICQ, AIM, MSN
+
+=item * Offene Protokolle:
+
+UNIX talk, BITNET, IRC, PSYC, SIMPLE (Ein von der IETF auf SIP basierendes
+Instant Messaging Protokoll), XMPP, u.a.
+
+=back
+
+=head2 XMPP (aka Jabber)
 
 Historie:
 
@@ -34,12 +53,12 @@ Jabber wurde 1999 von Jeremy Miller entwickelt.
 
 =item *
 
-SpÃ¤ter (2002) wurde Jabber dann von der Jabber Software Foundation
-(Seit 2007 heiÃŸt diese XMPP Standards Foundation) als RFC in die IETF gepusht.
+Später (2002) wurde Jabber dann von der Jabber Software Foundation
+(Seit 2007 heißt diese XMPP Standards Foundation) als RFC in die IETF gepusht.
 
 =item *
 
-Das Jabber Protokoll wurde umbenannt in XMPP (Extensible Messaging and Presence
+Das Jabber Protokoll wurde umbenannt in X<XMPP>XMPP (Extensible Messaging and Presence
 Protocol) und in 2 RFCs aufgespalten: RFC 3920 & 3921 (Sowie die weniger
 relevanten RFCs 3922 und 3923).
 
@@ -49,17 +68,13 @@ Was es macht:
 
 =over 4
 
-=item *
-
-XMPP ist ein Protkoll zum austausch von PrÃ¤senz-Informationen
-("Bin da", "Bin kurz weg", "Bin nicht da") sowie zum austausch
+=item * XMPP ist ein Protkoll zum austausch von Präsenz-Informationen
+("Bin da", "Bin kurz weg", "Bin nicht da") sowie zum Austausch
 von (meist kurzen) Nachrichten.
 
-=item *
-
-Es gibt viele kleine erweiterungs Protokolle, die XEPs (XMPP Extension Protocols),
-die beispielsweise weitere FunktionalitÃ¤ten definieren wie z.b. ChatrÃ¤ume,
-Dateitransfer, und andere kleine Gimmicks wie z.b. Avatare (Kleine Bildchen die in den
+=item * Es gibt viele kleine erweiterungs Protokolle, die XEPs (XMPP Extension Protocols),
+die beispielsweise weitere Funktionalitäten definieren wie z.b. Chaträume,
+Dateitransfer, und andere kleine Gimmicks wie z.b. Avatare (kleine Bildchen die in den
 Clicki-Bunti-Clients von anderen angezeigt werden).
 
 =back
@@ -68,205 +83,183 @@ Clicki-Bunti-Clients von anderen angezeigt werden).
 
 =over 4
 
-=item *
-
-Kontakte im XMPP Netzwerk haben eine JID, die ca. so aussieht wie eine
+=item * Kontakte im XMPP Netzwerk haben eine JID, die ca. so aussieht wie eine
 E-Mail Addresse. z.B.: C<elmex@jabber.org>
 
-=item *
-
-Server kÃ¶nnen von jedermann aufgesetzt werden. Man kann also entweder
+=item * Server können von jedermann aufgesetzt werden. Man kann also entweder
 seinen eigenen Server unterhalten oder man sucht sich einen kostenlosen
-Server (z.b. ueber eine auf jabber.org zu findende Liste von).
+Server (z.B. über eine auf jabber.org zu findende Liste von).
 
 Die JID des Accounts ergibt sich dann aus C<name@domain.tld>. Also z.B. C<elmex@jabber.org>.
 
-Alle Daten die dann zum Account gehÃ¶ren (Kontaktlisten, etc.) werden
+Alle Daten die dann zum Account gehören (Kontaktlisten, etc.) werden
 auf dem Server gespeichert.
 
-=item *
-
-Nachrichten zwischen zwei Clients im XMPP Netzwerk legen folgenden Weg zurÃ¼ck:
+=item * Nachrichten zwischen zwei Clients im XMPP Netzwerk legen folgenden Weg zurück:
 
    Client <-> Server <-> Server <-> Client
 
-Also: Clients connecten zum Server zu einem bestimmten Account (Meist JID + passwort
-fÃ¼r Authentifizierung nÃ¶tig). Wenn dann der Client eine Nachricht sendet an einen
+Also: Clients connecten zum Server zu einem bestimmten Account (Meist JID + Passwort
+für Authentifizierung nötig). Wenn dann der Client eine Nachricht sendet an einen
 User auf einem anderen Server, bauen die Server untereinander Verbindugen
-auf zum Ã¼bertragen der Nachricht.
+auf zum Übertragen der Nachricht.
 
-=item *
-
-Komponenten kÃ¶nnen spezielle FunktionalitÃ¤ten implementieren und
+=item * Komponenten können spezielle Funktionalitäten implementieren und
 mit Servern verbunden werden, und geniessen dabei etwas mehr Zugriffsrechte als
 ein normaler Client.
-Bestes Beispiel hierfÃ¼r sind "ChatrÃ¤ume" die bei XMPP/Jabber eher als
-"after-thought" dazu gehackt wurden.
+Bestes Beispiel hierfür sind I<Chaträume> die bei XMPP/Jabber eher als
+I<after-thought> dazu gehackt wurden.
 
-=item *
-
-Die Verbindungen zwischen den Servern und zwischen Client und Server werden
+=item * Die Verbindungen zwischen den Servern und zwischen Client und Server werden
 (auf Protokollebene) 'XML Stream' genannt. Dort werden sogenannte 'XML Stanzas',
-XML Fragmente, hin und her geschickt. Es wird ein XML-Stream-Parser benÃ¶tigt, wie
-z.b. expat, um mit diesem XML umgehen zu kÃ¶nnen.
+XML Fragmente, hin und her geschickt. Es wird ein Stream-Parser benötigt, wie
+z.b. expat, um mit diesem XML umgehen zu können.
 
 =back
 
-=head2 Was Net::XMPP2 macht/ist
+=head2 Net::XMPP2 Überblick
 
 =over 4
 
-=item *
+=item * L<Net::XMPP2> ist ein Perl Modul zum Entwickeln von XMPP Clienten und Komponenten.
 
-L<Net::XMPP2> ist ein Perl Modul zum entwickeln von XMPP Clienten und Komponenten.
-
-=item *
-
-Es nimmt einem die ganzen Kopfschmerzen ab, wie z.b. man den 'XML stream'
-zum Server aufbaut, Nachrichten verschickt und PrÃ¤senz-Informationen und
+=item * Es nimmt einem die ganzen Kopfschmerzen ab, wie z.b. man den 'XML Stream'
+zum Server aufbaut, Nachrichten verschickt und Präsenz-Informationen und
 die Kontaktliste (bei XMPP 'Roster' genannt) verwaltet.
 
-=item *
-
-Dazu implementiert L<Net::XMPP2> ein paar wichtige XEPs ohne die man keinen
-ernsthaften IM Clienten der auf XMPP basiert entwickeln kÃ¶nnte.
+=item * Dazu implementiert L<Net::XMPP2> ein paar wichtige XEPs ohne die man keinen
+ernsthaften IM Clienten der auf XMPP basiert entwickeln könnte.
 
 =back
 
-=head2 Warum die 2 in Net::XMPP2?
+=head2 Die 2 in Net::XMPP2
 
 =over 4
 
-=item *
-
-Alternativen wie L<Net::XMPP>, L<Net::Jabber> und L<Jabber::Lite> sind teilweise
-veraltet und erlauben auch oft nur schwer oder garkeine Event-basierte Programmierung.
-Man muss dann auf Threads zurÃ¼ckgreifen.
-
-  - Jabber::Lite
-    - kein UTF-8 support
-    - nicht Event basiert, man braucht Threads um noch dinge
-      ausser XMPP zu machen
-    - man muss das meiste selbst machen (Roster verwaltung, etc.)
-  - Net::Jabber
-    - auch nicht Event basiert
-  - Net::XMPP sehr Ã¤hnlich zu Net::Jabber und hat die selben
-    Probleme
-
-=item *
-
-L<Net::XMPP2> hab ich geschrieben um:
+=item * Alternativen wie L<Net::XMPP>, L<Net::Jabber> und L<Jabber::Lite> sind teilweise
+veraltet und erlauben auch oft nur schwer oder gar keine Event-basierte Programmierung.
+Dort müsste man dann auf Threads zurückgreifen um noch sinnvoll andere Dinge tun zu
+können, wie z.B. eine GUI steuern.
 
 =over 4
 
-=item *
+=item - Jabber::Lite
 
-Ohne Threads auszukommen und es einfacher zu haben Event-basiert zu arbeiten.
+  - kein UTF-8 Support
+  - nicht Event basiert, man braucht Threads um noch Dinge
+    ausser XMPP zu machen
+  - man muss das meiste selbst machen (Roster Verwaltung, etc.)
 
-=item *
+=item - Net::Jabber
 
-Die Aktuellen XMPP RFCs umzusetzen.
+  - auch nicht Event basiert
 
-=item *
+=item - Net::XMPP
 
-Mit sovielen XMPP Servern interoperabel zu sein wie mÃ¶glich.  Vorallem Ã¤ltere
-XMPP Server, unterstÃ¼tzen teilweise nur alte, teilweise nicht spezifizierte,
+  - Sehr ähnlich zu Net::Jabber und hat die selben Probleme
+
+=item * L<Net::XMPP2> hab ich geschrieben um:
+
+=over 4
+
+=item * Ohne Threads auszukommen und es einfacher zu haben Event-basiert zu arbeiten.
+
+=item * Die Aktuellen XMPP RFCs umzusetzen.
+
+=item * Mit sovielen XMPP Servern interoperabel zu sein wie möglich.  Vor allem ältere
+XMPP Server, unterstützen teilweise nur alte, teilweise nicht spezifizierte
 Authentifizierungs-Protokolle.
 
 =back
 
 =back
 
-=head2 Dependencies von Net::XMPP2
+=head2 Abhängigkeiten von Net::XMPP2
 
-L<Net::XMPP2> hat einige AbhÃ¤ngigkeiten um XMPP standardkonform zu implementieren:
+L<Net::XMPP2> hat einige Abhängigkeiten um XMPP standardkonform zu implementieren:
 
-  AnyEvent            - Um dem User von Net::XMPP2 die Event-loop Wahl zu Ã¼berlassen
+  AnyEvent            - Um dem User von Net::XMPP2 die Event-Loop Wahl zu überlassen
   XML::Writer         - Um "XML" auszugeben
   XML::Parser::Expat  - Um mit dem "XML", wie XMPP es definiert, umzugehen
   Net::SSLeay         - Um TLS Verbindungen aufzubauen zu XMPP Servern
-  Net::DNS            - Um DNS SRV Records fÃ¼r XMPP Servern abzufragen
+  Net::DNS            - Um DNS SRV Records für XMPP Servern abzufragen
   Net::LibIDN         - Um JIDs zu normalisieren (mit stringprep).
-  Authen::SASL        - FÃ¼r die SASL Authentifizierung mit dem XMPP Server
+  Authen::SASL        - Für die SASL Authentifizierung mit dem XMPP Server
 
 Und noch ein paar andere wie: L<Digest::SHA1>, L<MIME::Base64>.
 
-Das sind leider ziemlich viele AbhÃ¤ngigkeiten die auch zum teil C-Bibliotheken
-benÃ¶tigen, allerdings sind all diese Technologien (TLS, SASL, LibIDN, DNS, ...)
-notwendig fÃ¼r eine brauchbare XMPP Implementation.
+Das sind leider ziemlich viele Abhängigkeiten die auch zum Teil C-Bibliotheken
+benötigen, allerdings sind all diese Technologien (TLS, SASL, LibIDN, DNS, ...)
+notwendig für eine brauchbare XMPP Implementation.
 
-An dieser Stelle mÃ¶chte ich auch nochmal auf die Verwendung von L<AnyEvent>
-hinweisen. L<AnyEvent> erlaubt dem Benutzer von L<Net::XMPP2> die Event-loop zu
-wÃ¤hlen, von der die I/O events kommen. Das heisst L<Net::XMPP2> ist einfach
+An dieser Stelle möchte ich auch nochmal auf die Verwendung von L<AnyEvent>
+hinweisen. L<AnyEvent> erlaubt dem Benutzer von L<Net::XMPP2> die Event-Loop zu
+wählen, von der die I/O Events kommen. Das heisst L<Net::XMPP2> ist einfach
 integrierbar in eine Applikation die bereits Gtk2, Tk, Glib, Event oder eine
-andere von AnyEvent unterstÃ¼tzte Event-loop benutzt.
+andere von AnyEvent unterstützte Event-Loop benutzt.
 
 =back
 
-=head2 Ãœberblick Ã¼ber Net::XMPP2
+=head2 Net::XMPP2 Module
 
-Die wichtigsten Module in L<Net::XMPP2> sind:
+L<Net::XMPP2> enthält noch eine Reihe anderer (Unter-)Module.
+Davon implementieren viele eher optionale Funktionalität.
+
+Die wichtigsten und grundlegendsten Module in L<Net::XMPP2> sind hier
+aufgelistet:
 
 =over 4
 
 =item Net::XMPP2::Event
 
-Das Eventmodell von L<Net::XMPP2>, auf welches ich im nÃ¤chsten Abschnitt eingehen
+Das Eventmodell von L<Net::XMPP2>, auf welches ich im nächsten Abschnitt eingehen
 werde.
 
 =item Net::XMPP2::Connection
 
-ReprÃ¤sentiert einen rohen "XML Stream" ohne weitere "Instant Messaging" FunktionalitÃ¤t.
+Repräsentiert einen rohen "XML Stream" ohne weitere "Instant Messaging" Funktionalität.
 
 Meistens wird man allerdings L<Net::XMPP2::IM::Connection> oder L<Net::XMPP2::Client>
-verwenden wollen, die in den nÃ¤chsten zwei Punkten beschrieben werden.
-
-# TODO: Wie benutzt man sie?
+verwenden wollen, die in den nächsten zwei Punkten beschrieben werden.
 
 =item Net::XMPP2::IM::Connection
 
-Ist von L<Net::XMPP2::Connection> abgeleitet und erweitert diese um "Instant Messaging"
-FunktionalitÃ¤t wie z.b. PrÃ¤senz-Status setzen, PrÃ¤senz von Kontakten empfangen
+Ist von L<Net::XMPP2::Connection> abgeleitet und erweitert diese um I<Instant Messaging>
+Funktionalität wie z.b. Präsenz-Status setzen, Präsenz von Kontakten empfangen
 sowie Kontaktlisten-(/Roster-)Management.
-
-# TODO: siehe oben
 
 =item Net::XMPP2::Client
 
 Implementiert einen einfachen XMPP Client der sich mit mehreren Accounts
-gleichzeitig verbinden kann und die L<Net::XMPP2::IM::Connection> Objekte fÃ¼r
+gleichzeitig verbinden kann und die L<Net::XMPP2::IM::Connection> Objekte für
 einen verwaltet.
-
-# TODO: Benutzung egal fÃ¼r vortrag
 
 =item Net::XMPP2::IM::Message
 
-Ein Objekt dieser Klasse reprÃ¤sentiert eine XMPP Nachricht. Die wohl wichtigsten
-Methoden sind C<to>, C<from> und C<any_body> um auf Absender, EmpfÃ¤nger und den
-Inhalt der Nachricht zugreifen zu kÃ¶nnen.
-
-# TODO: Benutzung
+Ein Objekt dieser Klasse repräsentiert eine XMPP Nachricht. Die wohl wichtigsten
+Methoden sind C<to>, C<from> und C<any_body> um auf Absender, Empfänger und den
+Inhalt der Nachricht zugreifen zu können.
 
 =back
 
-FÃ¼r nÃ¤here Information zu den Modulen bitte ich die jeweilige POD Dokumentation
+Für nähere Information zu den Modulen bitte ich die jeweilige POD Dokumentation
 aufzusuchen.
 
 =head2 Events in Net::XMPP2
 
-Ich habe eine relativ einfaches Eventmodell fÃ¼r L<Net::XMPP2> implementiert.
+Ich habe eine relativ einfaches Eventmodell für L<Net::XMPP2> implementiert.
 L<Net::XMPP2::Connection> ist von L<Net::XMPP2::Event> abgeleitet und erbt
-vom dem unter anderem die folgenden Methoden:
+unter anderen die folgenden Methoden:
 
 =over 4
 
 =item reg_cb ($event1, $cb1, ...)
 
-Um bestimmte events die in der Dokumentation beschrieben sind zu empfangen
+Um bestimmte Events, die in der Dokumentation beschrieben sind zu empfangen,
 muss man einen Callback mit C<reg_cb> registrieren. Wenn man zum Beispiel den
-C<session_ready> Event von L<Net::XMPP2::IM::Connection> bekommen mÃ¶chte
-(der geschickt wird wenn man authentifiziert ist und Nachrichten verschicken kann)
-macht man ungefÃ¤hr dies:
+C<session_ready> Event von L<Net::XMPP2::IM::Connection> bekommen möchte
+(der geschickt wird wenn man authentifiziert ist und Nachrichten verschicken kann),
+macht man ungefähr dies:
 
    my $con = Net::XMPP2::IM::Connection->new (...);
    ...
@@ -275,7 +268,7 @@ macht man ungefÃ¤hr dies:
       ...
    });
 
-Oder, fÃ¼r Leute die Closures nicht so mÃ¶gen:
+Oder, für Leute die Closures nicht so mögen:
 
    sub session_ready_cb {
       my ($con) = @_;
@@ -283,13 +276,13 @@ Oder, fÃ¼r Leute die Closures nicht so mÃ¶gen:
    ...
    $con->reg_cb (session_ready => \&session_ready_cb);
 
-Man kann Ã¼berigends mehrere Callbacks fÃ¼r einen Event registrieren,
-diese werden dann in der Reihenfolge, in der sie Registriert wurden, aufgerufen
-wenn der Event ausgelÃ¶st wird.
+Man kann übrigens mehrere Callbacks für einen Event registrieren,
+diese werden dann in der Reihenfolge, in der sie registriert wurden, aufgerufen
+wenn der Event ausgelöst wird.
 
 =item unreg_cb ($regid)
 
-Das Returnvalue von C<reg_cb> ist Ã¼berigends eine ID die man fÃ¼r die C<unreg_cb>
+Das Returnvalue von C<reg_cb> ist übrigens eine ID, die man für die C<unreg_cb>
 Methode braucht um die Events wieder abzubestellen:
 
    my $regid =
@@ -304,7 +297,7 @@ Methode braucht um die Events wieder abzubestellen:
 
 =item unreg_me
 
-Wenn man sich innerhalb eines Callbacks befindet und beschliesst das man diesen
+Wenn man sich innerhalb eines Callbacks befindet und beschliesst, dass man diesen
 unregistrieren will kann man folgendes machen:
 
    $con->reg_cb (
@@ -316,29 +309,29 @@ unregistrieren will kann man folgendes machen:
       }
    );
 
-Die Methode C<unreg_me> sorgt dafÃ¼r das der registrierte und gerade aufgerufene
+Die Methode C<unreg_me> sorgt dafür das der registrierte und gerade aufgerufene
 Callback entfernt wird.
 
 =item event ($eventname, @args)
 
-Diese Methode kann man benutzen um eigene Events auszulÃ¶sen. Dabei sollte man allerdings
-vermeiden von L<Net::XMPP2> verwendete Events zu benutzen, da dies zu Fehlern fÃ¼hren
-kÃ¶nnte. Das erste Argument ist der Name des Events den man auslÃ¶sen mÃ¶chte
-und die C<@args> werden spÃ¤ter den Callbacks Ã¼bergeben.
+Diese Methode kann man benutzen um eigene Events auszulösen. Dabei sollte man allerdings
+vermeiden von L<Net::XMPP2> verwendete Events zu benutzen, da dies zu Fehlern führen
+könnte. Das erste Argument ist der Name des Events den man auslösen möchte
+und die C<@args> werden später den Callbacks übergeben.
 
-Das ganze sieht ca. so aus:
+Das Ganze sieht ca. so aus:
 
    $con->reg_cb (
       mein_test_event => sub {
          my ($con, $str) = @_;
-         print "mein_test_event ausgelÃ¶st mit erstem argument: $str\n";
+         print "mein_test_event ausgelöst mit erstem argument: $str\n";
       }
    );
    $con->event (mein_test_event => "argument1");
 
 Gibt folgendes aus:
 
-   mein_test_event ausgelÃ¶st mit erstem argument: argument1
+   mein_test_event ausgelöst mit erstem argument: argument1
 
 =item set_exception_cb ($cb)
 
@@ -353,88 +346,98 @@ Die Ausgabe kann man dann mit C<set_exception_cb> abfangen und selbst machen:
 
 =back
 
-Es gibt noch eine Reihe weiterer interessanter Methoden die ich (bei Interesse)
-bitte in der Dokumentation von L<Net::XMPP2::Event> nachzulesen.
+Es gibt noch eine Reihe weiterer interessanter Methoden, die ich hier nicht erläutern
+werde. Bei Interesse diese bitte in der Dokumentation von L<Net::XMPP2::Event> nachlesen.
 
 =head2 Beispiel
 
-Als Abschluss mÃ¶chte ich noch ein ausfÃ¼hrlich Dokumentiertes
+Als Abschluss möchte ich noch ein ausführlich dokumentiertes
 Beispiel bringen, welches eine Nachricht an jemanden verschickt:
 
-   #!/opt/perl/bin/perl
-   use strict;
-   use AnyEvent;
-   use Net::XMPP2::IM::Connection;
+ #!/opt/perl/bin/perl
+ use strict;
+ use AnyEvent;
+ use Net::XMPP2::IM::Connection;
+ 
+ unless (@ARGV >= 3) { die "sendmsg <account jid> <password> <destination jid>\n" }
+ 
+ my $msg  = do { local $/; <STDIN> };  # Die Nachricht zum Schicken
+ my $dest = $ARGV[2];                  # Das Ziel der Nachricht
+ 
+ my $j = AnyEvent->condvar; # Wird später für die Event-Loop gebraucht
+ 
+ # Wir erzeugen erstmal ein neues Verbindungsobjekt:
+ my $con =
+    Net::XMPP2::IM::Connection->new (
+       jid      => $ARGV[0],    # Die JID von _unserem_ Account
+       password => $ARGV[1],    # Das Passwort für _unseren_ Account
+       initial_presence => -10, # Die initiale Präsenz-Priorität, eine negative
+                                # Priorität heisst, dass wir keinerlei auf dem Server
+                                # gespeicherten Nachrichten empfangen wollen.
+    );
+ 
+ # Dann registrieren wir ein paar Callbacks:
+ $con->reg_cb (
+    # Dieser Event wird ausgelöst, wenn wir erfolgreich mit dem XMPP
+    # Server verbunden wurden:
+    session_ready => sub {
+       my ($con) = @_;
+       print "Connected as " . $con->jid . "\n"; # Gibt die JID für diese Session aus
+       print "Sending message to $dest:\n$msg\n";
+ 
+       # Wir verpacken die Nachricht, die wir schicken wollen:
+       my $immsg = Net::XMPP2::IM::Message->new (to => $dest, body => $msg);
+ 
+       # Und schicken sie über die Verbindung zum Server:
+       $immsg->send ($con);
+    },
+ 
+    # Wenn jemand eine Nachricht an uns geschickt hat
+    # wird dieser Callback aufgerufen:
+    message => sub {
+       my ($con, $msg) = @_;
+ 
+       # $msg ist ein Net::XMPP2::IM::Message Objekt, von welchem wir hier
+       # das Wissenswerte ausgeben:
+       print "Message from " . $msg->from . ":\n" . $msg->any_body . "\n---\n";
+    },
+ 
+    # Wenn irgendein Fehler auftritt wird dieser Event aufgerufen,
+    # mit einem Fehler-Objekt, welches uns mehr über den Fehler sagen kann:
+    error => sub {
+       my ($con, $error) = @_;
+       warn "Error: " . $error->string . "\n"; # Die ->string Methode gibt einen
+                                               # human-readable String zurück
+    },
+ 
+    # Sollte es aus irgendeinem Grund zum Verbindungsabbruch kommen wird dieser
+    # Callback aufgerufen:
+    disconnect => sub {
+       my ($con, $h, $p, $reason) = @_;
+       warn "Disconnected from $h:$p: $reason\n";
+ 
+       $j->broadcast; # Hier wird die Event-Loop beendet, damit sich das Programm
+                      # beenden kann
+    }
+ );
+ 
+ # Und nach dem Callback-Registrieren bauen wir die TCP Verbindung auf
+ # und setzen die Authentifizierung in Gang:
+ print "Trying to connect...\n";
+ $con->connect ();
+ 
+ # Nach dem Initieren der Verbindung wollen wir nun auf I/O Events warten
+ # und starten die Event-Loop:
+ $j->wait;
+ # Hier gehts weiter wenn $j->broadcast aufgerufen wurde
+ # (siehe Disconnect Callback oben).
 
-   unless (@ARGV >= 3) { die "sendmsg <account jid> <password> <destination jid>\n" }
+=head2 Quellen / Referenzen
 
-   my $msg  = do { local $/; <STDIN> };  # Die Nachricht zum schicken
-   my $dest = $ARGV[2];                  # Das Ziel der nachricht
+=over 4
 
-   my $j = AnyEvent->condvar; # Wird spÃ¤ter fÃ¼r die Event-loop gebraucht
+=item XMPP
 
-   # Wir erzeugen erstmal ein neues Verbindungsobjekt:
-   my $con =
-      Net::XMPP2::IM::Connection->new (
-         jid      => $ARGV[0],    # Die JID von _unserem_ account
-         password => $ARGV[1],    # Das Passwort fÃ¼r _unseren_ account
-         initial_presence => -10, # Die initiale PrÃ¤senz-PrioritÃ¤t, eine negative
-                                  # PrioritÃ¤t heisst das wir keinerlei auf dem Server
-                                  # gespeicherten Nachrichten empfangen wollen.
-      );
+I<XMPP RFC3920 & RFC3921>, C<http://www.xmpp.org/rfcs/>
 
-   # Dann registrieren wir ein paar Callbacks:
-   $con->reg_cb (
-      # Dieser Event wird ausgelÃ¶st wenn wir erfolgreich mit dem XMPP
-      # Server verbunden wurden:
-      session_ready => sub {
-         my ($con) = @_;
-         print "Connected as " . $con->jid . "\n"; # Gibt die JID fÃ¼r diese session aus
-         print "Sending message to $dest:\n$msg\n";
-
-         # Wir verpacken die Nachricht die wir schicken wollen:
-         my $immsg = Net::XMPP2::IM::Message->new (to => $dest, body => $msg);
-
-         # Und schicken sie Ã¼ber die Verbindung zum server:
-         $immsg->send ($con);
-      },
-
-      # Wenn jemand eine Nachricht an uns geschickt hat
-      # wird dieser Callback aufgerufen:
-      message => sub {
-         my ($con, $msg) = @_;
-
-         # $msg ist ein Net::XMPP2::IM::Message objekt, von welchem wir hier
-         # das wissenswerte ausgeben:
-         print "Message from " . $msg->from . ":\n" . $msg->any_body . "\n---\n";
-      },
-
-      # Wenn irgendein Fehler auftritt wird dieser Event aufgerufen,
-      # mit einem Fehler-objekt welches uns mehr Ã¼ber den Fehler sagen kann:
-      error => sub {
-         my ($con, $error) = @_;
-         warn "Error: " . $error->string . "\n"; # Die ->string Methode gibt einen
-                                                 # human-readable String zurÃ¼ck
-      },
-
-      # Sollte es aus irgendeinem Grund zum Verbindungsabbruch kommen wird dieser
-      # Callback aufgerufen:
-      disconnect => sub {
-         my ($con, $h, $p, $reason) = @_;
-         warn "Disconnected from $h:$p: $reason\n";
-
-         $j->broadcast; # Hier wird die Event-Loop beendet, damit sich das Programm
-                        # beenden kann
-      }
-   );
-
-   # Und nach dem Callback-Registrieren bauen wir die TCP Verbindung auf
-   # und setzen die Authentifizierung in gang:
-   print "Trying to connect...\n";
-   $con->connect ();
-
-   # Nach dem initieren der Verbindung wollen wir nun auf I/O Events warten
-   # und starten die Event-Loop:
-   $j->wait;
-   # Hier gehts weiter wenn $j->broadcast aufgerufen wurde
-   # (siehe disconnect Callback oben).
+=back
