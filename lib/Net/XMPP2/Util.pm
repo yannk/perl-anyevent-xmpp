@@ -12,6 +12,7 @@ our @EXPORT_OK = qw/resourceprep nodeprep prep_join_jid join_jid
                     node_jid domain_jid res_jid
                     prep_node_jid prep_domain_jid prep_res_jid
                     from_xmpp_datetime to_xmpp_datetime to_xmpp_time
+                    xmpp_datetime_as_timestamp
                     filter_xml_chars filter_xml_attr_hash_chars
                     /;
 our @ISA = qw/Exporter/;
@@ -447,6 +448,22 @@ sub from_xmpp_datetime {
       ($1 ne '' ? $1 - 1900 : undef),
       ($8 ne '' ? $8        : undef),
       ($7 ne '' ? $7        : undef))
+}
+
+=item B<xmpp_datetime_as_timestamp ($string)>
+
+This function takes the same arguments as C<from_xmpp_datetime>, but returns a
+unix timestamp, like C<time ()> would.
+
+This function requires the L<POSIX> module.
+
+=cut
+
+sub xmpp_datetime_as_timestamp {
+   my ($string) = @_;
+   require POSIX;
+   my ($s, $m, $h, $md, $mon, $year) = from_xmpp_datetime ($string);
+   POSIX::mktime ($s, $m, $h, $md, $mon, $year)
 }
 
 sub dump_twig_xml {

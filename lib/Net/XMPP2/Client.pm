@@ -228,9 +228,10 @@ sub remove_accounts {
    }
 }
 
-=head2 remove_account ($acc)
+=head2 remove_account ($acc, $reason)
 
-Removes and disconnects account C<$acc>.
+Removes and disconnects account C<$acc> (which is a L<Net::XMPP2::IM::Account> object).
+The reason for the removal can be given via C<$reason>.
 
 =cut
 

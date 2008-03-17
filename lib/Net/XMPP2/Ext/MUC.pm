@@ -178,6 +178,15 @@ See also the C<make_instant> and C<request_configuration> methods of L<Net::XMPP
 
 The password for the room.
 
+=item nickcollision_cb => $cb
+
+If the join to the room results in a nickname collision the C<$cb>
+will be called with the nickname that collided and the return value will
+be used as alternate nickname and the join is retried.
+
+This function is called E<everytime> the nickname collides on join, so you
+should take care of possible endless retries.
+
 =back
 
 =cut
@@ -202,13 +211,20 @@ sub join_room {
             text => "Couldn't join room in time, timeout after $timeout\n"
          );
          delete $self->{room_join_timer}->{$pbj};
-         $cb->($muce);
+         $cb->(undef, undef, $muce);
       });
 
    my $rcb_id;
    $rcb_id = $room->reg_cb (
       join_error => sub {
          my ($room, $error) = @_;
+
+         if ($error->type eq 'nickname_in_use'
+             && exists $args{nickcollision_cb}) {
+            $nick = $args{nickcollision_cb}->($nick);
+            $room->send_join ($nick, $args{password});
+            return;
+         }
 
          delete $self->{room_join_timer}->{$pbj};
          $self->uninstall_room ($room);
