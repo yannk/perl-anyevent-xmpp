@@ -45,38 +45,13 @@
 <!-- <h4>[affiliation of presenter]</h4> -->
 </div>
 
-
 <div class="slide">
-   <h1>Begriff: Instant Messaging</h1>
-   <ul class="incremental">
-      <li>Als <i>Instant Messaging</i> wird die text basierte Echt-Zeit Kommunikation zwischen zwei oder mehr Personen bezeichnet.</li>
-      <li>
-         Dafür gibt es eine Reihe von Protokollen:
-         <ul class="incremental">
-            <li><b>Klassische:</b> UNIX talk, BITNET, IRC</li>
-            <li><b>Proprietäre:</b> ICQ, AIM, MSN</li>
-            <li><b>Offene (auf IM spezialisiert):</b> PSYC, SIMPLE, XMPP</li>
-         </ul>
-      </li>
-   </ul>
-</div>
-
-<div class="slide">
-   <h1>Was ist XMPP?</h1>
+   <h1>Was ist XMPP (aka Jabber)?</h1>
    <h2>Ein (Internet) Protokoll zum Austausch von:</h2>
    <ul class="incremental">
         <li>Präsenz-Informationen (von Personen)</li>
         <li>(Meist kurzen) Nachrichten</li>
-   </ul>
-</div>
-
-<div class="slide">
-   <h1>Geschichte von XMPP (Jabber)</h1>
-   <ul class="incremental">
-      <li><i>Jabber</i> wurde 1999 von Jeremy Miller entwickelt.</li>
-      <li>2002 wurde Jabber dann in XMPP umbenannt und als RFCs in die IETF gepusht.</li>
-      <li>Wichtigste RFCs: RFC 3920 und RFC 3921.</li>
-      <li>Protokoll-Erweiterungen in Form von <i>XMPP Extension Protocols</i> (XEPs).</li>
+        <li>=&gt; <i>Instant Messaging</i> genannt</li>
    </ul>
 </div>
 
@@ -85,18 +60,15 @@
    <ul class="incremental">
       <li>Addressen ähneln E-Mail, sog. <i>JID</i>s: <u>elmex@jabber.org</u></li>
       <li>Kommunikation via XML-Fragmente (über TCP).<br>=&gt; <i>XML-Stream</i></li>
-
       <li>Üblicher Weg einer Nachricht: <tt>Client -&gt; Server -&gt; Server -&gt; Client</tt>
       </li>
-
-      <li>Server können Funktionalität in <i>Komponenten</i> auslagern.</li>
    </ul>
 </div>
 
 <div class="slide">
    <h1>Zu Net::XMPP2</h1>
    <ul class="incremental">
-      <li>Perl Modul zum entwickeln von XMPP Clienten und Komponenten.</li>
+      <li>Perl Modul zum Entwickeln von XMPP Clienten und Komponenten.</li>
       <li>Implementiert <i>XML-Stream</i> handling.</li>
       <li>Verwaltet Präsenz-Informationen.</li>
       <li>Regelt Austausch von Nachrichten.</li>
@@ -125,31 +97,14 @@
 </div>
 
 <div class="slide">
-   <h1>Net::XMPP2 Dependencies</h1>
-   <h2>Komplexe (XML) Technologie =&gt; Viele Module Notwendig:</h2>
-   <ul class="incremental">
-      <li>AnyEvent - Die Event-Loop.</li>
-      <li>XML::Writer, XML::Parser::Expat - XML handling.</li>
-      <li>Net::SSLeay, Authen::SASL - SSL &amp; Authentifizierung.</li>
-      <li>Net::DNS, Net::LibIDN - DNS SRV &amp; Address normalisierung (stringprep).</li>
-   </ul>
-</div>
-
-<div class="slide">
    <h1>Net::XMPP2 Überblick</h1>
    <h2>Wichtigste Net::XMPP2 Module/Klassen:</h2>
    <ul class="incremental">
-      <li>Net::XMPP2::Event - Eventmodell, zum registrieren von Callbacks.</li>
-      <li>Net::XMPP2::Connection - Rohe <i>XML-Stream</i> implementation.</li>
-      <li>Net::XMPP2::IM::Connection - API für Nachrichten und Präsenzverwaltung.</li>
-   </ul>
-</div>
-
-<div class="slide">
-   <h1>Net::XMPP2 Überblick 2</h1>
-   <ul class="incremental">
-      <li>Net::XMPP2::Client - API für Clienten.</li>
-      <li>Net::XMPP2::IM::Message - Repräsentation von XMPP Nachrichten.</li>
+      <li>Net::XMPP2::Event<br>- Eventmodell, zum registrieren von Callbacks.</li>
+      <li>Net::XMPP2::Connection <br>- Rohe <i>XML-Stream</i> implementation.</li>
+      <li>Net::XMPP2::IM::Connection <br>- API für Nachrichten und Präsenzverwaltung.</li>
+      <li>Net::XMPP2::Client <br>- API für Clienten.</li>
+      <li>Net::XMPP2::IM::Message <br>- Repräsentation von XMPP Nachrichten.</li>
    </ul>
 </div>
 
@@ -160,23 +115,14 @@
       <li><tt>$regid = reg_cb (session_ready =&gt; sub { ... })</tt></li>
       <li><tt>unreg_cb ($regid)</tt> &amp; <tt>unreg_me</tt> (in Callbacks)</li>
       <li><tt>event ($event, @args)</tt> zum Auslösen von Events.</li>
+      <li>Module erben das Interface (z.B. Net::XMPP2::Connection) =&gt; Verf&uuml;gbare Events in Doku.</li>
    </ul>
 </div>
-
-<div class="slide">
-   <h1>Net::XMPP2::Event 2</h1>
-   <ul class="incremental">
-      <li>Net::XMPP2::Connection, ::IM::Connection und ::Client abgeleitet von Net::XMPP2::Event.</li>
-      <li>=&gt; Events via Net::XMPP2::Event interface registrierbar.</li>
-      <li>Welche Events intern erzeugt werden steht in der Doku.</li>
-   </ul>
-</div>
-
 
 <div class="slide">
    <h1>Beispiel - sendmsg</h1>
    <ul class="incremental">
-   <li>Verschicken einer XMPP Nachricht an jemanden.</li>
+   <li>Verschickt eine XMPP Nachricht.</li>
    <li>Aufruf:<br />
       <tt>echo "Hallo da!" |<br>&nbsp;&nbsp;./sendmsg elmex@jabber.org geheim123 jemand@anders.org</tt>
    </li>
@@ -281,6 +227,13 @@ $con-&gt;connect ();
 
 $j-&gt;wait (); # Event-Loop Start
 </pre>
+</div>
+
+<div class="slide">
+   <h1>Und der Rest...</h1>
+   <ul>
+      <li>Im Tagungsband!</li>
+   </ul>
 </div>
 
 </div>
