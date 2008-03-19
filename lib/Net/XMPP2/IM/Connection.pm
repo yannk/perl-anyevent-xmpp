@@ -295,7 +295,8 @@ has changed.
 C<$old_presence> is a L<Net::XMPP2::IM::Presence> object which represents the
 presence prior to the change.
 C<$new_presence> is a L<Net::XMPP2::IM::Presence> object which represents the
-presence after to the change.
+presence after to the change. The new presence might be undef if the new presence
+is 'unavailable'.
 
 =item presence_error => $error
 
