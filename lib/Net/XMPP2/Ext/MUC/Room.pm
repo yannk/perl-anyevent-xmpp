@@ -243,6 +243,17 @@ sub get_user_jid {
    $self->{users}->{$nick}
 }
 
+=item B<get_users>
+
+This method returns the list of occupants as L<Net::XMPP2::Ext::MUC::User> objects.
+
+=cut
+
+sub get_users {
+   my ($self) = @_;
+   values %{$self->{users}};
+}
+
 sub add_user_xml {
    my ($self, $node) = @_;
    my $from = $node->attr ('from');
