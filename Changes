@@ -1,6 +1,10 @@
 Revision history for Net-XMPP2
 
 0.11
+         - tweaked tests a bit
+         - and added use strict to some modules
+         - fixed a small oversight in Ext::Version w.r.t. to 'use strict'
+         - added the pod-coverage test
          - added some more MUC functions (Net::XMPP2::Ext::MUC::Room::get_users)
          - added nickcollision callback
          - fixed some errors in the documentation
