@@ -27,7 +27,6 @@ Net::XMPP2::Error::Stream
 Net::XMPP2::Error::Parser
 Net::XMPP2::Error::Presence
 Net::XMPP2::Error::Message
-Net::XMPP2::Event
 Net::XMPP2::Client
 Net::XMPP2::SimpleConnection
 Net::XMPP2::Extendable
