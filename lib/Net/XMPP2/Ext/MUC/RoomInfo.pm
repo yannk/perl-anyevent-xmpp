@@ -50,6 +50,12 @@ sub disco_info {
    $_[0]->{disco_info}
 }
 
+=item B<as_debug_string>
+
+Returns the MUC room information as string for debugging.
+
+=cut
+
 sub as_debug_string {
    my ($self) = @_;
    my $info = $self->{disco_info};

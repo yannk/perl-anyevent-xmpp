@@ -6,6 +6,7 @@ README
 t/00-load.t
 t/boilerplate.t
 t/pod.t
+t/pod-coverage.t
 t/datetime.t
 t/events.t
 t/xml_filter_chars.t
@@ -22,6 +23,7 @@ t/z_06_iq_ping.t
 t/z_06_iq_ping_timeout.t
 t/z_06_iq_version.t
 t/z_20_unregister.t
+samples/sendmsg
 samples/devcl/DevCL/Browser.pm
 samples/devcl/DevCL/TreeView.pm
 samples/devcl/DevCL/Main.pm
@@ -78,7 +80,6 @@ lib/Net/XMPP2/Ext/MUC/Message.pm
 lib/Net/XMPP2/Ext/MUC/Room.pm
 lib/Net/XMPP2/Ext/MUC/RoomInfo.pm
 lib/Net/XMPP2/Ext/MUC/User.pm
-lib/Net/XMPP2/Event.pm
 lib/Net/XMPP2/Client.pm
 lib/Net/XMPP2/SimpleConnection.pm
 lib/Net/XMPP2/Extendable.pm

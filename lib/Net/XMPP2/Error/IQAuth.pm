@@ -13,7 +13,7 @@ Subclass of L<Net::XMPP2::Error>
 
 =over 4
 
-=item B<type>
+=item B<context>
 
 This method returns either:
 

@@ -1,7 +1,6 @@
 package Net::XMPP2::Ext::MUC::User;
 use strict;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
-use Net::XMPP2::Event;
 use Net::XMPP2::IM::Presence;
 use Net::XMPP2::Ext::MUC::Message;
 use Net::XMPP2::Util qw/split_jid/;

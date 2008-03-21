@@ -5,16 +5,16 @@ use IO::Socket::INET;
 use Net::XMPP2::Parser;
 use Net::XMPP2::Writer;
 use Net::XMPP2::Util qw/split_jid join_jid simxml/;
-use Net::XMPP2::Event;
 use Net::XMPP2::SimpleConnection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Extendable;
 use Net::XMPP2::Error;
+use BS::Event;
 use Net::DNS;
 use Digest::SHA1 qw/sha1_hex/;
 use Encode;
 
-our @ISA = qw/Net::XMPP2::SimpleConnection Net::XMPP2::Event Net::XMPP2::Extendable/;
+our @ISA = qw/Net::XMPP2::SimpleConnection BS::Event Net::XMPP2::Extendable/;
 
 =head1 NAME
 

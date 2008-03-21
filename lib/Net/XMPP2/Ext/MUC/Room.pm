@@ -6,10 +6,10 @@ use Net::XMPP2::Util qw/
    bare_jid prep_bare_jid cmp_jid split_jid join_jid is_bare_jid
    prep_res_jid prep_join_jid resourceprep
 /;
-use Net::XMPP2::Event;
 use Net::XMPP2::Ext::MUC::User;
 use Net::XMPP2::Ext::DataForm;
 use Net::XMPP2::Error::MUC;
+use BS::Event;
 
 use constant {
    JOIN_SENT => 1,
@@ -17,7 +17,7 @@ use constant {
    LEFT      => 3,
 };
 
-our @ISA = qw/Net::XMPP2::Event/;
+our @ISA = qw/BS::Event/;
 
 =head1 NAME
 

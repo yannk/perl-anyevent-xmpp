@@ -9,13 +9,14 @@ use Net::XMPP2::IM::Message;
 use Net::XMPP2::Util qw/bare_jid/;
 
 my $cl =
-   Net::XMPP2::TestClient->new_or_exit (tests => 3, two_accounts => 1, finish_count => 2);
+   Net::XMPP2::TestClient->new_or_exit (tests => 4, two_accounts => 1, finish_count => 2);
 my $C = $cl->client;
 my $vers = $cl->instance_ext ('Net::XMPP2::Ext::Version');
 
 $vers->set_os ('GNU/Virtual 0.23 x86_128');
 
 my $recv_error;
+my $recv_error_2;
 my $recv_vers_error = '';
 my $recv_vers;
 
@@ -47,7 +48,7 @@ $C->reg_cb (
          node => { ns => 'broken:iq:request', name => 'query' }
       }, sub {
          my ($n, $e) = @_;
-         $recv_error = $e;
+         $recv_error_2 = $e;
          $cl->finish;
       }, to => $jid2);
    }
@@ -55,11 +56,8 @@ $C->reg_cb (
 
 $cl->wait;
 
-if ($recv_error) {
-   is ($recv_error->condition (), 'service-unavailable', 'service unavailable error');
-} else {
-   fail ('service unavailable error');
-}
+ok ((not defined $recv_error), 'no service unavailable error on first request');
+is ($recv_error_2->condition (), 'service-unavailable', 'service unavailable error for second request');
 is ($recv_vers_error         , ''                   , 'no software version error');
 is ($recv_vers,
     "($dest) Net::XMPP2/$Net::XMPP2::VERSION/GNU/Virtual 0.23 x86_128",
