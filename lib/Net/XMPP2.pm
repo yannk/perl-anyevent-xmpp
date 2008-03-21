@@ -8,11 +8,11 @@ Net::XMPP2 - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.10
+Version 0.11
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 =head1 SYNOPSIS
 
@@ -67,6 +67,12 @@ modules to make it work.
 
 For the I/O events and timers.
 
+=item L<BS::Event>
+
+The former L<Net::XMPP2::Event> module has been outsourced to the L<BS::Event>
+module to provide a more generic way for more other modules to register and call
+event callbacks.
+
 =item L<XML::Writer>
 
 For writing "XML".
@@ -115,6 +121,19 @@ Here are some notes to the last releases (release of this version is at top):
 =head2 Version
 
 =over 4
+
+=item * 0.11
+
+Mainly a maintenance release. The C<init> method for the connection classes
+have been made implicit on connect. So you should not call it yourself anymore.
+
+Aside from that there were some documentation fixes in L<Net::XMPP2::Client>.
+
+Other additions were the xmpp_datetime_as_timestamp in L<Net::XMPP2::Util> and
+the nick collision callback in L<Net::XMPP2::Ext::MUC>, to change the nick when the
+nick has already been taken when joining a room.
+
+The tests have been tweaked a bit and a L<Pod::Coverage> test has been added.
 
 =item * 0.10
 

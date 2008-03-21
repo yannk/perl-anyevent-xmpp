@@ -8,7 +8,6 @@ t/boilerplate.t
 t/pod.t
 t/pod-coverage.t
 t/datetime.t
-t/events.t
 t/xml_filter_chars.t
 t/z_00_register.t
 t/z_01_message.t

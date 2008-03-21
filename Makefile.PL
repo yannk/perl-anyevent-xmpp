@@ -19,6 +19,7 @@ WriteMakefile(
         'Net::SSLeay'        => 0,
         'Net::DNS'           => 0,
         'Digest::SHA1'       => 0,
+        'BS::Event'          => 0,
     },
     dist                => {
        COMPRESS => 'gzip -9f',

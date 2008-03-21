@@ -49,6 +49,7 @@ my %SPEC = (
    'Net::XMPP2::Ext::OOB' => [qw/disco_feature init/],
    'Net::XMPP2::Ext::MUC' => [qw/cleanup init install_room uninstall_room/],
    'Net::XMPP2::Ext::DataForm' => [qw/init _field_to_simxml _extract_field/],
+   'Net::XMPP2::Ext::Version' => [qw/DESTROY _version_from_node handle_query init version_result/],
    'Net::XMPP2::IM::Message' => [qw/from_node to_string/],
    'Net::XMPP2::IM::Account' => [qw/new remove_connection spawn_connection/],
    'Net::XMPP2::IM::Presence' => [qw/clone debug_dump message_class new update/],

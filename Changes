@@ -1,6 +1,6 @@
 Revision history for Net-XMPP2
 
-0.11
+0.11 Fri Mar 21 03:00:58 CET 2008
          - tweaked tests a bit
          - and added use strict to some modules
          - fixed a small oversight in Ext::Version w.r.t. to 'use strict'

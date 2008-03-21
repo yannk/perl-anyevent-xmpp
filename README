@@ -2,7 +2,7 @@ NAME
     Net::XMPP2 - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.10
+    Version 0.11
 
 SYNOPSIS
        use Net::XMPP2::Connection;
@@ -52,6 +52,11 @@ REQUIREMENTS
     AnyEvent
         For the I/O events and timers.
 
+    BS::Event
+        The former Net::XMPP2::Event module has been outsourced to the
+        BS::Event module to provide a more generic way for more other
+        modules to register and call event callbacks.
+
     XML::Writer
         For writing "XML".
 
@@ -89,18 +94,38 @@ RELEASE NOTES
     top):
 
   Version
-    * 0.10
+    *   0.11
+
+        Mainly a maintenance release. The "init" method for the connection
+        classes have been made implicit on connect. So you should not call
+        it yourself anymore.
+
+        Aside from that there were some documentation fixes in
+        Net::XMPP2::Client.
+
+        Other additions were the xmpp_datetime_as_timestamp in
+        Net::XMPP2::Util and the nick collision callback in
+        Net::XMPP2::Ext::MUC, to change the nick when the nick has already
+        been taken when joining a room.
+
+        The tests have been tweaked a bit and a Pod::Coverage test has been
+        added.
+
+    *   0.10
+
         Fixed some bugs and implemented an old/ancient authentication method
         used by some very old (jabberd 1.4.2) servers. Also implemented a
         chat session tracking mechanism to help the users of
         Net::XMPP2::Client to get their message to the right resource. (See
         also the method "send_tracked_message" of Net::XMPP2::IM::Account).
 
-    * 0.09
+    *   0.09
+
         Just a bugfix release. Last change before the last release
         introduced a bug with namespace handling in resource binding.
 
-    * 0.08
+    *   0.08
+
         Lots of bugfixes and minor changes you might want to read about in
         the "Changes" file. Added some examples which might be useful.
 
@@ -110,7 +135,8 @@ RELEASE NOTES
         is confuses if this module tries everything to be as reliable as
         possible.
 
-    * 0.07
+    *   0.07
+
         Many small changes in Net::XMPP2::Event. Implemented XEP-0199 (XMPP
         Ping) and also whitespace pings in Net::XMPP2::Connection.
 
@@ -118,7 +144,8 @@ RELEASE NOTES
 
         For further details look in the "Changes" file.
 
-    * 0.06
+    *   0.06
+
         The event API has been changed a bit, it's possible to intercept
         events now, see Net::XMPP2::Event.
 
@@ -157,7 +184,8 @@ RELEASE NOTES
         And another API change: "reply_iq_result" and "reply_iq_error" now
         attach a from attribute themselves (see Net::XMPP2::Connection).
 
-    * 0.05
+    *   0.05
+
         I added some unit tests and fixed a lot of bugs. The unit tests are
         mostly for me (the AUTHOR) to not accidentally release a buggy
         version with too ugly show stopper bugs.
@@ -167,7 +195,8 @@ RELEASE NOTES
         these tests yourself you might want to take a look at
         Net::XMPP2::TestClient.
 
-    * 0.04
+    *   0.04
+
         After realizing that in band registration in Net::XMPP2::Ext was
         already in in version 0.03 I finally had to implement it.
 
@@ -177,7 +206,8 @@ RELEASE NOTES
 
         I also fixed some bugs in Net::XMPP2::Ext::Disco.
 
-    * older
+    *   older
+
         For older release notes please have a look at the Changes file or
         CPAN.
 
@@ -371,26 +401,32 @@ SUPPORT
 
     You can also look for information at:
 
-    * IRC: Net::XMPP2 IRC Channel
+    *   IRC: Net::XMPP2 IRC Channel
+
           IRC Network: http://freenode.net/
           Server     : chat.freenode.net
           Channel    : #net_xmpp2
 
           Feel free to join and ask questions!
 
-    * Net::XMPP2 Project Site
+    *   Net::XMPP2 Project Site
+
         <http://www.ta-sa.org/net_xmpp2>
 
-    * AnnoCPAN: Annotated CPAN documentation
+    *   AnnoCPAN: Annotated CPAN documentation
+
         <http://annocpan.org/dist/Net-XMPP2>
 
-    * CPAN Ratings
+    *   CPAN Ratings
+
         <http://cpanratings.perl.org/d/Net-XMPP2>
 
-    * RT: CPAN's request tracker
+    *   RT: CPAN's request tracker
+
         <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-XMPP2>
 
-    * Search CPAN
+    *   Search CPAN
+
         <http://search.cpan.org/dist/Net-XMPP2>
 
 ACKNOWLEDGEMENTS
@@ -403,7 +439,8 @@ ACKNOWLEDGEMENTS
 
     Thanks to:
 
-    * Carlo von Loesch (aka lynX) <http://www.psyced.org/>
+    *   Carlo von Loesch (aka lynX) <http://www.psyced.org/>
+
         For pointing out some typos.
 
 COPYRIGHT & LICENSE
