@@ -1,5 +1,6 @@
 package Net::XMPP2::Ext::Skel;
 use Net::XMPP2::Ext;
+use strict;
 
 our @ISA = qw/Net::XMPP2::Ext/;
 

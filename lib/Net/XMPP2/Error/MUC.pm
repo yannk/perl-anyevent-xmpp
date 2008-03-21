@@ -1,5 +1,6 @@
 package Net::XMPP2::Error::MUC;
 use Net::XMPP2::Error;
+use strict;
 our @ISA = qw/Net::XMPP2::Error/;
 
 =head1 NAME

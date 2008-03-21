@@ -1,5 +1,6 @@
 package Net::XMPP2::Ext::Disco::Info;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use strict;
 
 =head1 NAME
 

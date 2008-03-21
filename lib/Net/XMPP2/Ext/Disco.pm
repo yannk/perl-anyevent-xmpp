@@ -4,6 +4,7 @@ use Net::XMPP2::Util qw/simxml/;
 use Net::XMPP2::Ext::Disco::Items;
 use Net::XMPP2::Ext::Disco::Info;
 use Net::XMPP2::Ext;
+use strict;
 
 our @ISA = qw/Net::XMPP2::Ext/;
 

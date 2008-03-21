@@ -2,6 +2,7 @@ package Net::XMPP2::Ext::Ping;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Util qw/simxml/;
 use Net::XMPP2::Ext;
+use strict;
 
 our @ISA = qw/Net::XMPP2::Ext/;
 

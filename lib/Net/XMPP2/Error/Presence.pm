@@ -1,5 +1,6 @@
 package Net::XMPP2::Error::Presence;
 use Net::XMPP2::Error::Stanza;
+use strict;
 our @ISA = qw/Net::XMPP2::Error::Stanza/;
 
 =head1 NAME

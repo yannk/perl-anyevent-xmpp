@@ -184,7 +184,7 @@ If the join to the room results in a nickname collision the C<$cb>
 will be called with the nickname that collided and the return value will
 be used as alternate nickname and the join is retried.
 
-This function is called E<everytime> the nickname collides on join, so you
+This function is called I<everytime> the nickname collides on join, so you
 should take care of possible endless retries.
 
 =back
