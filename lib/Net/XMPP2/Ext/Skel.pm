@@ -14,6 +14,8 @@ Net::XMPP2::Ext::Skel - Extension skeleton
 
 =head1 DESCRIPTION
 
+This is just a skeleton extension.
+
 =head1 METHODS
 
 =over 4
