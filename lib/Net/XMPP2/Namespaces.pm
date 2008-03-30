@@ -34,6 +34,8 @@ our %NAMESPACES = (
    x_delay     => 'jabber:x:delay',
    delay       => 'urn:xmpp:delay',
    ping        => 'urn:xmpp:ping',
+
+   vcard       => 'vcard-temp',
 );
 
 =head1 NAME
@@ -83,6 +85,8 @@ which make handling of namepsaces a bit easier:
    data_form   => jabber:x:data
 
    ping        => urn:xmpp:ping
+
+   vcard       => vcard-temp
 
 =head1 FUNCTIONS
 
