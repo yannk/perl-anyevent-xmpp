@@ -73,17 +73,21 @@ sub connect {
    $self->{socket}
       and return 1;
 
+   $self->{host}   = $host;
+   $self->{port}   = $port;
+
    my $sock = IO::Socket::INET->new (
       PeerAddr => $host,
       PeerPort => $port,
       Proto    => 'tcp',
       Blocking => 1
    );
-   return undef unless $sock;;
+   unless ($sock) {
+      $self->disconnect ("Couldn't connect to $host:$port: $!");
+      return undef;
+   }
 
    $self->{socket} = $sock;
-   $self->{host}   = $host;
-   $self->{port}   = $port;
    delete $self->{read_buffer};
    delete $self->{write_buffer};
 

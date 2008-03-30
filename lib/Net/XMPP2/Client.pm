@@ -7,6 +7,7 @@ use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Extendable;
 use Net::XMPP2::IM::Account;
 use BS::Event;
+use Scalar::Util;
 
 #use XML::Twig;
 #
@@ -157,7 +158,11 @@ This method tries to connect all unconnected accounts.
 sub update_connections {
    my ($self) = @_;
 
-   for my $acc (values %{$self->{accounts}}) {
+   Scalar::Util::weaken $self;
+
+   for (values %{$self->{accounts}}) {
+      my $acc = $_;
+
       if (!$acc->is_connected && !$self->{prep_connections}->{$acc->bare_jid}) {
          my %args = (initial_presence => 10);
 
@@ -186,16 +191,16 @@ sub update_connections {
                $con->unreg_me
             },
             disconnect => sub {
+               my ($con, $h, $p, $err) = @_;
+               $self->event (connect_error => $acc, $err);
                delete $self->{accounts}->{$acc};
                delete $self->{prep_connections}->{$acc->bare_jid};
-               $_[0]->unreg_me
+               $con->unreg_me;
+               $con->remove_forward ($self);
             }
          );
 
-         unless ($con->connect) {
-            $self->event (connect_error => "Couldn't connect to ".($acc->jid).": $!");
-            next
-         }
+         $con->connect;
       }
    }
 }

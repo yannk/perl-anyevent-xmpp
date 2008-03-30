@@ -11,6 +11,7 @@ WriteMakefile(
     PL_FILES            => {},
     PREREQ_PM => {
         'AnyEvent'           => 0,
+        'Scalar::Util'       => 0,
         'XML::Writer'        => 0,
         'XML::Parser::Expat' => 0,
         'MIME::Base64'       => 0,
