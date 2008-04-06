@@ -1,6 +1,10 @@
 Revision history for Net-XMPP2
 
 0.12
+         - added a socket_timeout argument to Net::XMPP2::Connection and
+           added an interface for setting it to ::SimpleConnection.
+         - fixed a serious bug in the split_jid regex, and added a test for
+           split_jid
          - fixed a few connection error bugs in Net::XMPP2::Client and the
            SimpleConnection class.
 

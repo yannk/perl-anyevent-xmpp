@@ -115,7 +115,7 @@ part and will return them as list.
 
 sub split_jid {
    my ($jid) = @_;
-   if ($jid =~ /^([^@]*)@?([^\/]+)\/?(.*)$/) {
+   if ($jid =~ /^(?:([^@]*)@)?([^\/]+)(?:\/(.*))?$/) {
       return ($1 eq '' ? undef : $1, $2, $3 eq '' ? undef : $3);
    } else {
       return (undef, undef, undef);

@@ -478,6 +478,12 @@ Thanks to:
 
 =over 4
 
+=item * J. Cameijo Cerdeira
+
+For pointing out a serious bug in C<split_jid> in L<Net::XMPP2::Util>
+and suggesting to add a timeout argument to the C<connect> method of
+L<Net::XMPP2::SimpleConnection>.
+
 =item * Carlo von Loesch (aka lynX) L<http://www.psyced.org/>
 
 For pointing out some typos.

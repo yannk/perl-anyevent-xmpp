@@ -68,7 +68,7 @@ sub set_noblock {
 }
 
 sub connect {
-   my ($self, $host, $port) = @_;
+   my ($self, $host, $port, $timeout) = @_;
 
    $self->{socket}
       and return 1;
@@ -80,8 +80,10 @@ sub connect {
       PeerAddr => $host,
       PeerPort => $port,
       Proto    => 'tcp',
-      Blocking => 1
+      Blocking => 1,
+      (defined $timeout ? (Timeout => $timeout) : ()),
    );
+
    unless ($sock) {
       $self->disconnect ("Couldn't connect to $host:$port: $!");
       return undef;

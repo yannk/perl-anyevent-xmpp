@@ -106,6 +106,13 @@ and port to connect to. See also C<connect>. This option is usually not
 very useful if SRV RR lookup is performed, as it is only used as a fallback.
 If you want to force the port to a certain value use C<override_port>.
 
+=item socket_timeout => $timeout
+
+This sets the timeout for the lowlevel TCP socket. See also L<IO::Socket::INET>
+about the C<Timeout> argument to the socket constructor.
+
+This timeout may also be used for connection timeouts in future.
+
 =item username => $username
 
 This is your C<$username> (the userpart in the JID);
@@ -353,7 +360,7 @@ sub connect {
 
    $port = $self->{override_port} if defined $self->{override_port};
 
-   if ($self->SUPER::connect ($host, $port)) {
+   if ($self->SUPER::connect ($host, $port, $self->{socket_timeout})) {
       $self->init;
       $self->event (connect => $host, $port);
       return 1;
@@ -373,6 +380,8 @@ call this function).
 
 Use C<reset_connect_tries> to reset the internal list of tried hosts.
 
+NOTE: This method is not yet implemented.
+
 =cut
 
 sub may_try_connect {
@@ -383,6 +392,8 @@ sub may_try_connect {
 
 This function resets the internal list of tried hosts for C<connect>.
 See also C<connect>.
+
+NOTE: This method is not yet implemented.
 
 =cut
 
