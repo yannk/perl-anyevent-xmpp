@@ -196,6 +196,9 @@ sub update_connections {
                delete $self->{accounts}->{$acc};
                delete $self->{prep_connections}->{$acc->bare_jid};
                $con->unreg_me;
+            },
+            after_disconnect => sub {
+               my ($con, $h, $p, $err) = @_;
                $con->remove_forward ($self);
             }
          );

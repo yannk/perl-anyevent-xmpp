@@ -117,7 +117,7 @@ like you need an explicit timeout for your connections.
 sub enable_timeout {
    my ($self, $con, $timeout) = @_;
    my $rt = $timeout;
-   unless (ref $rt) {
+   unless (ref $timeout) {
       $rt = \$timeout;
    }
    $self->_start_cust_timeout ($con, $rt);
@@ -140,10 +140,10 @@ sub _start_cust_timeout {
          $self->ping ($con, undef, sub {
             my ($t, $e) = @_;
 
-            if ($e->condition eq 'client-timeout') {
+            if (defined ($e) && $e->condition eq 'client-timeout') {
                $con->disconnect ("exceeded ping timeout of $$rtimeout seconds");
             } else {
-               $self->_start_cust_timeout ($con, $$rtimeout)
+               $self->_start_cust_timeout ($con, $rtimeout)
             }
          }, $$rtimeout);
       });
