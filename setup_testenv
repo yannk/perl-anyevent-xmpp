@@ -1,5 +1,5 @@
 #!/bin/bash
 
-export NET_XMPP2_TEST="test1@jabber.ta-sa.org/x:lolfe123"
+export NET_XMPP2_TEST="test1_netxm2@jabber.ta-sa.org/x:lolfe123"
 export NET_XMPP2_TEST_MUC="conference.ejabberd.ta-sa.org"
 export NET_XMPP2_TEST_DEBUG=1

@@ -145,7 +145,7 @@ sub init {
 
 
    if ($self->{muc_test} && $ENV{NET_XMPP2_TEST_MUC}) {
-      $self->{muc_room} = "test@" . $ENV{NET_XMPP2_TEST_MUC};
+      $self->{muc_room} = "test_nxmpp2@" . $ENV{NET_XMPP2_TEST_MUC};
 
       my $disco = $self->instance_ext ('Net::XMPP2::Ext::Disco');
       $self->{disco} = $disco;
@@ -169,7 +169,7 @@ sub init {
                my ($room, $user, $error) = @_;
                $room1 = $room;
                if ($error) {
-                  $self->{error} .= "Error: Couldn't join $self->{muc_room} as 'test1'\n";
+                  $self->{error} .= "Error: Couldn't join $self->{muc_room} as 'test1': ".$error->string."\n";
                   $self->{condvar}->broadcast;
                } else {
                   my $muc = $self->{muc2} = $self->{mucs}->{prep_bare_jid $jid2};
@@ -177,7 +177,7 @@ sub init {
                      my ($room, $user, $error) = @_;
                      my $room2 = $room;
                      if ($error) {
-                        $self->{error} .= "Error: Couldn't join $self->{muc_room} as 'test2'\n";
+                        $self->{error} .= "Error: Couldn't join $self->{muc_room} as 'test2'".$error->string."\n";
                         $self->{condvar}->broadcast;
                      } else {
                         $cl->event (two_rooms_joined => $acc, $jid1, $jid2, $room1, $room2)
@@ -199,6 +199,22 @@ sub init {
    });
 
    $cl->start;
+}
+
+sub checkpoint {
+   my ($self, $name, $cnt, $cb) = @_;
+   $self->{checkpoints}->{$name} = [$cnt, $cb];
+}
+
+sub reached_checkpoint {
+   my ($self, $name) = @_;
+   my $chp = $self->{checkpoints}->{$name}
+      or die "no such checkpoint defined: $name";
+   $chp->[0]--;
+   if ($chp->[0] <= 0) {
+      $chp->[1]->();
+      delete $self->{checkpoints}->{$name};
+   }
 }
 
 sub main_account { ($_[0]->{jid}, $_[0]->{password}) }

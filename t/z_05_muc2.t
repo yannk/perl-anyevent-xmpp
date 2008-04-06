@@ -15,7 +15,7 @@ unless ($MUC) {
    exit;
 }
 
-my $ROOM = "test@".$MUC;
+my $ROOM = "test_nxmpp2@".$MUC;
 
 my $cl =
    Net::XMPP2::TestClient->new_or_exit (
