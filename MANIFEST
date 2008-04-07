@@ -47,6 +47,8 @@ samples/simple_component
 samples/talkbot
 samples/talkbot_channel
 samples/retrieve_roster
+samples/display_avatar
+samples/store_avatar
 lib/Net/XMPP2/IM/Contact.pm
 lib/Net/XMPP2/IM/Roster.pm
 lib/Net/XMPP2/IM/Connection.pm
