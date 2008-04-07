@@ -36,6 +36,7 @@ our %NAMESPACES = (
    ping        => 'urn:xmpp:ping',
 
    vcard       => 'vcard-temp',
+   vcard_upd   => 'vcard-temp:x:update',
 );
 
 =head1 NAME

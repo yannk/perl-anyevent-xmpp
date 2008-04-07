@@ -1,5 +1,5 @@
 package Net::XMPP2::Ext;
-use warnings;
+no warnings;
 use strict;
 use BS::Event;
 
@@ -37,6 +37,11 @@ For example XEP-0055 (Jabber Search) or also In-band registration.
 
 This extension allows you to send service discovery requests and
 define a set of discoverable information. See also L<Net::XMPP2::Ext::Disco>.
+
+=item XEP-0054 - vcard-temp (Version 1.1)
+
+This extension allows the retrieval and storage of XMPP vcards
+as defined in XEP-0054. It is implemented by L<Net::XMPP2::Ext::VCard>.
 
 =item XEP-0066 - Out of Band Data (Version 1.5)
 
@@ -98,6 +103,12 @@ and makes it possible to implement services like pubsub, muc, or
 whatever you can imagine (even gateways).
 See documentation of L<Net::XMPP2::Component> and the example
 C<samples/simple_component>.
+
+=item XEP-0153 - vCard-Based Avatars (Version 1.0)
+
+This extension allows to store and retrive avatars from vcards.
+On top of that it will also signal others that you support avatars and
+that they might have changed. See L<Net::XMPP2::Ext::VCard>.
 
 =item XEP-0199 - XMPP Ping (Version 1.0)
 

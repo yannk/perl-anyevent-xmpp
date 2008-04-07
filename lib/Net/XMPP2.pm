@@ -8,11 +8,11 @@ Net::XMPP2 - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.11
+Version 0.12
 
 =cut
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 =head1 SYNOPSIS
 
@@ -121,6 +121,15 @@ Here are some notes to the last releases (release of this version is at top):
 =head2 Version
 
 =over 4
+
+=item * 0.12
+
+Implemented XEP-0054 and XEP-0153 (see L<Net::XMPP2::Ext::VCard>),
+on top of that a serious bug in C<split_jid> in L<Net::XMPP2::Util> was fixed
+and a C<socket_timeout> argument can be set now for L<Net::XMPP2::Connection>.
+
+Aside from that a few changes here and there, but nothing serious,
+see the C<Changes> file.
 
 =item * 0.11
 
@@ -393,6 +402,13 @@ This is a simple example script that will retrieve the roster
 for an account and print it to stdout. You start it like this:
 
    samples/# ./retrieve_roster <jid> <password>
+
+=item B<samples/display_avatar>
+
+This is just a small example which should display the avatar
+of the account you connect to. It can be used like this:
+
+   samples/# ./display_avatar <jid> <password>
 
 =back
 
