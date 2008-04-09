@@ -509,7 +509,11 @@ sub set_default_iq_timeout {
 
 =item B<send_iq ($type, $create_cb, $result_cb, %attrs)>
 
-This method sends an IQ XMPP request.
+This method sends an IQ XMPP B<request>.
+
+If you want to B<respond> to a IQ request you received via the C<iq_set_request_xml>,
+and C<iq_get_request_xml> events you have to use the C<reply_iq_result> or
+C<reply_iq_error> methods documented below.
 
 Please take a look at the documentation for C<send_iq> in Net::XMPP2::Writer
 about the meaning of C<$type>, C<$create_cb> and C<%attrs> (with the exception

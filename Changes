@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.12
+         - improved the documentation of the send_iq method of Net::XMPP2::Connection
          - added samples/display_my_avatar
          - added support for XEP-0054 (vCard) and added a test for it (z_07_vcard.t)
          - replaced the big and unmaintainable MUC test by some smaller
