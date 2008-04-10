@@ -1004,6 +1004,14 @@ sub stream_id { $_[0]->{stream_id} }
 
 =head1 EVENTS
 
+The L<Net::XMPP2::Connection> class is derived from the L<BS::Event> class,
+and thus inherits the event callback registering system from it. Consult the
+documentation of L<BS::Event> about more details.
+
+NODE: Every callback gets as it's first argument the L<Net::XMPP2::Connection>
+object. The further callback arguments are described in the following listing of
+events.
+
 These events can be registered on with C<reg_cb>:
 
 =over 4
@@ -1192,7 +1200,7 @@ Example:
    # this appends a <test/> element to all outgoing IQs
    # and also a <test2/> element to all outgoing IQs
    $con->reg_cb (send_iq_hook => sub {
-      my ($id, $type, $attrs) = @_;
+      my ($con, $id, $type, $attrs) = @_;
       (sub {
          my $w = shift; # $w is a XML::Writer instance
          $w->emptyTag ('test');
