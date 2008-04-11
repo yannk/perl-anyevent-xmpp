@@ -104,6 +104,9 @@ sub init {
       Start => sub { $self->cb_start_tag (@_) },
       End   => sub { $self->cb_end_tag   (@_) },
       Char  => sub { $self->cb_char_data (@_) },
+#      CdataStart => sub { $self->cb_cdata_start (@_) },
+#      CdataEnd   => sub { $self->cb_cdata_end (@_) },
+      Default    => sub { $self->cb_default (@_) },
    );
    $self->{nso} = {};
    $self->{nodestack} = [];
@@ -210,6 +213,12 @@ sub cb_end_tag {
    if ($@) {
       $self->{error_cb}->($@, undef, 'exception');
    }
+}
+
+sub cb_default {
+   my ($self, $p, $str) = @_;
+   $self->{nodestack}->[-1]->append_raw ($str)
+      if @{$self->{nodestack}};
 }
 
 =back
