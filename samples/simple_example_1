@@ -1,13 +1,12 @@
 #!/opt/perl/bin/perl
 use strict;
 use utf8;
-use Event;
 use AnyEvent;
 use Net::XMPP2::Client;
 
 my $j = AnyEvent->condvar;
 my $cl = Net::XMPP2::Client->new (debug => 1);
-$cl->add_account ('net_xmpp2@jabber.org', 'test');
+$cl->add_account ('net_xmpp2@ist.m8geil.de', 'test');
 $cl->reg_cb (
    session_ready => sub {
       my ($cl, $acc) = @_;

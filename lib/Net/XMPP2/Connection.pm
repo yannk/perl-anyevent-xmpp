@@ -31,8 +31,8 @@ Net::XMPP2::Connection - XML stream that implements the XMPP RFC 3920.
          resource => "Net::XMPP2"
       );
 
-   $con->connect or die "Couldn't connect to jabber.org: $!";
    $con->reg_cb (stream_ready => sub { print "XMPP stream ready!\n" });
+   $con->connect; # will do non-blocking connect
 
 =head1 DESCRIPTION
 
@@ -309,7 +309,7 @@ sub new {
 
 =item B<connect ($no_srv_rr)>
 
-Try to connect to the domain and port passed in C<new>.
+Try to connect (non blocking) to the domain and port passed in C<new>.
 
 A SRV RR lookup will be performed on the domain to discover
 the host and port to use. If you don't want this set C<$no_srv_rr>
@@ -319,18 +319,14 @@ As the SRV RR lookup might return multiple host and you fail to
 connect to one you might just call this function again to try a
 different host.
 
-If C<connect> was successful and we connected a true value is returned.
-If the connect was unsuccessful undef is returned and C<$!> will be set
-to the error that occured while connecting.
+The connection is performed non blocking, so this method will just
+trigger the connection process. The event C<connect> will be emitted
+when the connection was successfully established.
 
-If you want to know whether further connection attempts might be more
-successful (as SRV RR lookup may return multiple hosts) call C<may_try_connect>
-(see also C<may_try_connect>).
+If the connection try was not successful a C<disconnect> event
+will be generated with an error message.
 
-Note that an internal list will be kept of tried hosts.  Use
-C<reset_connect_tries> to reset the internal list of tried hosts.
-
-Also note that the "XML" stream initiation is sent when the connection
+NOTE: The "XML" stream initiation is sent when the connection
 was successfully connected.
 
 =cut
@@ -360,45 +356,13 @@ sub connect {
 
    $port = $self->{override_port} if defined $self->{override_port};
 
-   if ($self->SUPER::connect ($host, $port, $self->{socket_timeout})) {
-      $self->init;
-      $self->event (connect => $host, $port);
-      return 1;
-   } else {
-      return undef;
-   }
+   $self->SUPER::connect ($host, $port, $self->{socket_timeout});
 }
 
-=item B<may_try_connect>
-
-Returns the number of left alternatives of hosts to connect to for the
-domain passed to C<new>.
-
-An internal list of tried hosts will be managed by C<connect> and those
-hosts will be ignored by a SRV RR lookup (which will be done if you
-call this function).
-
-Use C<reset_connect_tries> to reset the internal list of tried hosts.
-
-NOTE: This method is not yet implemented.
-
-=cut
-
-sub may_try_connect {
-   # TODO
-}
-
-=item B<reset_connect_tries>
-
-This function resets the internal list of tried hosts for C<connect>.
-See also C<connect>.
-
-NOTE: This method is not yet implemented.
-
-=cut
-
-sub reset_connect_tries {
-   # TODO
+sub connected {
+   my ($self) = @_;
+   $self->init;
+   $self->event (connect => $self->{host}, $self->{port});
 }
 
 sub handle_data {

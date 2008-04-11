@@ -1,6 +1,9 @@
 Revision history for Net-XMPP2
 
 0.12
+         - API CHANGE: The C<connect> method of L<Net::XMPP2::SimpleConnection>
+           and thus L<Net::XMPP2::Connection> is now non-blocking!
+           IMPORTANT: Please revisit your connection code and adjust accordingly!
          - improved the documentation w.r.t. event callback arguments a bit
          - improved the documentation of the send_iq method of Net::XMPP2::Connection
          - added samples/display_my_avatar

@@ -73,23 +73,45 @@ sub connect {
    $self->{socket}
       and return 1;
 
-   $self->{host}   = $host;
-   $self->{port}   = $port;
+   $self->{host} = $host;
+   $self->{port} = $port;
 
-   my $sock = IO::Socket::INET->new (
+   $self->{socket} = IO::Socket::INET->new (
       PeerAddr => $host,
       PeerPort => $port,
       Proto    => 'tcp',
-      Blocking => 1,
+      Blocking => 0,
       (defined $timeout ? (Timeout => $timeout) : ()),
    );
+
+   unless (defined $self->{socket}) {
+      return 0;
+   }
+
+   $self->{con_wat} =
+      AnyEvent->io (poll => 'w', fh => $self->{socket}, cb => sub {
+         delete $self->{con_wat};
+
+         if ($! = $self->{socket}->sockopt (SO_ERROR)) {
+            $self->disconnect ("Couldn't connect to $host:$port: $!");
+         } else {
+            $self->finish_connect;
+         }
+      });
+
+   return 1;
+}
+
+sub finish_connect {
+   my ($self) = @_;
+   my ($host, $port, $sock) =
+      ($self->{host}, $self->{port}, $self->{socket});
 
    unless ($sock) {
       $self->disconnect ("Couldn't connect to $host:$port: $!");
       return undef;
    }
 
-   $self->{socket} = $sock;
    delete $self->{read_buffer};
    delete $self->{write_buffer};
 
@@ -117,6 +139,8 @@ sub connect {
             }
          }
       });
+
+   $self->connected;
    return 1;
 }
 
