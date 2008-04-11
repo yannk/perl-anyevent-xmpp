@@ -81,11 +81,19 @@ sub connect {
       PeerPort => $port,
       Proto    => 'tcp',
       Blocking => 0,
-      (defined $timeout ? (Timeout => $timeout) : ()),
    );
 
    unless (defined $self->{socket}) {
+      $self->disconnect ("Couldn't create socket to $host:$port: $!");
       return 0;
+   }
+
+   if (defined $timeout) {
+      $self->{con_tout} =
+         AnyEvent->timer (after => $timeout, cb => sub {
+            delete $self->{con_wat};
+            $self->disconnect ("Couldn't connect to $host:$port: Timeout");
+         });
    }
 
    $self->{con_wat} =
@@ -156,7 +164,7 @@ sub end_sockets {
       Net::SSLeay::CTX_free ($self->{ctx});
       delete $self->{ctx};
    }
-   close ($self->{socket});
+   close ($self->{socket}) if $self->{socket};
    delete $self->{socket};
 }
 

@@ -11,7 +11,7 @@ Revision history for Net-XMPP2
          - replaced the big and unmaintainable MUC test by some smaller
            tests.
          - fixed a bug with disconnect event propagation by Net::XMPP2::Client
-         - added a socket_timeout argument to Net::XMPP2::Connection and
+         - added a connect_timeout argument to Net::XMPP2::Connection and
            added an interface for setting it to ::SimpleConnection.
          - fixed a serious bug in the split_jid regex, and added a test for
            split_jid

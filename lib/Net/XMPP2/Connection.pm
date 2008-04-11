@@ -106,12 +106,11 @@ and port to connect to. See also C<connect>. This option is usually not
 very useful if SRV RR lookup is performed, as it is only used as a fallback.
 If you want to force the port to a certain value use C<override_port>.
 
-=item socket_timeout => $timeout
+=item connect_timeout => $timeout
 
-This sets the timeout for the lowlevel TCP socket. See also L<IO::Socket::INET>
-about the C<Timeout> argument to the socket constructor.
-
-This timeout may also be used for connection timeouts in future.
+This sets the connection timeout. If the socket connect takes too long
+a C<disconnect> event will be generated with an appropriate error message.
+If this argument is not given no timeout is installed for the connects.
 
 =item username => $username
 
@@ -356,7 +355,7 @@ sub connect {
 
    $port = $self->{override_port} if defined $self->{override_port};
 
-   $self->SUPER::connect ($host, $port, $self->{socket_timeout});
+   $self->SUPER::connect ($host, $port, $self->{connect_timeout});
 }
 
 sub connected {
