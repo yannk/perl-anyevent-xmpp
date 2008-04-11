@@ -1,11 +1,6 @@
 'x' means: is done!
 
-- revisit error reporting of failed connects
-
 - add nick_change to documentation
-- Solve probable bug in recognized string handling
-  with CDATA which is parsed by expat in a seperate step.
-  Need to check other callbacks too.
 - Implement XEP-0045: Multi-User Chat
    x store full jid info on entering room
    x implement delayed delivery for messages
@@ -78,8 +73,7 @@
    - 7.6 Converting a One-to-One Chat Into a Conference
 
 - write a tutorial for simxml
-- implement connection timeout if the server sucks...
-- read into SSL and improve the SSL/TLS handling
+- improve the SSL/TLS handling
 - make more tests
    - oob
    - data forms
