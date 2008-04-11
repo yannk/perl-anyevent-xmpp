@@ -124,9 +124,13 @@ Here are some notes to the last releases (release of this version is at top):
 
 =item * 0.12
 
+B<API CHANGE:> The connects are now non-blocking, you should revisit the
+places you use the C<connect> method of Net::XMPP2::Connection/::IM::Connection
+directly!
+
 Implemented XEP-0054 and XEP-0153 (see L<Net::XMPP2::Ext::VCard>),
 on top of that a serious bug in C<split_jid> in L<Net::XMPP2::Util> was fixed
-and a C<socket_timeout> argument can be set now for L<Net::XMPP2::Connection>.
+and a C<connect_timeout> argument can be set now for L<Net::XMPP2::Connection>.
 
 Aside from that a few changes here and there, but nothing serious,
 see the C<Changes> file.

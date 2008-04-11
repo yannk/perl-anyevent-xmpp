@@ -2,7 +2,7 @@ NAME
     Net::XMPP2 - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.11
+    Version 0.12
 
 SYNOPSIS
        use Net::XMPP2::Connection;
@@ -94,6 +94,20 @@ RELEASE NOTES
     top):
 
   Version
+    *   0.12
+
+        API CHANGE: The connects are now non-blocking, you should revisit
+        the places you use the "connect" method of
+        Net::XMPP2::Connection/::IM::Connection directly!
+
+        Implemented XEP-0054 and XEP-0153 (see Net::XMPP2::Ext::VCard), on
+        top of that a serious bug in "split_jid" in Net::XMPP2::Util was
+        fixed and a "connect_timeout" argument can be set now for
+        Net::XMPP2::Connection.
+
+        Aside from that a few changes here and there, but nothing serious,
+        see the "Changes" file.
+
     *   0.11
 
         Mainly a maintenance release. The "init" method for the connection
@@ -365,6 +379,12 @@ EXAMPLES
 
            samples/# ./retrieve_roster <jid> <password>
 
+    samples/display_avatar
+        This is just a small example which should display the avatar of the
+        account you connect to. It can be used like this:
+
+           samples/# ./display_avatar <jid> <password>
+
     For others, which the author might forgot or didn't want to list here
     see the "samples/" directory.
 
@@ -438,6 +458,12 @@ ACKNOWLEDGEMENTS
     brought this module to a usable state.
 
     Thanks to:
+
+    *   J. Cameijo Cerdeira
+
+        For pointing out a serious bug in "split_jid" in Net::XMPP2::Util
+        and suggesting to add a timeout argument to the "connect" method of
+        Net::XMPP2::SimpleConnection.
 
     *   Carlo von Loesch (aka lynX) <http://www.psyced.org/>
 

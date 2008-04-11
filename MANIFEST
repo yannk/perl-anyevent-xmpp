@@ -26,6 +26,7 @@ t/z_06_iq_version.t
 t/z_07_vcard.t
 t/z_08_vcard_hook.t
 t/z_20_unregister.t
+t/n_xmpp2_avatar.png
 samples/sendmsg
 samples/devcl/DevCL/Browser.pm
 samples/devcl/DevCL/TreeView.pm
@@ -66,6 +67,7 @@ lib/Net/XMPP2/Ext/RegisterForm.pm
 lib/Net/XMPP2/Ext/OOB.pm
 lib/Net/XMPP2/Ext/Ping.pm
 lib/Net/XMPP2/Ext/Version.pm
+lib/Net/XMPP2/Ext/VCard.pm
 lib/Net/XMPP2/Namespaces.pm
 lib/Net/XMPP2/Util.pm
 lib/Net/XMPP2/Ext.pm
