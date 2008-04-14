@@ -171,31 +171,15 @@ This will set the whitespace ping interval (in seconds). The default interval
 are 60 seconds.  You can disable the whitespace ping by setting C<$interval> to
 0.
 
-=item wait_for_send_buffer_empty => $bool
+=item blocking_write => $bool
 
 This is a special option which will make all send operations C<send_message>, C<send_iq>
-and C<send_presence> block the control flow until the C<send_buffer_empty> event
-is emitted by the underlying connection. (See also C<send_buffer_empty> event below).
+and C<send_presence> block until the output buffer is empty. If this option is
+enabled every C<send_message>, C<send_iq> and C<send_presence> call will call
+C<drain> internally to block until the output buffer is empty.
 
 This option is DISABLED by default and you should only enable it if you know
 what you are doing.
-
-This is an example of what happens when you do a C<send_message> with this
-option enabled:
-
-   my $cvar = AnyEvent->condvar; # it will make a new condvar
-   $con->reg_cb (                # install the send_buffer_empty callback
-      send_buffer_empty =>
-         sub {
-            my ($con) = @_;
-            $cvar->broadcast;   # which will stop the waiting
-            $con->unreg_me      # and unregisters itself
-         }
-   );
-   # then it sends the message:
-   $con->send_message ("Hello there!" => 'elmex@jabber.org', undef, 'normal');
-   # and waits for the event callback we installed above
-   $cvar->wait;
 
 =back
 
@@ -392,7 +376,6 @@ sub connected {
 
 sub send_buffer_empty {
    my ($self) = @_;
-   warn "BUEM{P\n";
    $self->event ('send_buffer_empty');
 }
 
@@ -410,7 +393,6 @@ sub debug_wrote_data {
 sub write_data {
    my ($self, $data) = @_;
    $self->event (send_stanza_data => $data);
-   warn "WRITEDATA\n";
    $self->SUPER::write_data ($data);
 }
 
@@ -474,41 +456,6 @@ sub handle_stanza {
 sub init {
    my ($self) = @_;
    $self->{writer}->send_init_stream ($self->{language}, $self->{domain}, $self->{stream_namespace});
-}
-
-sub _prepare_wait_buffer_cond {
-   my ($self) = @_;
-   my $cvar = AnyEvent->condvar;
-   $self->reg_cb (send_buffer_empty => sub {
-      my ($self) = @_;
-      warn "SEND BU EMPTY\n";
-      $cvar->broadcast;
-      $self->unreg_me;
-   });
-   $cvar
-}
-
-sub wait_for_empty_buffer {
-   my ($self, $cb) = @_;
-   my $cvar = $self->_prepare_wait_buffer_cond;
-   warn "WITIN\n";
-   $cb->();
-   warn "FEOFEO\n";
-   $cvar->wait;
-   warn "ENDO\n";
-}
-
-sub writer_op {
-   my ($self, $op, @args) = @_;
-
-   warn "WRITEROP '$op' (@args)\n";
-   if ($self->{wait_for_empty_buffer}) {
-   warn "A\n";
-      $self->wait_for_empty_buffer (sub { $self->{writer}->$op (@args) });
-      warn "B\n";
-   } else {
-      $self->{writer}->$op (@args);
-   }
 }
 
 =item B<is_connected ()>
@@ -580,8 +527,7 @@ sub send_iq {
          });
    }
 
-   $self->writer_op (send_iq => $id, $type, $create_cb, %attrs);
-
+   $self->{writer}->send_iq ($id, $type, $create_cb, %attrs);
    $id
 }
 
@@ -616,7 +562,7 @@ pass it via C<%attrs>.
 
 sub reply_iq_result {
    my ($self, $iqnode, $create_cb, %attrs) = @_;
-   $self->writer_op (send_iq =>
+   $self->{writer}->send_iq (
       $iqnode->attr ('id'), 'result', $create_cb,
       (defined $iqnode->attr ('from') ? (to => $iqnode->attr ('from')) : ()),
       %attrs
@@ -647,7 +593,7 @@ pass it via C<%attrs>.
 sub reply_iq_error {
    my ($self, $iqnode, $errtype, $error, %attrs) = @_;
 
-   $self->writer_op (send_iq =>
+   $self->{writer}->send_iq (
       $iqnode->attr ('id'), 'error',
       sub { $self->{writer}->write_error_tag ($iqnode, $errtype, $error) },
       (defined $iqnode->attr ('from') ? (to => $iqnode->attr ('from')) : ()),
@@ -911,7 +857,7 @@ will return the id that was used (so you can react on possible replies).
 sub send_presence {
    my ($self, $type, $create_cb, %attrs) = @_;
    my $id = $self->{iq_id}++;
-   $self->writer_op (send_presence => $id, $type, $create_cb, %attrs);
+   $self->{writer}->send_presence ($id, $type, $create_cb, %attrs);
    $id
 }
 
@@ -929,7 +875,7 @@ will return the id that was used (so you can react on possible replies).
 sub send_message {
    my ($self, $to, $type, $create_cb, %attrs) = @_;
    my $id = $self->{iq_id}++;
-   $self->writer_op (send_message => $id, $to, $type, $create_cb, %attrs);
+   $self->{writer}->send_message ($id, $to, $type, $create_cb, %attrs);
    $id
 }
 
@@ -1031,6 +977,21 @@ This is the ID of this stream that was given us by the server.
 =cut
 
 sub stream_id { $_[0]->{stream_id} }
+
+=item B<drain>
+
+This method will block until the output buffer is empty.
+For example if you want to block the program until the message sent
+by C<send_message>, C<send_iq> or C<send_presence> or any other
+sending method, is written out to the kernel completly.
+
+NOTE: Use this method only if you know what you are doing!
+
+Also note that this function will emit the C<send_buffer_empty> event when
+the buffer was emptied successfully. On error the connection is disconnected
+with the error message.
+
+=cut
 
 =back
 

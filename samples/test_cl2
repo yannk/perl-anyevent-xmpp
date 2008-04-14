@@ -1,9 +1,7 @@
 #!/opt/perl/bin/perl
 use strict;
 use utf8;
-use Event;
 use AnyEvent;
-use XML::Twig;
 use Net::XMPP2::Client;
 use Net::XMPP2::Ext::Disco;
 use Net::XMPP2::Ext::Version;

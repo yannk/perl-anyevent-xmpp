@@ -1,8 +1,6 @@
 #!/opt/perl/bin/perl
 use strict;
-use Event;
 use AnyEvent;
-use XML::Twig;
 use Net::XMPP2::IM::Connection;
 
 my $DEBUG   = 0;  # set to 1 if you want to see a protocol dump
@@ -57,7 +55,5 @@ $con->reg_cb (
    }
 );
 
-$con->connect
-   or die "Couldn't connect to $jid: $!\n";
-$con->init;
+$con->connect;
 $j->wait;

@@ -1,7 +1,6 @@
 #!/opt/perl/bin/perl
 use strict;
 use utf8;
-use Event;
 use AnyEvent;
 use Net::XMPP2::Component;
 use Net::XMPP2::Util qw/install_default_debug_dump/;

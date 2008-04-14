@@ -180,6 +180,8 @@ sub try_ssl_write {
    my ($self) = @_;
 
    my $data = substr $self->{write_buffer}, 0, $self->{max_write_length};
+   if ($data eq '') { delete $self->{w}; return; }
+
    my $l = Net::SSLeay::write ($self->{ssl}, $data);
 
    if ($l <= 0) {
@@ -210,8 +212,8 @@ sub try_ssl_write {
       $self->debug_wrote_data (substr $self->{write_buffer}, 0, $l);
       $self->{write_buffer} = substr $self->{write_buffer}, $l;
       if (length ($self->{write_buffer}) <= 0) {
-         $self->send_buffer_empty;
          delete $self->{w};
+         $self->send_buffer_empty;
       }
    }
 }
@@ -254,7 +256,7 @@ sub try_ssl_read {
             sprintf (
                "Error while reading from server '$self->{host}:$self->{port}':"
                ."(%d|%s|%s)",
-               $err2, (Net::SSLeay::ERR_error_string $err), "$!")
+               $err, (Net::SSLeay::ERR_error_string $err), "$!")
          );
          return;
       }
@@ -272,33 +274,88 @@ sub write_data {
       $self->{w} =
          AnyEvent->io (poll => 'w', fh => $cl, cb => sub {
             if (not $self->{ssl_enabled}) {
-               if (my $data = $self->{write_buffer}) {
-                  $data = substr $data, 0, $self->{max_write_length};
-                  my $len = syswrite $cl, $data;
-                  unless ($len) {
-                     return if $! == Errno::EAGAIN;
-                     if (not defined $len) {
-                        warn "error when writing data on $self->{host}:$self->{port}: $!";
-                        return;
-                     } else {
-                        delete $self->{w};
-                     }
-                  }
+               my $data = $self->{write_buffer};
+               if ($data eq '') {
+                  delete $self->{w};
+                  return;
+               }
 
-                  my $buf_empty = ($len == length $self->{write_buffer});
-                  $self->debug_wrote_data (substr $self->{write_buffer}, 0, $len);
-                  $self->{write_buffer} = substr $self->{write_buffer}, $len;
-
-                  if ($buf_empty) {
+               $data = substr $data, 0, $self->{max_write_length};
+               my $len = syswrite $cl, $data;
+               unless ($len) {
+                  return if $! == Errno::EAGAIN;
+                  if (not defined $len) {
+                     $self->disconnect ("error while writing data on $self->{host}:$self->{port}: $!");
+                     return;
+                  } else {
                      delete $self->{w};
-                     $self->send_buffer_empty;
                   }
+               }
+
+               my $buf_empty = ($len == length $self->{write_buffer});
+               $self->debug_wrote_data (substr $self->{write_buffer}, 0, $len);
+               $self->{write_buffer} = substr $self->{write_buffer}, $len;
+
+               if ($buf_empty) {
+                  delete $self->{w};
+                  $self->send_buffer_empty;
                }
             } else {
                $self->try_ssl_write;
             }
          });
    }
+}
+
+sub drain {
+   my ($self) = @_;
+   $self->set_block;
+
+   if (not $self->{ssl_enabled}) {
+
+      while ($self->{write_buffer} ne '') {
+         my $r = syswrite $self->{socket}, $self->{write_buffer};
+         if (not defined $r) {
+            $self->disconnect (
+               "error while drainig data on $self->{host}:$self->{port}: $!"
+            );
+            $self->set_noblock;
+            return;
+
+         } else {
+            substr ($self->{write_buffer}, 0, $r, '');
+         }
+      }
+
+   } else {
+
+      # enable SSL_MODE_AUTO_RETRY
+      Net::SSLeay::CTX_set_mode($self->{ctx}, 1 | 2 | 4);
+
+      while ($self->{write_buffer} ne '') {
+         my $r = Net::SSLeay::write ($self->{ssl}, $self->{write_buffer});
+
+         if ($r <= 0) {
+            my $err = Net::SSLeay::ERR_get_error;
+
+            $self->disconnect (
+               sprintf (
+                  "Error while writing (blocking) to server '$self->{host}:$self->{port}':"
+                  ."(%d|%s|%s)",
+                  $err, (Net::SSLeay::ERR_error_string $err), "$!")
+            );
+
+            $self->set_noblock;
+            Net::SSLeay::CTX_set_mode($self->{ctx}, 1 | 2);
+            return;
+         }
+         substr ($self->{write_buffer}, 0, $r, '');
+      }
+
+      Net::SSLeay::CTX_set_mode($self->{ctx}, 1 | 2);
+   }
+   $self->set_noblock;
+   $self->send_buffer_empty;
 }
 
 sub make_ssl_read_watcher {

@@ -20,11 +20,13 @@ $cl->reg_cb (
         my ($w) = @_;
         $w->raw ('<a:b/>');
       });
+
       $acc->connection->reg_cb (send_buffer_empty => sub {
          warn "DONE SENDING";
          $acc->connection->disconnect ("sent message");
       });
       $msg->send ($acc->connection);
+      $acc->connection->drain;
    },
    disconnect => sub {
       my ($cl, $acc, $h, $p, $reas) = @_;
