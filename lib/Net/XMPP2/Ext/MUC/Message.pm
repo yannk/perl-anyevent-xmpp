@@ -119,8 +119,6 @@ sub make_reply {
    $msg
 }
 
-
-
 =back
 
 =head1 AUTHOR

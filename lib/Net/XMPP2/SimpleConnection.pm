@@ -152,6 +152,14 @@ sub finish_connect {
    return 1;
 }
 
+sub connected {
+   # subclass responsibility
+}
+
+sub send_buffer_empty {
+   # subclass responsibility
+}
+
 sub end_sockets {
    my ($self) = @_;
    delete $self->{r};
@@ -202,6 +210,7 @@ sub try_ssl_write {
       $self->debug_wrote_data (substr $self->{write_buffer}, 0, $l);
       $self->{write_buffer} = substr $self->{write_buffer}, $l;
       if (length ($self->{write_buffer}) <= 0) {
+         $self->send_buffer_empty;
          delete $self->{w};
       }
    }
@@ -276,12 +285,14 @@ sub write_data {
                      }
                   }
 
-                  if ($len == length $self->{write_buffer}) {
-                     delete $self->{w};
-                  }
-
+                  my $buf_empty = ($len == length $self->{write_buffer});
                   $self->debug_wrote_data (substr $self->{write_buffer}, 0, $len);
                   $self->{write_buffer} = substr $self->{write_buffer}, $len;
+
+                  if ($buf_empty) {
+                     delete $self->{w};
+                     $self->send_buffer_empty;
+                  }
                }
             } else {
                $self->try_ssl_write;

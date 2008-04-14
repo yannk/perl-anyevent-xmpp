@@ -1,21 +1,30 @@
 #!/opt/perl/bin/perl
 use strict;
 use utf8;
-use Coro;
 use AnyEvent;
 use Net::XMPP2::Client;
 
 my $j = AnyEvent->condvar;
 my $cl = Net::XMPP2::Client->new (debug => 1);
-$cl->add_account ('net_xmpp2@jabber.org', 'test', undef, undef, { wait_for_empty_buffer => 1 });
+$cl->add_account ('net_xmpp2@jabber.org', 'test');
 $cl->reg_cb (
    session_ready => sub {
       my ($cl, $acc) = @_;
       print "session ready\n";
-      $cl->send_message (
-         "Hi! I'm too lazy to adjust examples!" => 'elmex@jabber.org', undef, 'chat'
-      );
-      warn "TEST\n";
+      my $msg =
+         Net::XMPP2::IM::Message->new (
+            to   => 'elmex@jabber.org/tkabber',
+            body => 'test'
+         );
+      $msg->append_creation (sub {
+        my ($w) = @_;
+        $w->raw ('<a:b/>');
+      });
+      $acc->connection->reg_cb (send_buffer_empty => sub {
+         warn "DONE SENDING";
+         $acc->connection->disconnect ("sent message");
+      });
+      $msg->send ($acc->connection);
    },
    disconnect => sub {
       my ($cl, $acc, $h, $p, $reas) = @_;

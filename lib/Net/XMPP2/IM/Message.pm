@@ -237,7 +237,7 @@ sub send {
       if $self->thread;
 
    $self->{connection}->send_message (
-      $self->to, $self->type, undef,
+      $self->to, $self->type, $self->{create_cbs},
       body => $self->{bodies},
       @add
    );
@@ -472,6 +472,34 @@ language attached.
 
 sub bodies {
    %{$_[0]->{bodies} || {}}
+}
+
+=item B<append_creation ($create_cb)>
+
+This method allows the user to append custom XML stuff to the message
+when it is sent. This is an example:
+
+   my $msg =
+      Net::XMPP2::IM::Message->new (
+         body => "Test!",
+         to => "test@test.tld",
+      );
+   $msg->append_creation (sub {
+      my ($w) = @_;
+      $w->startTag (['http://test.namespace','test']);
+      $w->characters ("TEST");
+      $w->endTag;
+   });
+
+   $msg->send ($con);
+
+This should send a message stanza similar to this:
+
+=cut
+
+sub append_creation {
+   my ($self, $cb) = @_;
+   push @{$self->{create_cbs}}, $cb;
 }
 
 =back

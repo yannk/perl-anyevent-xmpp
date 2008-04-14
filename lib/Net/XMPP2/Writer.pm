@@ -305,6 +305,10 @@ be used to generate the contents of the IQ stanza. (This is very convenient
 when you want to write the contents of stanzas in the code and don't want to
 build a DOM tree yourself...).
 
+If C<$create_cb> is an array reference it's elements will be interpreted as
+single C<$create_cb> argument (which can either be a hash reference or code
+reference themself) and executed sequencially.
+
 If C<$create_cb> is undefined an empty tag will be generated.
 
 Example:
@@ -425,6 +429,12 @@ sub _trans_create_cb {
       $cb = sub {
          my ($w) = @_;
          simxml ($w, %$args);
+      }
+   } elsif (ref ($cb) eq 'ARRAY') {
+      my @cbs = map { _trans_create_cb ($_) } @$cb;
+      $cb = sub {
+         my ($w) = @_;
+         for (@cbs) { $_->($w) }
       }
    }
    $cb
