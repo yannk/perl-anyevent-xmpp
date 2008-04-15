@@ -2,7 +2,7 @@ NAME
     Net::XMPP2 - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.12
+    Version 0.13
 
 SYNOPSIS
        use Net::XMPP2::Connection;
@@ -52,9 +52,9 @@ REQUIREMENTS
     AnyEvent
         For the I/O events and timers.
 
-    BS::Event
+    Object::Event
         The former Net::XMPP2::Event module has been outsourced to the
-        BS::Event module to provide a more generic way for more other
+        Object::Event module to provide a more generic way for more other
         modules to register and call event callbacks.
 
     XML::Writer
