@@ -1,6 +1,7 @@
 #!/opt/perl/bin/perl
 use strict;
 use utf8;
+use AnyEvent::Impl::Tk;
 use AnyEvent;
 use Net::XMPP2::Client;
 

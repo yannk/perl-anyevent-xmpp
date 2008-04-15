@@ -2,6 +2,7 @@ package Net::XMPP2::SimpleConnection;
 use strict;
 no warnings;
 
+use AnyEvent;
 use IO::Socket::INET;
 use Errno;
 use Fcntl;
@@ -269,6 +270,8 @@ sub write_data {
 
    my $cl = $self->{socket};
    $self->{write_buffer} .= encode_utf8 ($data);
+
+   return unless length $self->{write_buffer};
 
    unless ($self->{w}) {
       $self->{w} =

@@ -1,9 +1,9 @@
 package Net::XMPP2::Ext;
 no warnings;
 use strict;
-use BS::Event;
+use Object::Event;
 
-our @ISA = qw/BS::Event/;
+our @ISA = qw/Object::Event/;
 
 =head1 NAME
 

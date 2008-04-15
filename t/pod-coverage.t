@@ -74,7 +74,7 @@ my %SPEC = (
                            _generate_key_xmls _trans_create_cb/],
    'Net::XMPP2::SimpleConnection' => [qw/ connect disconnect enable_ssl end_sockets
       make_ssl_read_watcher make_ssl_write_watcher new set_block set_noblock try_ssl_read
-      try_ssl_write write_data
+      try_ssl_write write_data drain send_buffer_empty
    /],
    'Net::XMPP2::Client' => [qw/add_extension/],
    'Net::XMPP2::TestClient' => [qr/./],

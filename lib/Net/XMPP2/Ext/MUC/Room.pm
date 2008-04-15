@@ -9,7 +9,7 @@ use Net::XMPP2::Util qw/
 use Net::XMPP2::Ext::MUC::User;
 use Net::XMPP2::Ext::DataForm;
 use Net::XMPP2::Error::MUC;
-use BS::Event;
+use Object::Event;
 
 use constant {
    JOIN_SENT => 1,
@@ -17,7 +17,7 @@ use constant {
    LEFT      => 3,
 };
 
-our @ISA = qw/BS::Event/;
+our @ISA = qw/Object::Event/;
 
 =head1 NAME
 

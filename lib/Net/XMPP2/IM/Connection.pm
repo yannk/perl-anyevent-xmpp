@@ -259,7 +259,7 @@ In the following events C<$roster> is the L<Net::XMPP2::IM::Roster>
 object you get by calling C<get_roster>.
 
 NODE: The first argument to each callback is alwasy the L<Net::XMPP2::IM::Connection>
-object itself. Also see L<BS::Event> for more information about registering
+object itself. Also see L<Object::Event> for more information about registering
 callbacks.
 
 =over 4

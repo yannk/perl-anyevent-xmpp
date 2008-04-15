@@ -9,12 +9,12 @@ use Net::XMPP2::SimpleConnection;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Extendable;
 use Net::XMPP2::Error;
-use BS::Event;
+use Object::Event;
 use Net::DNS;
 use Digest::SHA1 qw/sha1_hex/;
 use Encode;
 
-our @ISA = qw/Net::XMPP2::SimpleConnection BS::Event Net::XMPP2::Extendable/;
+our @ISA = qw/Net::XMPP2::SimpleConnection Object::Event Net::XMPP2::Extendable/;
 
 =head1 NAME
 
@@ -997,9 +997,9 @@ with the error message.
 
 =head1 EVENTS
 
-The L<Net::XMPP2::Connection> class is derived from the L<BS::Event> class,
+The L<Net::XMPP2::Connection> class is derived from the L<Object::Event> class,
 and thus inherits the event callback registering system from it. Consult the
-documentation of L<BS::Event> about more details.
+documentation of L<Object::Event> about more details.
 
 NODE: Every callback gets as it's first argument the L<Net::XMPP2::Connection>
 object. The further callback arguments are described in the following listing of

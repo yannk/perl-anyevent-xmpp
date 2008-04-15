@@ -6,7 +6,7 @@ use Net::XMPP2::Util qw/stringprep_jid prep_bare_jid dump_twig_xml bare_jid/;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 use Net::XMPP2::Extendable;
 use Net::XMPP2::IM::Account;
-use BS::Event;
+use Object::Event;
 use Scalar::Util;
 
 #use XML::Twig;
@@ -23,7 +23,7 @@ use Scalar::Util;
 #   }
 #}
 
-our @ISA = qw/BS::Event Net::XMPP2::Extendable/;
+our @ISA = qw/Object::Event Net::XMPP2::Extendable/;
 
 =head1 NAME
 

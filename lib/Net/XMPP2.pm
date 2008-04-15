@@ -8,11 +8,11 @@ Net::XMPP2 - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.12
+Version 0.13
 
 =cut
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 =head1 SYNOPSIS
 
@@ -67,9 +67,9 @@ modules to make it work.
 
 For the I/O events and timers.
 
-=item L<BS::Event>
+=item L<Object::Event>
 
-The former L<Net::XMPP2::Event> module has been outsourced to the L<BS::Event>
+The former L<Net::XMPP2::Event> module has been outsourced to the L<Object::Event>
 module to provide a more generic way for more other modules to register and call
 event callbacks.
 
