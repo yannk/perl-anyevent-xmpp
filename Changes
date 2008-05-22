@@ -1,5 +1,8 @@
 Revision history for Net-XMPP2
 
+0.14
+         - improved the documentation a bit and fixed typos
+
 0.13 Tue Apr 15 13:07:02 CEST 2008
          - added a 'send_buffer_empty' event, to be able to wait
            for an empty send buffer. and also the C<drain> method, which
