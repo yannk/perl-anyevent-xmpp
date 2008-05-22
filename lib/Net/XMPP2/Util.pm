@@ -281,14 +281,14 @@ Where node is:
    <node> := {
                 ns => '<xmlnamespace>',
                 name => 'tagname',
-                attrs => [ ['name', 'value'], ... ],
+                attrs => [ 'name', 'value', 'name2', 'value2', ... ],
                 childs => [ <node>, ... ]
              }
            | {
                 dns => '<xmlnamespace>',  # this will set that namespace to
                                           # the default namespace before using it.
                 name => 'tagname',
-                attrs => [ ['name', 'value'], ... ],
+                attrs => [ 'name', 'value', 'name2', 'value2', ... ],
                 childs => [ <node>, ... ]
              }
            | "textnode"
@@ -308,6 +308,32 @@ This makes it easier to write things like this:
 
 Please note that all attribute values and character data will be filtered
 by C<filter_xml_chars>.
+
+This is a bigger example:
+
+   ...
+
+   $msg->append_creation( sub {
+      my($w) = @_;
+      simxml($w,
+         defns => 'muc_user',   # sets the default namepsace for all following elements
+         node  => {
+            name => 'x',        # element 'x' in namespace 'muc_user'
+            childs => [
+               {
+                  'name' => 'invite', # element 'invite' in namespace 'muc_user'
+                  'attrs' => [ 'to', $to_jid ], # to="$to_jid" attribute for 'invite'
+                  'childs' => [         
+                     { # the <reason>$reason</reason> element in the invite element
+                       'name' => 'reason', 
+                       childs => [ $reason ]
+                     }
+                  ],
+               }
+            ]
+         }
+      );
+   });
 
 =cut
 
