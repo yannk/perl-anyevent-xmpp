@@ -326,6 +326,7 @@ sub drain {
             return;
 
          } else {
+            $self->debug_wrote_data (substr $self->{write_buffer}, 0, $r);
             substr ($self->{write_buffer}, 0, $r, '');
          }
       }
@@ -352,6 +353,7 @@ sub drain {
             Net::SSLeay::CTX_set_mode($self->{ctx}, 1 | 2);
             return;
          }
+         $self->debug_wrote_data (substr $self->{write_buffer}, 0, $r);
          substr ($self->{write_buffer}, 0, $r, '');
       }
 
