@@ -295,12 +295,12 @@ Where node is:
 
 Please note: C<childs> stands for C<child sequence> :-)
 
-Also note that if you omit the C<ns> key for nodes there is a fallback
+Also note that if you omit the C<ns> key for nodes there is a fall back
 to the namespace of the parent element or the last default namespace.
 This makes it easier to write things like this:
 
    {
-      defns => 'muc_owner,
+      defns => 'muc_owner',
       node => { name => 'query' }
    }
 
