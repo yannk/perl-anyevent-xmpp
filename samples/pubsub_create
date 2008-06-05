@@ -1,0 +1,80 @@
+#!/opt/perl/bin/perl
+use strict;
+use utf8;
+use AnyEvent;
+use Net::XMPP2::Client;
+use Net::XMPP2::Ext::Disco;
+use Net::XMPP2::Ext::Version;
+use Net::XMPP2::Ext::Pubsub;
+use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Util qw/simxml/;
+
+binmode STDOUT, ":utf8";
+
+my ($jid, $pw) = @ARGV;
+
+unless (@ARGV >= 2) {
+   warn "usage: test_cl2 <jid> <password>\n";
+   exit;
+}
+
+my $j     = AnyEvent->condvar;
+my $cl    = Net::XMPP2::Client->new (debug => 1);
+my $disco = Net::XMPP2::Ext::Disco->new;
+my $version = Net::XMPP2::Ext::Version->new;
+my $pubsub  = Net::XMPP2::Ext::Pubsub->new;
+$cl->add_extension ($disco);
+$cl->add_extension ($version);
+$cl->add_extension ($pubsub);
+
+$cl->set_presence ('away', 'I\'m a bot now.', -1);
+
+$cl->add_account ($jid, $pw);
+warn "connecting to $jid...\n";
+
+my ($gitems, $ginfo, $gvers);
+
+$cl->reg_cb (
+   session_ready => sub {
+      my ($cl, $acc) = @_;
+      my $con = $acc->connection;
+      $pubsub->create_node ($con, 'elmex_test1', sub {
+         my ($err) = @_;
+         if (defined $err) {
+            warn "error: " . $err->string . "\n";
+         }
+
+
+         $pubsub->publish_item ($con, 'elmex_test1', sub {
+            my ($w) = @_;
+            simxml ($w, node => {
+               name => 'test', childs => [ 'All your base are belong to us 2!' ]
+            });
+         }, sub {
+            my ($err) = @_;
+            defined $err and warn "pub error: " . $err->string . "\n";
+
+            $pubsub->retrieve_items ($con, 'elmex_test1');
+         });
+
+        # $pubsub->delete_node ($con, 'elmex_test1', sub {
+        #    my ($err) = @_;
+        #    $err and warn "error delete: ".$err->string."\n";
+        # });
+
+      });
+   },
+   error => sub {
+      my ($cl, $acc, $error) = @_;
+      warn "ERROR: ".$error->string."\n";
+      $j->broadcast;
+   },
+   disconnect => sub {
+      warn "DISCON[@_]\n";
+      $j->broadcast;
+   },
+);
+
+$cl->start;
+
+$j->wait;

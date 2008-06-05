@@ -1,7 +1,10 @@
 package Net::XMPP2::Ext::Pubsub;
 use strict;
-use Net::XMPP2::Util;
+use Net::XMPP2::Util qw/simxml/;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
+use Net::XMPP2::Ext;
+
+our @ISA = qw/Net::XMPP2::Ext/;
 
 =head1 NAME
 
@@ -41,6 +44,86 @@ sub new {
 
 sub init {
    my ($self) = @_;
+}
+
+sub delete_node {
+   my ($self, $con, $node, $cb) = @_;
+
+   $con->send_iq (
+      set => sub {
+         my ($w) = @_;
+         simxml ($w, defns => 'pubsub_own', node => {
+            name => 'pubsub', childs => [
+               { name => 'delete', attrs => [ node => $node ] },
+            ]
+         });
+      },
+      sub {
+         my ($node, $err) = @_;
+         $cb->(defined $err ? $err : ()) if $cb;
+      }
+   );
+}
+
+sub create_node {
+   my ($self, $con, $node, $cb) = @_;
+
+   $con->send_iq (
+      set => sub {
+         my ($w) = @_;
+         simxml ($w, defns => 'pubsub', node => {
+            name => 'pubsub', childs => [
+               { name => 'create', attrs => [ node => $node ] },
+               { name => 'configure' },
+            ]
+         });
+      },
+      sub {
+         my ($node, $err) = @_;
+         $cb->(defined $err ? $err : ()) if $cb;
+      }
+   );
+}
+
+sub publish_item {
+   my ($self, $con, $node, $create_cb, $cb) = @_;
+
+   $con->send_iq (
+      set => sub {
+         my ($w) = @_;
+         simxml ($w, defns => 'pubsub', node => {
+            name => 'pubsub', childs => [
+               { name => 'publish', attrs => [ node => $node ], childs => [
+                   { name => 'item', childs => [ $create_cb ] }
+                 ]
+               },
+            ]
+         });
+      },
+      sub {
+         my ($node, $err) = @_;
+         $cb->(defined $err ? $err : ()) if $cb;
+      }
+   );
+}
+
+sub retrieve_items {
+   my ($self, $con, $node, $cb) = @_;
+
+   $con->send_iq (
+      get => sub {
+         my ($w) = @_;
+         simxml ($w, defns => 'pubsub', node => {
+            name => 'pubsub', childs => [
+               { name => 'items', attrs => [ node => $node ] }
+            ]
+         });
+      },
+      sub {
+         my ($node, $err) = @_;
+         $cb->(defined $err ? $err : ()) if $cb;
+      }
+   );
 }
 
 =back

@@ -291,6 +291,7 @@ Where node is:
                 attrs => [ 'name', 'value', 'name2', 'value2', ... ],
                 childs => [ <node>, ... ]
              }
+           | sub { my ($w) = @_; ... } # with $w being a XML::Writer object
            | "textnode"
 
 Please note: C<childs> stands for C<child sequence> :-)
@@ -358,6 +359,9 @@ sub simxml {
    if (not defined $node) {
       return;
 
+   } elsif (ref ($node) eq 'CODE') {
+      $node->($w);
+
    } elsif (ref ($node)) {
       my $ns = $node->{dns} ? $node->{dns} : $node->{ns};
       $ns    = $ns          ? $ns          : $desc{fb_ns};
@@ -376,8 +380,10 @@ sub simxml {
          if ($node->{defns}) { @args = (defns => $node->{defns}) }
 
          for (@{$node->{childs}}) {
-            if (ref ($_) && $_->{dns}) { push @args, (defns => $_->{dns}) }
-            if (ref ($_) && $_->{ns})  {
+            if (ref ($_) eq 'HASH' && $_->{dns}) {
+               push @args, (defns => $_->{dns})
+            }
+            if (ref ($_) eq 'HASH' && $_->{ns})  {
                push @args, (fb_ns => $_->{ns})
             } else {
                push @args, (fb_ns => $desc{fb_ns})

@@ -37,6 +37,10 @@ our %NAMESPACES = (
 
    vcard       => 'vcard-temp',
    vcard_upd   => 'vcard-temp:x:update',
+
+   pubsub      => 'http://jabber.org/protocol/pubsub',
+   pubsub_own  => 'http://jabber.org/protocol/pubsub#owner',
+   pubsub_ev   => 'http://jabber.org/protocol/pubsub#event',
 );
 
 =head1 NAME
@@ -88,6 +92,10 @@ which make handling of namepsaces a bit easier:
    ping        => urn:xmpp:ping
 
    vcard       => vcard-temp
+
+   pubsub      => http://jabber.org/protocol/pubsub
+   pubsub_own  => http://jabber.org/protocol/pubsub#owner
+   pubsub_ev   => http://jabber.org/protocol/pubsub#event
 
 =head1 FUNCTIONS
 

@@ -4,6 +4,7 @@ use utf8;
 use AnyEvent;
 use Net::XMPP2::Client;
 use Net::XMPP2::Ext::Disco;
+use Net::XMPP2::Ext::DataForm;
 use Net::XMPP2::Ext::Version;
 use Net::XMPP2::Namespaces qw/xmpp_ns/;
 
