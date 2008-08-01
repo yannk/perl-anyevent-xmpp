@@ -562,9 +562,11 @@ pass it via C<%attrs>.
 
 sub reply_iq_result {
    my ($self, $iqnode, $create_cb, %attrs) = @_;
-   $self->{writer}->send_iq (
-      $iqnode->attr ('id'), 'result', $create_cb,
-      (defined $iqnode->attr ('from') ? (to => $iqnode->attr ('from')) : ()),
+   
+   return $self->_reply_iq(
+      $iqnode,
+      'result',
+      $create_cb,
       %attrs
    );
 }
@@ -593,10 +595,21 @@ pass it via C<%attrs>.
 sub reply_iq_error {
    my ($self, $iqnode, $errtype, $error, %attrs) = @_;
 
-   $self->{writer}->send_iq (
-      $iqnode->attr ('id'), 'error',
+   return $self->_reply_iq(
+      $iqnode,
+      'error',
       sub { $self->{writer}->write_error_tag ($iqnode, $errtype, $error) },
+      %attrs
+   );
+}
+
+sub _reply_iq {
+   my ($self, $iqnode, $type, $create_cb, %attrs) = @_;
+
+   return $self->{writer}->send_iq (
+      $iqnode->attr ('id'), $type, $create_cb,
       (defined $iqnode->attr ('from') ? (to => $iqnode->attr ('from')) : ()),
+      (defined $iqnode->attr ('to') ? (from => $iqnode->attr ('to')) : ()),
       %attrs
    );
 }
@@ -1244,6 +1257,10 @@ is described in the C<send_iq_hook> event above.
 =head1 AUTHOR
 
 Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
+
+=head1 CONTRIBUTORS
+
+melo@simplicade.org - minor fixes
 
 =head1 COPYRIGHT & LICENSE
 

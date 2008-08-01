@@ -6,7 +6,6 @@ README
 t/00-load.t
 t/boilerplate.t
 t/pod.t
-t/pod-coverage.t
 t/datetime.t
 t/xml_filter_chars.t
 t/jidsplit.t
