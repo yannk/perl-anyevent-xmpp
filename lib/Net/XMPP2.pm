@@ -8,11 +8,11 @@ Net::XMPP2 - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.13
+Version 0.14
 
 =cut
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 =head1 SYNOPSIS
 
@@ -27,6 +27,9 @@ or:
    use Net::XMPP2::Client;
 
 =head1 DESCRIPTION
+
+B<NOTE>: L<Net::XMPP2> is deprecated, for the newest version of this module
+look for the L<AnyEvent::XMPP> module!
 
 This is the head module of the L<Net::XMPP2> XMPP client protocol (as described in
 RFC 3920 and RFC 3921) framework.
@@ -121,6 +124,12 @@ Here are some notes to the last releases (release of this version is at top):
 =head2 Version
 
 =over 4
+
+=item * 0.14
+
+Only minor additions and bugfixes. 
+B<PLEASE NOTE>: This is the last release of this module under the name L<Net::XMPP2>.
+All further releases will be done under the name L<AnyEvent::XMPP>!
 
 =item * 0.12
 

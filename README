@@ -2,7 +2,7 @@ NAME
     Net::XMPP2 - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.13
+    Version 0.14
 
 SYNOPSIS
        use Net::XMPP2::Connection;
@@ -16,6 +16,9 @@ SYNOPSIS
        use Net::XMPP2::Client;
 
 DESCRIPTION
+    NOTE: Net::XMPP2 is deprecated, for the newest version of this module
+    look for the AnyEvent::XMPP module!
+
     This is the head module of the Net::XMPP2 XMPP client protocol (as
     described in RFC 3920 and RFC 3921) framework.
 
@@ -94,6 +97,12 @@ RELEASE NOTES
     top):
 
   Version
+    *   0.14
+
+        Only minor additions and bugfixes. PLEASE NOTE: This is the last
+        release of this module under the name Net::XMPP2. All further
+        releases will be done under the name AnyEvent::XMPP!
+
     *   0.12
 
         API CHANGE: The connects are now non-blocking, you should revisit
