@@ -15,36 +15,32 @@ my $c = Net::XMPP2::Component-> new (
 
 install_default_debug_dump ($c);
 
-if ($c->connect) {
-   $c->reg_cb (
-      connect => sub {
-         warn "connected...\n";
-      },
-      error => sub {
-         my ($c, $e) = @_;
-         warn "ERROR: " . $e->string . "\n";
-         1
-      },
-      disconnect => sub {
-         my ($c, $h, $p, $r) = @_;
-         warn "DISCON @_\n";
-         1
-      },
-      session_ready => sub {
-         my ($c) = @_;
+$c->reg_cb (
+   connect => sub {
+      warn "connected...\n";
+   },
+   error => sub {
+      my ($c, $e) = @_;
+      warn "ERROR: " . $e->string . "\n";
+      1
+   },
+   disconnect => sub {
+      my ($c, $h, $p, $r) = @_;
+      warn "DISCON @_\n";
+      1
+   },
+   session_ready => sub {
+      my ($c) = @_;
 
-         print "component ready!\n";
+      print "component ready!\n";
 
-         $c->send_message (
-            '*dev@ve.symlynx.com', 'chat', undef,
-            body => "Hi!",
-            from => 'test@test.jabber.ta-sa.org'
-         );
-      }
-   );
-} else {
-   print "connect error: $!\n";
-   $j->broadcast;
-}
+      $c->send_message (
+         '*dev@ve.symlynx.com', 'chat', undef,
+         body => "Hi!",
+         from => 'test@test.jabber.ta-sa.org'
+      );
+   }
+);
+$c->connect;
 
 $j->wait;
