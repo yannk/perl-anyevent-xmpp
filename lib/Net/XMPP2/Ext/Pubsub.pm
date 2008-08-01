@@ -19,9 +19,22 @@ Net::XMPP2::Ext::Pubsub - Implements XEP-0060: Publish-Subscribe
 =head1 DESCRIPTION
 
 This module implements all tasks of handling the publish subscribe
-mechanism. (NOT IMPLEMENTED YET!)
+mechanism. (partially implemented)
 
 =cut
+
+sub handle_incoming_pubsub_event {
+   my ($self, $node) = @_;
+   my (@items);
+   if(my ($q) = $node->find_all ([qw/pubsub_ev items/]))
+   {
+      foreach($q->find_all ([qw/pubsub_ev item/]))
+      {
+         push(@items, $_);
+      }
+   }
+   $self->event(pubsub_recv => @items);
+}
 
 =head1 METHODS
 
@@ -44,7 +57,30 @@ sub new {
 
 sub init {
    my ($self) = @_;
+
+   $self->reg_cb (
+      ext_before_message_xml => sub {
+         my ($self, $con, $node) = @_;
+
+         my $handled = 0;
+         for ($node->find_all ([qw/pubsub_ev event/])) {
+            $self->stop_event;
+            $self->handle_incoming_pubsub_event($_);
+         }
+
+         $handled
+      }
+   );
 }
+
+=item B<delete_node($con, $node, $cb)>
+C<$con> is the connection already established,
+C<$node> is the name of the node to be created
+C<$cb> is the callback
+
+Try to remove a node.
+
+=cut
 
 sub delete_node {
    my ($self, $con, $node, $cb) = @_;
@@ -65,6 +101,15 @@ sub delete_node {
    );
 }
 
+=item B<create_node ($con, $node, $cb)>
+C<$con> is the connection already established,
+C<$node> is the name of the node to be created
+C<$cb> is the callback
+
+Try to create a node.
+
+=cut
+
 sub create_node {
    my ($self, $con, $node, $cb) = @_;
 
@@ -74,7 +119,51 @@ sub create_node {
          simxml ($w, defns => 'pubsub', node => {
             name => 'pubsub', childs => [
                { name => 'create', attrs => [ node => $node ] },
-               { name => 'configure' },
+               { name => 'configure', childs => [
+                  { name => 'x', attrs => [ xmlns => 'jabber:x:data', type => 'submit' ],
+                    childs => [
+                       { name => 'field', attrs => [ var => 'FORM_TYPE',
+                                                     type => 'hidden'],
+                                          childs => [
+                          { name => 'value', childs => ['http://jabber.org/protocol/pubsub#node_config']}]
+                       },
+                       { name => 'field', attrs => [ var => 'pubsub#access_model'],
+                                          childs => [
+                          { name => 'value', childs => [ 'open'] }]
+                       }]
+                  }]
+               }]
+         });
+      },
+      sub {
+         my ($node, $err) = @_;
+         $cb->(defined $err ? $err : ()) if $cb;
+      }
+   );
+}
+
+=item B<subscribe_node($con, $node, $cb)>
+C<$con> is the connection already established,
+C<$node> is the name of the node to be created
+C<$cb> is the callback
+
+Try to retrieve items.
+
+=cut
+
+sub subscribe_node {
+   my ($self, $con, $node, $cb) = @_;
+   our $jid = $con->jid;
+
+   $con->send_iq (
+      set => sub {
+         my ($w) = @_;
+         simxml ($w, defns => 'pubsub', node => {
+            name => 'pubsub', childs => [
+               { name => 'subscribe', attrs => [ 
+                  node => $node,
+                  jid => $jid ]
+               }
             ]
          });
       },
@@ -84,6 +173,16 @@ sub create_node {
       }
    );
 }
+
+=item B<publish_item($con, $node, $create_cb, $bc)>
+C<$con> is the connection already established,
+C<$node> is the name of the node to be created
+C<$create_cb> is the callback
+C<$cb> is the callback
+
+Try to publish an item.
+
+=cut
 
 sub publish_item {
    my ($self, $con, $node, $create_cb, $cb) = @_;
@@ -107,6 +206,15 @@ sub publish_item {
    );
 }
 
+=item B<retrive_items($con, $node, $cb)>
+C<$con> is the connection already established,
+C<$node> is the name of the node to be created
+C<$cb> is the callback
+
+Try to retrieve items.
+
+=cut
+
 sub retrieve_items {
    my ($self, $con, $node, $cb) = @_;
 
@@ -126,11 +234,47 @@ sub retrieve_items {
    );
 }
 
+=item B<retrive_item($con, $node, $id, $cb)>
+C<$con> is the connection already established,
+C<$node> is the name of the node to be created
+C<$id> is the id of the entry to be retrieved
+C<$cb> is the cb
+
+Try to retrieve item.
+
+=cut
+
+sub retrieve_item {
+   my ($self, $con, $node, $id, $cb) = @_;
+
+   $con->send_iq (
+      get => sub {
+         my ($w) = @_;
+         simxml( $w, defns => 'pubsub', node => {
+            name => 'pubsub', childs => [
+               { name => 'items', attrs => [ node => $node ],
+                                  childs => [
+                  { name => 'item', attrs => [ id => $id ] }]
+               }
+            ]
+         });
+      },
+      sub {
+         my ($node, $err) = @_;
+         $cb->(defined $err ? $err : ()) if $cb;
+      }
+   );
+}
+
 =back
 
 =head1 AUTHOR
 
 Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
+
+=head1 CONTRIBUTORS
+
+Chris Miceli - additional work on the pubsub extension
 
 =head1 COPYRIGHT & LICENSE
 
@@ -142,3 +286,4 @@ under the same terms as Perl itself.
 =cut
 
 1; # End of Net::XMPP2::Ext::Pubsub
+

@@ -1260,7 +1260,7 @@ Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 CONTRIBUTORS
 
-melo@simplicade.org - minor fixes
+melo - minor fixes
 
 =head1 COPYRIGHT & LICENSE
 

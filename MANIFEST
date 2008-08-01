@@ -3,6 +3,7 @@ MANIFEST
 Makefile.PL
 TODO
 README
+CONTRIBUTORS
 t/00-load.t
 t/boilerplate.t
 t/pod.t

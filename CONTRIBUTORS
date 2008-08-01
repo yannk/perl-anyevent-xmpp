@@ -1,0 +1,4 @@
+These people have helped to work on Net::XMPP2:
+
+   * melo - minor fixes on Net::XMPP2::Connection
+   * Chris Miceli - additional work on the pubsub extension
