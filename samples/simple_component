@@ -8,7 +8,7 @@ use Net::XMPP2::Util qw/install_default_debug_dump/;
 my $j = AnyEvent->condvar;
 my $c = Net::XMPP2::Component-> new (
            domain => 'test.jabber.ta-sa.org',
-           server => 'sprawl',
+           server => 'localhost',
            port   => 5347,
            secret => 'lolfe',
         );
@@ -16,8 +16,10 @@ my $c = Net::XMPP2::Component-> new (
 install_default_debug_dump ($c);
 
 if ($c->connect) {
-   $c->init;
    $c->reg_cb (
+      connect => sub {
+         warn "connected...\n";
+      },
       error => sub {
          my ($c, $e) = @_;
          warn "ERROR: " . $e->string . "\n";

@@ -1,6 +1,7 @@
 Revision history for Net-XMPP2
 
 0.14
+         - fixed small bug in simple_component
          - fixed a debugging bug in the drain method of SimpleConnection,
            where the written data wasn't passed to the debugging events.
          - improved the documentation a bit and fixed typos
