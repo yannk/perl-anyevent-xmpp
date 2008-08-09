@@ -26,11 +26,9 @@ mechanism. (partially implemented)
 sub handle_incoming_pubsub_event {
    my ($self, $node) = @_;
    my (@items);
-   if(my ($q) = $node->find_all ([qw/pubsub_ev items/]))
-   {
-      foreach($q->find_all ([qw/pubsub_ev item/]))
-      {
-         push(@items, $_);
+   if(my ($q) = $node->find_all ([qw/pubsub_ev items/])) {
+      foreach($q->find_all ([qw/pubsub_ev item/])) {
+         push @items, $_;
       }
    }
    $self->event(pubsub_recv => @items);
@@ -73,9 +71,10 @@ sub init {
    );
 }
 
-=item B<delete_node($con, $node, $cb)>
+=item B<delete_node($con, $node, $service, $cb)>
 C<$con> is the connection already established,
 C<$node> is the name of the node to be created
+C<$service> the pubsub service to use, can be undef
 C<$cb> is the callback
 
 Try to remove a node.
@@ -83,7 +82,7 @@ Try to remove a node.
 =cut
 
 sub delete_node {
-   my ($self, $con, $node, $cb) = @_;
+   my ($self, $con, $node, $service, $cb) = @_;
 
    $con->send_iq (
       set => sub {
@@ -97,13 +96,15 @@ sub delete_node {
       sub {
          my ($node, $err) = @_;
          $cb->(defined $err ? $err : ()) if $cb;
-      }
+      },
+      (defined $service ? (to => $service) : ())
    );
 }
 
-=item B<create_node ($con, $node, $cb)>
+=item B<create_node ($con, $node, $service, $cb)>
 C<$con> is the connection already established,
 C<$node> is the name of the node to be created
+C<$service> pubsub service, can be undef
 C<$cb> is the callback
 
 Try to create a node.
@@ -111,7 +112,7 @@ Try to create a node.
 =cut
 
 sub create_node {
-   my ($self, $con, $node, $cb) = @_;
+   my ($self, $con, $node, $service, $cb) = @_;
 
    $con->send_iq (
       set => sub {
@@ -119,26 +120,15 @@ sub create_node {
          simxml ($w, defns => 'pubsub', node => {
             name => 'pubsub', childs => [
                { name => 'create', attrs => [ node => $node ] },
-               { name => 'configure', childs => [
-                  { name => 'x', attrs => [ xmlns => 'jabber:x:data', type => 'submit' ],
-                    childs => [
-                       { name => 'field', attrs => [ var => 'FORM_TYPE',
-                                                     type => 'hidden'],
-                                          childs => [
-                          { name => 'value', childs => ['http://jabber.org/protocol/pubsub#node_config']}]
-                       },
-                       { name => 'field', attrs => [ var => 'pubsub#access_model'],
-                                          childs => [
-                          { name => 'value', childs => [ 'open'] }]
-                       }]
-                  }]
-               }]
+               { name => 'configure' }
+               ]
          });
       },
       sub {
          my ($node, $err) = @_;
          $cb->(defined $err ? $err : ()) if $cb;
-      }
+      },
+      (defined $service ? (to => $service) : ())
    );
 }
 
@@ -153,7 +143,7 @@ Try to retrieve items.
 
 sub subscribe_node {
    my ($self, $con, $node, $cb) = @_;
-   our $jid = $con->jid;
+   my $jid = $con->jid;
 
    $con->send_iq (
       set => sub {
@@ -174,10 +164,44 @@ sub subscribe_node {
    );
 }
 
-=item B<publish_item($con, $node, $create_cb, $bc)>
+=item B<unsubscribe_node>($con, $node, $service, $bc)>
+C<$con> is the connection already established,
+C<$node> is the name of the node to be created
+C<$service> is the pubsubservice
+C<$cb> is the callback
+
+Try to unsubscribe from a node.
+
+=cut
+
+sub unsubscribe_node {
+   my ($self, $con, $node, $service, $cb) = @_;
+   my $jid = $con->jid;
+
+   $con->send_iq (
+      set => sub {
+         my ($w) = @_;
+         simxml ($w, defns => 'pubsub', node => {
+            name => 'pubsub', childs => [
+               { name => 'unsubscribe', attrs => [
+                  node => $node,
+                  jid => $jid ]
+               }
+            ]
+         });
+      },
+      sub {
+         my ($node, $err) = @_;
+         $cb->(defined $err ? $err : ()) if $cb;
+      }, (defined $service ? (to => $service) : ())
+   );
+}
+
+=item B<publish_item($con, $node, $create_cb, $service, $bc)>
 C<$con> is the connection already established,
 C<$node> is the name of the node to be created
 C<$create_cb> is the callback
+C<$service> the pubsub service, can be undef
 C<$cb> is the callback
 
 Try to publish an item.
@@ -185,7 +209,7 @@ Try to publish an item.
 =cut
 
 sub publish_item {
-   my ($self, $con, $node, $create_cb, $cb) = @_;
+   my ($self, $con, $node, $service, $create_cb, $cb) = @_;
 
    $con->send_iq (
       set => sub {
@@ -201,8 +225,10 @@ sub publish_item {
       },
       sub {
          my ($node, $err) = @_;
+         warn "OK $create_cb / $cb\n";
          $cb->(defined $err ? $err : ()) if $cb;
-      }
+      },
+      (defined $service ? (to => $service) : ())
    );
 }
 

@@ -1,5 +1,7 @@
 Revision history for Net-XMPP2
 
+         - minor additions to ::Ext::Pubsub.
+
 0.14 Fri Aug  1 12:13:11 CEST 2008
          - NOTICE: This is the last release of this module under the name
                    Net::XMPP2. All further releases will be done under the name
