@@ -505,7 +505,7 @@ If the IQ resulted in a stanza error the second argument to C<$result_cb> will
 be C<undef> (if the error type was not 'continue') and the third argument will
 be a L<Net::XMPP2::Error::IQ> object.
 
-The timeout can be set by C<set_default_iq_timeout> or passed seperatly
+The timeout can be set by C<set_default_iq_timeout> or passed separately
 in the C<%attrs> array as the value for the key C<timeout> (timeout in seconds btw.).
 
 This method returns the newly generated id for this iq request.
@@ -996,7 +996,7 @@ sub stream_id { $_[0]->{stream_id} }
 This method will block until the output buffer is empty.
 For example if you want to block the program until the message sent
 by C<send_message>, C<send_iq> or C<send_presence> or any other
-sending method, is written out to the kernel completly.
+sending method, is written out to the kernel completely.
 
 NOTE: Use this method only if you know what you are doing!
 
@@ -1107,9 +1107,9 @@ C<$host> and C<$port>.
 =item disconnect => $host, $port, $message
 
 This event is generated when the connection was lost or another error
-occured while writing or reading from it.
+occurred while writing or reading from it.
 
-C<$message> is a humand readable error message for the failure.
+C<$message> is a human readable error message for the failure.
 C<$host> and C<$port> were the host and port we were connected to.
 
 Note: C<$host> and C<$port> might be different from the domain you passed to
@@ -1121,7 +1121,7 @@ This event is generated before any processing of a "XML" stanza happens.
 C<$node> is the node of the stanza that is being processed, it's of
 type L<Net::XMPP2::Node>.
 
-This method might not be as handy for debuggin purposes as C<debug_recv>.
+This method might not be as handy for debugging purposes as C<debug_recv>.
 
 If you want to handle the stanza yourself and don't want this module
 to take care of it return a true value from your registered callback.
@@ -1144,7 +1144,7 @@ is mostly the same as C<send_stanza_data>.
 
 =item debug_recv => $data
 
-This method is incoked whenever a chunk of data was received.
+This method is invoked whenever a chunk of data was received.
 
 It works to filter C<$data> through L<XML::Twig> for debugging
 display purposes sometimes, but as C<$data> is some arbitrary chunk
@@ -1153,15 +1153,15 @@ application of "XML" sucks?).
 
 So you might want to use C<recv_stanza_xml> to detect
 complete stanzas. Unfortunately C<recv_stanza_xml> doesn't have the
-bytes anymore and just a datastructure (L<Net::XMPP2::Node>).
+bytes anymore and just a data structure (L<Net::XMPP2::Node>).
 
 =item send_buffer_empty
 
 This event is VERY useful if you want to wait (or at least be notified)
 when the output buffer is empty. If you got a bunch of messages to sent
 or even one and you want to do something when the output buffer is empty,
-you can wait for this event. It is emitted everytime the output buffer is
-completly written out to the kernel.
+you can wait for this event. It is emitted every time the output buffer is
+completely written out to the kernel.
 
 Here is an example:
 
