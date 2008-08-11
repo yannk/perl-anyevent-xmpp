@@ -348,4 +348,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1; # End of Net::XMPP2::Ext::Pubsub
+1; # End of Net::XMPP2::Ext::MUC
