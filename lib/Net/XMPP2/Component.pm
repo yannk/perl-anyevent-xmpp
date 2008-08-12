@@ -18,9 +18,8 @@ Net::XMPP2::Component - "XML" stream that implements the XEP-0114
                 port   => 5347,
                 secret => 'insecurepasswordforthehackers'
              );
-   $con->connect;
-   $con->init;
    $con->reg_cb (session_ready => sub { ... });
+   $con->connect;
 
 =head1 DESCRIPTION
 
