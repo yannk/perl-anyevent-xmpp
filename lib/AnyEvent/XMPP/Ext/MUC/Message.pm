@@ -75,6 +75,8 @@ sub send {
       if %{$self->{subjects} || {}};
    push @add, (thread => $self->thread)
       if $self->thread;
+   push @add, (from => $self->from)
+      if defined $self->from;
 
    $self->{connection}->send_message (
       $self->to, $self->type, undef,
