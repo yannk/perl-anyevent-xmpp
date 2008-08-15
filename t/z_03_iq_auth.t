@@ -3,18 +3,18 @@
 use strict;
 no warnings;
 use Test::More;
-use Net::XMPP2::TestClient;
-use Net::XMPP2::IM::Message;
-use Net::XMPP2::Util qw/bare_jid/;
+use AnyEvent::XMPP::TestClient;
+use AnyEvent::XMPP::IM::Message;
+use AnyEvent::XMPP::Util qw/bare_jid/;
 
 my $ANAL = $ENV{NET_XMPP2_TEST_ANAL};
 
 my $cl =
-   Net::XMPP2::TestClient->new_or_exit (
+   AnyEvent::XMPP::TestClient->new_or_exit (
       tests => 1,
       connection_args => {
          disable_sasl => 1,
-         resource => "Net::XMPP2::TestClient",
+         resource => "AnyEvent::XMPP::TestClient",
          ($ANAL ? (anal_iq_auth => 1) : ())
       }
    );

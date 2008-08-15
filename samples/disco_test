@@ -2,13 +2,13 @@
 use strict;
 use utf8;
 use AnyEvent;
-use Net::XMPP2::Client;
-use Net::XMPP2::Ext::Disco;
-use Net::XMPP2::Ext::DataForm;
+use AnyEvent::XMPP::Client;
+use AnyEvent::XMPP::Ext::Disco;
+use AnyEvent::XMPP::Ext::DataForm;
 
 my $j  = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new (debug => 1);
-my $d  = Net::XMPP2::Ext::Disco->new;
+my $cl = AnyEvent::XMPP::Client->new (debug => 1);
+my $d  = AnyEvent::XMPP::Ext::Disco->new;
 $cl->add_extension ($d);
 $cl->add_account ('net_xmpp2@jabber.org/test', 'test');
 $cl->reg_cb (
@@ -27,7 +27,7 @@ $cl->reg_cb (
          my ($d, $i, $e) = @_;
          my (@q) = $i->xml_node ()->find_all ([qw/data_form x/]);
          return unless @q;
-         my $df = Net::XMPP2::Ext::DataForm->new;
+         my $df = AnyEvent::XMPP::Ext::DataForm->new;
          $df->from_node (@q);
          print "occupants: " . $df->get_field ('muc#roominfo_occupants')->{values}->[0] . "\n";
       });

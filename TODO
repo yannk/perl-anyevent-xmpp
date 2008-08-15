@@ -80,7 +80,7 @@
    - jabber component
 - fix the inaviodable memoryleaks with the callbacks
   the circular object structs.
-- allow the inclusion of custom (raw) XML into Net::XMPP2::IM::Messages!
+- allow the inclusion of custom (raw) XML into AnyEvent::XMPP::IM::Messages!
    - eg. by attaching usual $create_cb callbacks which can also be
      simxml nodes. (sub { $_[0]->raw ("...") } then also works.)
 - put some serious stuff in the synopsises
@@ -93,17 +93,17 @@
 - test the xml parse error object somehow!
 - add context field to IQ error for all the places origin from IQ errors
   (bind_error, session_error, ...)
-- Net::XMPP2::Client
+- AnyEvent::XMPP::Client
   - find a way to distinguish presences from JIDs that
     are in multiple account's roster.
-- Net::XMPP2 missing functionality to be RFC 3920 conform:
+- AnyEvent::XMPP missing functionality to be RFC 3920 conform:
    - improve error handling for SASL to
      support retries as specified in RFC 3920.
      (eg. by supporting a method sasl_retry() which takes
       the changed credentials)
    x SRV record lookup
       - weight handling!
-- Net::XMPP2::IM missing functionality to be RFC 3921 conform:
+- AnyEvent::XMPP::IM missing functionality to be RFC 3921 conform:
    - 7.2.  Business Rules
 - Implement XEP-0115: Entity Capabilities
 - Implement XEP-0190: Best Practice for Closing Idle Streams
@@ -111,7 +111,7 @@ x Implement XEP-0030: Service Discovery
    - see also: XEP-0128: Service Discovery Extensions
    - missing feature: building up a item tree for discovery
 - see also: grep 'XXX\|FIXME\|TODO' * -r
-  - lib/Net/XMPP2/Writer.pm: # XXX: removed authname, because it
+  - lib/AnyEvent/XMPP/Writer.pm: # XXX: removed authname, because it
                                     ensures maximum connectivitiy
 long term?
 ==========

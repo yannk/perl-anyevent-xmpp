@@ -3,17 +3,17 @@
 use strict;
 no warnings;
 use Test::More;
-use Net::XMPP2;
-use Net::XMPP2::Namespaces qw/xmpp_ns/;
-use Net::XMPP2::TestClient;
-use Net::XMPP2::IM::Message;
-use Net::XMPP2::Util qw/bare_jid/;
+use AnyEvent::XMPP;
+use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
+use AnyEvent::XMPP::TestClient;
+use AnyEvent::XMPP::IM::Message;
+use AnyEvent::XMPP::Util qw/bare_jid/;
 
 my $cl =
-   Net::XMPP2::TestClient->new_or_exit (tests => 1, finish_count => 1);
+   AnyEvent::XMPP::TestClient->new_or_exit (tests => 1, finish_count => 1);
 my $C = $cl->client;
-my $disco = $cl->instance_ext ('Net::XMPP2::Ext::Disco');
-my $ping  = $cl->instance_ext ('Net::XMPP2::Ext::Ping');
+my $disco = $cl->instance_ext ('AnyEvent::XMPP::Ext::Disco');
+my $ping  = $cl->instance_ext ('AnyEvent::XMPP::Ext::Ping');
 
 $disco->enable_feature ($ping->disco_feature);
 

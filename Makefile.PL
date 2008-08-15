@@ -3,11 +3,11 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME                => 'Net::XMPP2',
+    NAME                => 'AnyEvent::XMPP',
     AUTHOR              => 'Robin Redeker <elmex@ta-sa.org>',
     LICENSE             => 'perl',
-    VERSION_FROM        => 'lib/Net/XMPP2.pm',
-    ABSTRACT_FROM       => 'lib/Net/XMPP2.pm',
+    VERSION_FROM        => 'lib/AnyEvent/XMPP.pm',
+    ABSTRACT_FROM       => 'lib/AnyEvent/XMPP.pm',
     PL_FILES            => {},
     PREREQ_PM => {
         'AnyEvent'           => 0,
@@ -25,7 +25,7 @@ WriteMakefile(
     dist                => {
        COMPRESS => 'gzip -9f',
        SUFFIX => 'gz',
-       PREOP => 'pod2text lib/Net/XMPP2.pm | tee README >$(DISTVNAME)/README; chmod -R u=rwX,go=rX . ;',
+       PREOP => 'pod2text lib/AnyEvent/XMPP.pm | tee README >$(DISTVNAME)/README; chmod -R u=rwX,go=rX . ;',
     },
-    clean               => { FILES => 'Net-XMPP2-*' },
+    clean               => { FILES => 'AnyEvent-XMPP-*' },
 );

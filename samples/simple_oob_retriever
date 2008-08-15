@@ -2,17 +2,17 @@
 use strict;
 use utf8;
 use AnyEvent;
-use Net::XMPP2::Client;
-use Net::XMPP2::Ext::OOB;
-use Net::XMPP2::Ext::Disco;
+use AnyEvent::XMPP::Client;
+use AnyEvent::XMPP::Ext::OOB;
+use AnyEvent::XMPP::Ext::Disco;
 
 my $j  = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new (debug => 1);
+my $cl = AnyEvent::XMPP::Client->new (debug => 1);
 
 $cl->add_account ('net_xmpp2@jabber.org/oobtest', 'test');
 
-my $disco = Net::XMPP2::Ext::Disco->new;
-my $oob   = Net::XMPP2::Ext::OOB->new;
+my $disco = AnyEvent::XMPP::Ext::Disco->new;
+my $oob   = AnyEvent::XMPP::Ext::OOB->new;
 
 $cl->add_extension ($disco);
 $cl->add_extension ($oob);

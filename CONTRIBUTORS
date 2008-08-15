@@ -1,4 +1,4 @@
-These people have helped to work on Net::XMPP2:
+These people have helped to work on AnyEvent::XMPP:
 
-   * melo - minor fixes on Net::XMPP2::Connection
+   * melo - minor fixes on AnyEvent::XMPP::Connection
    * Chris Miceli - additional work on the pubsub extension

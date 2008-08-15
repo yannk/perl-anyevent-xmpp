@@ -2,9 +2,9 @@
 use strict;
 use utf8;
 use AnyEvent;
-use Net::XMPP2::Client;
-use Net::XMPP2::Ext::Disco;
-use Net::XMPP2::Ext::DataForm;
+use AnyEvent::XMPP::Client;
+use AnyEvent::XMPP::Ext::Disco;
+use AnyEvent::XMPP::Ext::DataForm;
 use Storable;
 use XML::DOM::XPath;
 use IO::Handle;
@@ -12,8 +12,8 @@ use EVQ;
 
 my @servers = map { s/^\s*(\S+)\s*$/\1/; $_ } <STDIN>;
 
-my $cl = Net::XMPP2::Client->new ();
-my $d  = Net::XMPP2::Ext::Disco->new;
+my $cl = AnyEvent::XMPP::Client->new ();
+my $d  = AnyEvent::XMPP::Ext::Disco->new;
 $cl->add_extension ($d);
 $cl->add_account ('net_xmpp2@jabber.org/test', 'test');
 
@@ -64,7 +64,7 @@ sub fetch_room_occupants {
          } else {
             my (@q) = $i->xml_node ()->find_all ([qw/data_form x/]);
             if (@q) {
-               my $df = Net::XMPP2::Ext::DataForm->new;
+               my $df = AnyEvent::XMPP::Ext::DataForm->new;
                $df->from_node (@q);
                if (my $f = $df->get_field ('muc#roominfo_occupants')) {
                   $cb->($jid, $f->{values}->[0]);

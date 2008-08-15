@@ -2,11 +2,11 @@
 use strict;
 use utf8;
 use AnyEvent;
-use Net::XMPP2::Component;
-use Net::XMPP2::Util qw/install_default_debug_dump/;
+use AnyEvent::XMPP::Component;
+use AnyEvent::XMPP::Util qw/install_default_debug_dump/;
 
 my $j = AnyEvent->condvar;
-my $c = Net::XMPP2::Component-> new (
+my $c = AnyEvent::XMPP::Component-> new (
            domain => 'test.jabber.ta-sa.org',
            server => 'localhost',
            port   => 5347,

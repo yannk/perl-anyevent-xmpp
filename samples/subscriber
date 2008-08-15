@@ -2,7 +2,7 @@
 use strict;
 use utf8;
 use AnyEvent;
-use Net::XMPP2::Client;
+use AnyEvent::XMPP::Client;
 
 
 my %ACCOUNTS = (qw/
@@ -25,7 +25,7 @@ my %ACCOUNTS = (qw/
 my %CONNECTED;
 
 my $j = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new (debug => 1);
+my $cl = AnyEvent::XMPP::Client->new (debug => 1);
 for (keys %ACCOUNTS) {
    my ($jid, $pass) = ($_, $ACCOUNTS{$_});
    $cl->add_account ($jid, $pass);

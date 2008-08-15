@@ -2,13 +2,13 @@
 
 use strict;
 use Test::More;
-use Net::XMPP2::TestClient;
-use Net::XMPP2::IM::Message;
-use Net::XMPP2::Util qw/bare_jid split_jid/;
-use Net::XMPP2::Ext::Registration;
+use AnyEvent::XMPP::TestClient;
+use AnyEvent::XMPP::IM::Message;
+use AnyEvent::XMPP::Util qw/bare_jid split_jid/;
+use AnyEvent::XMPP::Ext::Registration;
 
 my $cl =
-   Net::XMPP2::TestClient->new_or_exit (
+   AnyEvent::XMPP::TestClient->new_or_exit (
       tests        => 2,
       two_accounts => 1,
       finish_count => 2
@@ -24,7 +24,7 @@ $C->reg_cb (
       my ($username) = split_jid ($acc->bare_jid);
       my $con = $acc->connection;
 
-      my $reg = Net::XMPP2::Ext::Registration->new (connection => $con);
+      my $reg = AnyEvent::XMPP::Ext::Registration->new (connection => $con);
 
       $reg->send_unregistration_request (sub {
          my ($reg, $ok, $error, $form) = @_;

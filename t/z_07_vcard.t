@@ -3,21 +3,21 @@
 use strict;
 no warnings;
 use Test::More;
-use Net::XMPP2;
-use Net::XMPP2::Namespaces qw/xmpp_ns/;
-use Net::XMPP2::TestClient;
-use Net::XMPP2::IM::Message;
-use Net::XMPP2::Util qw/bare_jid prep_bare_jid/;
+use AnyEvent::XMPP;
+use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
+use AnyEvent::XMPP::TestClient;
+use AnyEvent::XMPP::IM::Message;
+use AnyEvent::XMPP::Util qw/bare_jid prep_bare_jid/;
 
 my $cl =
-   Net::XMPP2::TestClient->new_or_exit (tests => 4, finish_count => 1);
+   AnyEvent::XMPP::TestClient->new_or_exit (tests => 4, finish_count => 1);
 my $C = $cl->client;
-my $disco = $cl->instance_ext ('Net::XMPP2::Ext::Disco');
-my $vcard = $cl->instance_ext ('Net::XMPP2::Ext::VCard');
+my $disco = $cl->instance_ext ('AnyEvent::XMPP::Ext::Disco');
+my $vcard = $cl->instance_ext ('AnyEvent::XMPP::Ext::VCard');
 
 my $test_vcard = {
    ADR      => [{ HOME => undef, LOCALITY => 'Hannover', PCODE => '23422' }],
-   DESC     => ['Just a test vCard for Net::XMPP2'],
+   DESC     => ['Just a test vCard for AnyEvent::XMPP'],
    NICKNAME => ['elmex'],
    FN       => ['Robin'],
    _avatar  => do { open my $av, "t/n_xmpp2_avatar.png" or die "$!"; local $/; binmode $av; <$av> },

@@ -3,15 +3,15 @@ use strict;
 use utf8;
 use EV;
 use AnyEvent;
-use Net::XMPP2::Client;
-use Net::XMPP2::Ext::VCard;
+use AnyEvent::XMPP::Client;
+use AnyEvent::XMPP::Ext::VCard;
 
 my $j = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new (debug => 1);
+my $cl = AnyEvent::XMPP::Client->new (debug => 1);
 $cl->add_account (@ARGV, undef, undef, {
    initial_presence => -1, dont_retrieve_roster => 1
 });
-my $ex = Net::XMPP2::Ext::VCard->new;
+my $ex = AnyEvent::XMPP::Ext::VCard->new;
 
 $ex->reg_cb (
    vcard => sub {

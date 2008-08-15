@@ -2,14 +2,14 @@
 use strict;
 use utf8;
 use AnyEvent;
-use Net::XMPP2 qw/xep-86/;
-use Net::XMPP2::Client;
+use AnyEvent::XMPP qw/xep-86/;
+use AnyEvent::XMPP::Client;
 use Encode;
 
 binmode STDOUT, ":utf8";
 
 my $j = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new (debug => 1);
+my $cl = AnyEvent::XMPP::Client->new (debug => 1);
 $cl->set_presence ('away', 'I\'m a bot now.', 1);
 $cl->add_account (@ARGV, undef, undef);
 $cl->reg_cb (

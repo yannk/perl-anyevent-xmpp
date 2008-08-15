@@ -2,12 +2,12 @@
 use strict;
 use utf8;
 use AnyEvent;
-use Net::XMPP2::Client;
-use Net::XMPP2::Util qw/simxml/;
-use Net::XMPP2::Ext::Disco;
+use AnyEvent::XMPP::Client;
+use AnyEvent::XMPP::Util qw/simxml/;
+use AnyEvent::XMPP::Ext::Disco;
 
 my $j = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new;
+my $cl = AnyEvent::XMPP::Client->new;
 
 $cl->add_account ('net_xmpp2@jabber.org', 'test');
 

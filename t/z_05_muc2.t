@@ -3,10 +3,10 @@
 use strict;
 no warnings;
 use Test::More;
-use Net::XMPP2::TestClient;
-use Net::XMPP2::IM::Message;
-use Net::XMPP2::Util qw/bare_jid prep_bare_jid split_jid cmp_jid/;
-use Net::XMPP2::Ext::MUC;
+use AnyEvent::XMPP::TestClient;
+use AnyEvent::XMPP::IM::Message;
+use AnyEvent::XMPP::Util qw/bare_jid prep_bare_jid split_jid cmp_jid/;
+use AnyEvent::XMPP::Ext::MUC;
 
 my $MUC = $ENV{NET_XMPP2_TEST_MUC};
 
@@ -18,11 +18,11 @@ unless ($MUC) {
 my $ROOM = "test_nxmpp2@".$MUC;
 
 my $cl =
-   Net::XMPP2::TestClient->new_or_exit (
+   AnyEvent::XMPP::TestClient->new_or_exit (
       tests => 26, two_accounts => 1, finish_count => 2
    );
 my $C     = $cl->client;
-my $disco = $cl->instance_ext ('Net::XMPP2::Ext::Disco');
+my $disco = $cl->instance_ext ('AnyEvent::XMPP::Ext::Disco');
 
 my %muc;
 
@@ -32,7 +32,7 @@ $C->reg_cb (
       my $con = $acc->connection;
       $con->add_extension (
          $muc{$acc->bare_jid} =
-            Net::XMPP2::Ext::MUC->new (disco => $disco, connection => $con)
+            AnyEvent::XMPP::Ext::MUC->new (disco => $disco, connection => $con)
       );
    },
    two_accounts_ready => sub {
@@ -95,7 +95,7 @@ sub step_rejoin {
 
                         $sr_pass_field = 1;
 
-                        my $af = Net::XMPP2::Ext::DataForm->new;
+                        my $af = AnyEvent::XMPP::Ext::DataForm->new;
                         $af->make_answer_form ($form);
                         $af->set_field_value ('muc#roomconfig_passwordprotectedroom', 1);
                         $af->set_field_value ('muc#roomconfig_roomsecret', "abc123");

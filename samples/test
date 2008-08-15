@@ -3,10 +3,10 @@ use strict;
 use utf8;
 use AnyEvent;
 use XML::Twig;
-use Net::XMPP2 qw/xep-86/;
-use Net::XMPP2::IM::Connection;
-use Net::XMPP2::Namespaces qw/xmpp_ns/;
-use Net::XMPP2::Util;
+use AnyEvent::XMPP qw/xep-86/;
+use AnyEvent::XMPP::IM::Connection;
+use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
+use AnyEvent::XMPP::Util;
 use Net::LibIDN qw/idn_prep_resource/;
 use Encode;
 
@@ -28,9 +28,9 @@ my $j = AnyEvent->condvar;
 
 my $res = "Net::XどなPP2";
 
-#my $res = "Net::XMPP2";
+#my $res = "AnyEvent::XMPP";
 
-my $con = Net::XMPP2::IM::Connection->new (
+my $con = AnyEvent::XMPP::IM::Connection->new (
             username => 'admin', password => 'xxxxxx', domain => 'localhost',
             resource => $res,
             disable_ssl => 0,

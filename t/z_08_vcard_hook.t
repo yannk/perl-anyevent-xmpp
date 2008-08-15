@@ -4,14 +4,14 @@ use strict;
 no warnings;
 use Test::More;
 use Digest::SHA1 qw/sha1_hex/;
-use Net::XMPP2;
-use Net::XMPP2::TestClient;
-use Net::XMPP2::Namespaces qw/xmpp_ns/;
-use Net::XMPP2::Util qw/bare_jid prep_bare_jid/;
+use AnyEvent::XMPP;
+use AnyEvent::XMPP::TestClient;
+use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
+use AnyEvent::XMPP::Util qw/bare_jid prep_bare_jid/;
 
-my $cl    = Net::XMPP2::TestClient->new_or_exit (tests => 3, finish_count => 1);
+my $cl    = AnyEvent::XMPP::TestClient->new_or_exit (tests => 3, finish_count => 1);
 my $C     = $cl->client;
-my $vcard = $cl->instance_ext ('Net::XMPP2::Ext::VCard');
+my $vcard = $cl->instance_ext ('AnyEvent::XMPP::Ext::VCard');
 
 my $got_my_vcard;
 my $my_avatar;

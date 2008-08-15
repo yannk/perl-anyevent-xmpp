@@ -1,6 +1,6 @@
-=head1 Einführung in I<Instant Messaging> mit Net::XMPP2 (Jabber)
+=head1 Einführung in I<Instant Messaging> mit AnyEvent::XMPP (Jabber)
 
-Eine Einführung in das Perl Modul L<Net::XMPP2> und wie man damit
+Eine Einführung in das Perl Modul L<AnyEvent::XMPP> und wie man damit
 I<Instant Messages> verschickt und empfängt.
 
 =head2 Autor
@@ -14,9 +14,9 @@ arbeite seit ca. 6 Jahren mit Perl.
 
 =head2 Abstract
 
-Dieser Artikel soll eine kurze Einführung in L<Net::XMPP2>
+Dieser Artikel soll eine kurze Einführung in L<AnyEvent::XMPP>
 geben. Angefangen bei einer kurzen Einführung in XMPP selbst,
-geht es weiter mit einem Überblick über das Perl Modul L<Net::XMPP2>.
+geht es weiter mit einem Überblick über das Perl Modul L<AnyEvent::XMPP>.
 Danach wird kurz das Eventmodell erläutert und am Ende ist dann ein
 ausführlich kommentiertes Beispiel-Script zu finden.
 
@@ -117,22 +117,22 @@ z.b. expat, um mit diesem XML umgehen zu können.
 
 =back
 
-=head2 Net::XMPP2 Überblick
+=head2 AnyEvent::XMPP Überblick
 
 =over 4
 
-=item * L<Net::XMPP2> ist ein Perl Modul zum Entwickeln von XMPP Clienten und Komponenten.
+=item * L<AnyEvent::XMPP> ist ein Perl Modul zum Entwickeln von XMPP Clienten und Komponenten.
 
 =item * Es nimmt einem die ganzen Kopfschmerzen ab, wie z.b. man den 'XML Stream'
 zum Server aufbaut, Nachrichten verschickt und Präsenz-Informationen und
 die Kontaktliste (bei XMPP 'Roster' genannt) verwaltet.
 
-=item * Dazu implementiert L<Net::XMPP2> ein paar wichtige XEPs ohne die man keinen
+=item * Dazu implementiert L<AnyEvent::XMPP> ein paar wichtige XEPs ohne die man keinen
 ernsthaften IM Clienten der auf XMPP basiert entwickeln könnte.
 
 =back
 
-=head2 Die 2 in Net::XMPP2
+=head2 Die 2 in AnyEvent::XMPP
 
 =over 4
 
@@ -158,7 +158,7 @@ können, wie z.B. eine GUI steuern.
 
   - Sehr ähnlich zu Net::Jabber und hat die selben Probleme
 
-=item * L<Net::XMPP2> hab ich geschrieben um:
+=item * L<AnyEvent::XMPP> hab ich geschrieben um:
 
 =over 4
 
@@ -174,11 +174,11 @@ Authentifizierungs-Protokolle.
 
 =back
 
-=head2 Abhängigkeiten von Net::XMPP2
+=head2 Abhängigkeiten von AnyEvent::XMPP
 
-L<Net::XMPP2> hat einige Abhängigkeiten um XMPP standardkonform zu implementieren:
+L<AnyEvent::XMPP> hat einige Abhängigkeiten um XMPP standardkonform zu implementieren:
 
-  AnyEvent            - Um dem User von Net::XMPP2 die Event-Loop Wahl zu überlassen
+  AnyEvent            - Um dem User von AnyEvent::XMPP die Event-Loop Wahl zu überlassen
   XML::Writer         - Um "XML" auszugeben
   XML::Parser::Expat  - Um mit dem "XML", wie XMPP es definiert, umzugehen
   Net::SSLeay         - Um TLS Verbindungen aufzubauen zu XMPP Servern
@@ -193,48 +193,48 @@ benötigen, allerdings sind all diese Technologien (TLS, SASL, LibIDN, DNS, ...)
 notwendig für eine brauchbare XMPP Implementation.
 
 An dieser Stelle möchte ich auch nochmal auf die Verwendung von L<AnyEvent>
-hinweisen. L<AnyEvent> erlaubt dem Benutzer von L<Net::XMPP2> die Event-Loop zu
-wählen, von der die I/O Events kommen. Das heisst L<Net::XMPP2> ist einfach
+hinweisen. L<AnyEvent> erlaubt dem Benutzer von L<AnyEvent::XMPP> die Event-Loop zu
+wählen, von der die I/O Events kommen. Das heisst L<AnyEvent::XMPP> ist einfach
 integrierbar in eine Applikation die bereits Gtk2, Tk, Glib, Event oder eine
 andere von AnyEvent unterstützte Event-Loop benutzt.
 
 =back
 
-=head2 Net::XMPP2 Module
+=head2 AnyEvent::XMPP Module
 
-L<Net::XMPP2> enthält noch eine Reihe anderer (Unter-)Module.
+L<AnyEvent::XMPP> enthält noch eine Reihe anderer (Unter-)Module.
 Davon implementieren viele eher optionale Funktionalität.
 
-Die wichtigsten und grundlegendsten Module in L<Net::XMPP2> sind hier
+Die wichtigsten und grundlegendsten Module in L<AnyEvent::XMPP> sind hier
 aufgelistet:
 
 =over 4
 
-=item Net::XMPP2::Event
+=item AnyEvent::XMPP::Event
 
-Das Eventmodell von L<Net::XMPP2>, auf welches ich im nächsten Abschnitt eingehen
+Das Eventmodell von L<AnyEvent::XMPP>, auf welches ich im nächsten Abschnitt eingehen
 werde.
 
-=item Net::XMPP2::Connection
+=item AnyEvent::XMPP::Connection
 
 Repräsentiert einen rohen "XML Stream" ohne weitere "Instant Messaging" Funktionalität.
 
-Meistens wird man allerdings L<Net::XMPP2::IM::Connection> oder L<Net::XMPP2::Client>
+Meistens wird man allerdings L<AnyEvent::XMPP::IM::Connection> oder L<AnyEvent::XMPP::Client>
 verwenden wollen, die in den nächsten zwei Punkten beschrieben werden.
 
-=item Net::XMPP2::IM::Connection
+=item AnyEvent::XMPP::IM::Connection
 
-Ist von L<Net::XMPP2::Connection> abgeleitet und erweitert diese um I<Instant Messaging>
+Ist von L<AnyEvent::XMPP::Connection> abgeleitet und erweitert diese um I<Instant Messaging>
 Funktionalität wie z.b. Präsenz-Status setzen, Präsenz von Kontakten empfangen
 sowie Kontaktlisten-(/Roster-)Management.
 
-=item Net::XMPP2::Client
+=item AnyEvent::XMPP::Client
 
 Implementiert einen einfachen XMPP Client der sich mit mehreren Accounts
-gleichzeitig verbinden kann und die L<Net::XMPP2::IM::Connection> Objekte für
+gleichzeitig verbinden kann und die L<AnyEvent::XMPP::IM::Connection> Objekte für
 einen verwaltet.
 
-=item Net::XMPP2::IM::Message
+=item AnyEvent::XMPP::IM::Message
 
 Ein Objekt dieser Klasse repräsentiert eine XMPP Nachricht. Die wohl wichtigsten
 Methoden sind C<to>, C<from> und C<any_body> um auf Absender, Empfänger und den
@@ -245,10 +245,10 @@ Inhalt der Nachricht zugreifen zu können.
 Für nähere Information zu den Modulen bitte ich die jeweilige POD Dokumentation
 aufzusuchen.
 
-=head2 Events in Net::XMPP2
+=head2 Events in AnyEvent::XMPP
 
-Ich habe eine relativ einfaches Eventmodell für L<Net::XMPP2> implementiert.
-L<Net::XMPP2::Connection> ist von L<Net::XMPP2::Event> abgeleitet und erbt
+Ich habe eine relativ einfaches Eventmodell für L<AnyEvent::XMPP> implementiert.
+L<AnyEvent::XMPP::Connection> ist von L<AnyEvent::XMPP::Event> abgeleitet und erbt
 unter anderen die folgenden Methoden:
 
 =over 4
@@ -257,11 +257,11 @@ unter anderen die folgenden Methoden:
 
 Um bestimmte Events, die in der Dokumentation beschrieben sind zu empfangen,
 muss man einen Callback mit C<reg_cb> registrieren. Wenn man zum Beispiel den
-C<session_ready> Event von L<Net::XMPP2::IM::Connection> bekommen möchte
+C<session_ready> Event von L<AnyEvent::XMPP::IM::Connection> bekommen möchte
 (der geschickt wird wenn man authentifiziert ist und Nachrichten verschicken kann),
 macht man ungefähr dies:
 
-   my $con = Net::XMPP2::IM::Connection->new (...);
+   my $con = AnyEvent::XMPP::IM::Connection->new (...);
    ...
    $con->reg_cb (session_ready => sub {
       my ($con) = @_;
@@ -315,7 +315,7 @@ Callback entfernt wird.
 =item event ($eventname, @args)
 
 Diese Methode kann man benutzen um eigene Events auszulösen. Dabei sollte man allerdings
-vermeiden von L<Net::XMPP2> verwendete Events zu benutzen, da dies zu Fehlern führen
+vermeiden von L<AnyEvent::XMPP> verwendete Events zu benutzen, da dies zu Fehlern führen
 könnte. Das erste Argument ist der Name des Events den man auslösen möchte
 und die C<@args> werden später den Callbacks übergeben.
 
@@ -336,7 +336,7 @@ Gibt folgendes aus:
 =item set_exception_cb ($cb)
 
 Wenn man einmal in einer Methode einen Fehler macht und eine Exception
-geworfen wird, dann wird diese von L<Net::XMPP2::Event> abgefangen und ausgegeben.
+geworfen wird, dann wird diese von L<AnyEvent::XMPP::Event> abgefangen und ausgegeben.
 Die Ausgabe kann man dann mit C<set_exception_cb> abfangen und selbst machen:
 
    $con->set_exception_cb (sub {
@@ -347,7 +347,7 @@ Die Ausgabe kann man dann mit C<set_exception_cb> abfangen und selbst machen:
 =back
 
 Es gibt noch eine Reihe weiterer interessanter Methoden, die ich hier nicht erläutern
-werde. Bei Interesse diese bitte in der Dokumentation von L<Net::XMPP2::Event> nachlesen.
+werde. Bei Interesse diese bitte in der Dokumentation von L<AnyEvent::XMPP::Event> nachlesen.
 
 =head2 Beispiel
 
@@ -357,7 +357,7 @@ Beispiel bringen, welches eine Nachricht an jemanden verschickt:
  #!/opt/perl/bin/perl
  use strict;
  use AnyEvent;
- use Net::XMPP2::IM::Connection;
+ use AnyEvent::XMPP::IM::Connection;
  
  unless (@ARGV >= 3) { die "sendmsg <account jid> <password> <destination jid>\n" }
  
@@ -368,7 +368,7 @@ Beispiel bringen, welches eine Nachricht an jemanden verschickt:
  
  # Wir erzeugen erstmal ein neues Verbindungsobjekt:
  my $con =
-    Net::XMPP2::IM::Connection->new (
+    AnyEvent::XMPP::IM::Connection->new (
        jid      => $ARGV[0],    # Die JID von _unserem_ Account
        password => $ARGV[1],    # Das Passwort für _unseren_ Account
        initial_presence => -10, # Die initiale Präsenz-Priorität, eine negative
@@ -386,7 +386,7 @@ Beispiel bringen, welches eine Nachricht an jemanden verschickt:
        print "Sending message to $dest:\n$msg\n";
  
        # Wir verpacken die Nachricht, die wir schicken wollen:
-       my $immsg = Net::XMPP2::IM::Message->new (to => $dest, body => $msg);
+       my $immsg = AnyEvent::XMPP::IM::Message->new (to => $dest, body => $msg);
  
        # Und schicken sie über die Verbindung zum Server:
        $immsg->send ($con);
@@ -397,7 +397,7 @@ Beispiel bringen, welches eine Nachricht an jemanden verschickt:
     message => sub {
        my ($con, $msg) = @_;
  
-       # $msg ist ein Net::XMPP2::IM::Message Objekt, von welchem wir hier
+       # $msg ist ein AnyEvent::XMPP::IM::Message Objekt, von welchem wir hier
        # das Wissenswerte ausgeben:
        print "Message from " . $msg->from . ":\n" . $msg->any_body . "\n---\n";
     },

@@ -2,20 +2,20 @@
 use strict;
 use utf8;
 use AnyEvent;
-use Net::XMPP2::Client;
-use Net::XMPP2::Ext::Disco;
-use Net::XMPP2::Ext::MUC;
+use AnyEvent::XMPP::Client;
+use AnyEvent::XMPP::Ext::Disco;
+use AnyEvent::XMPP::Ext::MUC;
 
 my $j = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new (debug => 1);
+my $cl = AnyEvent::XMPP::Client->new (debug => 1);
 $cl->add_account ('net_xmpp2@jabber.org', 'test');
-$cl->add_extension (my $disco = Net::XMPP2::Ext::Disco->new);
+$cl->add_extension (my $disco = AnyEvent::XMPP::Ext::Disco->new);
 my $muc;
 $cl->reg_cb (
    session_ready => sub {
       my ($cl, $acc) = @_;
       $muc =
-         Net::XMPP2::Ext::MUC->new (connection => $acc->connection, disco => $disco);
+         AnyEvent::XMPP::Ext::MUC->new (connection => $acc->connection, disco => $disco);
       $cl->add_extension ($muc);
       $muc->join_room ('test@conference.ejabberd.ta-sa.org', "TestBot", sub {
          my ($err) = @_;

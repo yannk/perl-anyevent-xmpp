@@ -1,62 +1,62 @@
 NAME
-    Net::XMPP2 - An implementation of the XMPP Protocol
+    AnyEvent::XMPP - An implementation of the XMPP Protocol
 
 VERSION
     Version 0.14
 
 SYNOPSIS
-       use Net::XMPP2::Connection;
+       use AnyEvent::XMPP::Connection;
 
     or:
 
-       use Net::XMPP2::IM::Connection;
+       use AnyEvent::XMPP::IM::Connection;
 
     or:
 
-       use Net::XMPP2::Client;
+       use AnyEvent::XMPP::Client;
 
 DESCRIPTION
-    NOTE: Net::XMPP2 is deprecated, for the newest version of this module
-    look for the AnyEvent::XMPP module!
+    NOTE: AnyEvent::XMPP is deprecated, for the newest version of this
+    module look for the AnyEvent::XMPP module!
 
-    This is the head module of the Net::XMPP2 XMPP client protocol (as
+    This is the head module of the AnyEvent::XMPP XMPP client protocol (as
     described in RFC 3920 and RFC 3921) framework.
 
-    Net::XMPP2::Connection is a RFC 3920 conformant "XML" stream
+    AnyEvent::XMPP::Connection is a RFC 3920 conformant "XML" stream
     implementation for clients, which handles TCP connect up to the resource
     binding. And provides low level access to the XML nodes on the XML
     stream along with some high level methods to send the predefined XML
     stanzas.
 
-    Net::XMPP2::IM::Connection is a more high level module, which is derived
-    from Net::XMPP2::Connection. It handles all the instant messaging client
-    functionality described in RFC 3921.
+    AnyEvent::XMPP::IM::Connection is a more high level module, which is
+    derived from AnyEvent::XMPP::Connection. It handles all the instant
+    messaging client functionality described in RFC 3921.
 
-    Net::XMPP2::Client is a multi account client class. It manages
+    AnyEvent::XMPP::Client is a multi account client class. It manages
     connections to multiple XMPP accounts and tries to offer a nice high
     level interface to XMPP communication.
 
     For a list of "Supported extensions" see below.
 
     There are also other modules in this distribution, for example:
-    Net::XMPP2::Util, Net::XMPP2::Writer, Net::XMPP2::Parser and those I
-    forgot :-) Those modules might be helpful and/or required if you want to
-    use this framework for XMPP.
+    AnyEvent::XMPP::Util, AnyEvent::XMPP::Writer, AnyEvent::XMPP::Parser and
+    those I forgot :-) Those modules might be helpful and/or required if you
+    want to use this framework for XMPP.
 
-    See also Net::XMPP2::Writer for a discussion about the brokeness of XML
-    in the XMPP specification.
+    See also AnyEvent::XMPP::Writer for a discussion about the brokeness of
+    XML in the XMPP specification.
 
     If you have any questions or seek for help look below under "SUPPORT".
 
 REQUIREMENTS
-    One of the major drawbacks I see for Net::XMPP2 is the long list of
+    One of the major drawbacks I see for AnyEvent::XMPP is the long list of
     required modules to make it work.
 
     AnyEvent
         For the I/O events and timers.
 
     Object::Event
-        The former Net::XMPP2::Event module has been outsourced to the
+        The former AnyEvent::XMPP::Event module has been outsourced to the
         Object::Event module to provide a more generic way for more other
         modules to register and call event callbacks.
 
@@ -97,137 +97,10 @@ RELEASE NOTES
     top):
 
   Version
-    *   0.14
+    *   0.15
 
-        Only minor additions and bugfixes. PLEASE NOTE: This is the last
-        release of this module under the name Net::XMPP2. All further
-        releases will be done under the name AnyEvent::XMPP!
-
-    *   0.12
-
-        API CHANGE: The connects are now non-blocking, you should revisit
-        the places you use the "connect" method of
-        Net::XMPP2::Connection/::IM::Connection directly!
-
-        Implemented XEP-0054 and XEP-0153 (see Net::XMPP2::Ext::VCard), on
-        top of that a serious bug in "split_jid" in Net::XMPP2::Util was
-        fixed and a "connect_timeout" argument can be set now for
-        Net::XMPP2::Connection.
-
-        Aside from that a few changes here and there, but nothing serious,
-        see the "Changes" file.
-
-    *   0.11
-
-        Mainly a maintenance release. The "init" method for the connection
-        classes have been made implicit on connect. So you should not call
-        it yourself anymore.
-
-        Aside from that there were some documentation fixes in
-        Net::XMPP2::Client.
-
-        Other additions were the xmpp_datetime_as_timestamp in
-        Net::XMPP2::Util and the nick collision callback in
-        Net::XMPP2::Ext::MUC, to change the nick when the nick has already
-        been taken when joining a room.
-
-        The tests have been tweaked a bit and a Pod::Coverage test has been
-        added.
-
-    *   0.10
-
-        Fixed some bugs and implemented an old/ancient authentication method
-        used by some very old (jabberd 1.4.2) servers. Also implemented a
-        chat session tracking mechanism to help the users of
-        Net::XMPP2::Client to get their message to the right resource. (See
-        also the method "send_tracked_message" of Net::XMPP2::IM::Account).
-
-    *   0.09
-
-        Just a bugfix release. Last change before the last release
-        introduced a bug with namespace handling in resource binding.
-
-    *   0.08
-
-        Lots of bugfixes and minor changes you might want to read about in
-        the "Changes" file. Added some examples which might be useful.
-
-        Introduced a character filter on the low XML writer level which will
-        filter out not allowed XML characters to prevent unexpected
-        disconnects. Arguably this is the programmers fault but I hope noone
-        is confuses if this module tries everything to be as reliable as
-        possible.
-
-    *   0.07
-
-        Many small changes in Net::XMPP2::Event. Implemented XEP-0199 (XMPP
-        Ping) and also whitespace pings in Net::XMPP2::Connection.
-
-        Also fixed some bugs.
-
-        For further details look in the "Changes" file.
-
-    *   0.06
-
-        The event API has been changed a bit, it's possible to intercept
-        events now, see Net::XMPP2::Event.
-
-        Implemented the old legacy XEP-0078 (IQ authentication), see also
-        Net::XMPP2::Ext for some notes about it.
-
-        Some bugs with JID preps have been fixed and some functions for JID
-        handling have been added to Net::XMPP2::Util.
-
-        Reworked the subscription system a bit, you now have to reply with
-        'subscribed' yourself, etc. (See also Net::XMPP2::IM::Connection
-        about subscriptions).
-
-        Implemented following new XEPs:
-
-           - XEP-0082 - XMPP Date and Time Profiles
-           - XEP-0091 - Delayed Delivery (legacy)
-           - XEP-0092 - Software Version
-           - XEP-0203 - Delayed Delivery (new)
-
-        For further information about them see Net::XMPP2::Ext.
-
-        I also started an implementation of XEP-0045 (Multi User Chats),
-        please consult the test t/z_05_muc.t and the API at
-        Net::XMPP2::Ext::MUC for the already working features. (Very basic
-        MUCing should work, but there are lots of edges still with error
-        reporting and all the other nice features).
-
-        Also enhanced the message API a bit see Net::XMPP2::IM::Message and
-        the methods of other classes that generate messages (eg. like
-        "make_message").
-
-        There has been a considerable efford in test writing. Added
-        instructions about the test suite below in section "TEST SUITE".
-
-        And another API change: "reply_iq_result" and "reply_iq_error" now
-        attach a from attribute themselves (see Net::XMPP2::Connection).
-
-    *   0.05
-
-        I added some unit tests and fixed a lot of bugs. The unit tests are
-        mostly for me (the AUTHOR) to not accidentally release a buggy
-        version with too ugly show stopper bugs.
-
-        The tests require network access to a jabber server and won't run
-        unless you set the right environment variable. If you want to run
-        these tests yourself you might want to take a look at
-        Net::XMPP2::TestClient.
-
-    *   0.04
-
-        After realizing that in band registration in Net::XMPP2::Ext was
-        already in in version 0.03 I finally had to implement it.
-
-        While implementing in band registration I implemented XEP-0066: Out
-        of Band Data. You can now receive and send URLs from and to others.
-        See also Net::XMPP2::Ext::OOB.
-
-        I also fixed some bugs in Net::XMPP2::Ext::Disco.
+        Renamed module from Net::XMPP2 to AnyEvent::XMPP. Net::XMPP2 is
+        herby deprecated!
 
     *   older
 
@@ -236,7 +109,7 @@ RELEASE NOTES
 
   TODO
     There are still lots of items on the TODO list (see also the TODO file
-    in the distribution of Net::XMPP2).
+    in the distribution of AnyEvent::XMPP).
 
 TEST SUITE
     If you are a developer and want to test either a server or maybe just
@@ -244,8 +117,8 @@ TEST SUITE
     developer test suite.
 
     This test suite is not enabled by default because it requires some human
-    interaction to set it up, please see Net::XMPP2::TestClient for hints
-    about the setup procedure for the test suite.
+    interaction to set it up, please see AnyEvent::XMPP::TestClient for
+    hints about the setup procedure for the test suite.
 
     I wrote the test suite mostly because I wanted to make sure I didn't
     break something essential before a release. The tests don't cover
@@ -255,9 +128,9 @@ TEST SUITE
     this test suite.
 
     The tests are also useful if you want to test a server implementation.
-    But there are maybe of course conformance issues with Net::XMPP2 itself,
-    so if you find something where Net::XMPP2 doesn't conform to the XMPP
-    RFCs or XEPs consult the BUGS section below.
+    But there are maybe of course conformance issues with AnyEvent::XMPP
+    itself, so if you find something where AnyEvent::XMPP doesn't conform to
+    the XMPP RFCs or XEPs consult the BUGS section below.
 
     If you find a server that doesn't handle something correctly but you
     need to interact with it you are free to implement workarounds and send
@@ -268,8 +141,8 @@ TEST SUITE
     probably not going to implement it.).
 
     Of course, if you find a bug in some server implementation don't forget
-    to file a bugreport to them, one hack less in Net::XMPP2 means more time
-    for bug fixing and improvements and new features.
+    to file a bugreport to them, one hack less in AnyEvent::XMPP means more
+    time for bug fixing and improvements and new features.
 
 Why (yet) another XMPP module?
     The main outstanding feature of this module in comparison to the other
@@ -286,20 +159,21 @@ Why (yet) another XMPP module?
     threads.
 
     Another thing was that I didn't like the APIs of the other modules. In
-    Net::XMPP2 I try to provide low level modules for speaking XMPP as
-    defined in RFC 3920 and RFC 3921 (see also Net::XMPP2::Connection and
-    Net::XMPP2::IM::Connection). But I also try to provide a high level API
-    for easier usage for instant messaging tasks and clients (eg.
-    Net::XMPP2::Client).
+    AnyEvent::XMPP I try to provide low level modules for speaking XMPP as
+    defined in RFC 3920 and RFC 3921 (see also AnyEvent::XMPP::Connection
+    and AnyEvent::XMPP::IM::Connection). But I also try to provide a high
+    level API for easier usage for instant messaging tasks and clients (eg.
+    AnyEvent::XMPP::Client).
 
 A note about TLS
     This module also supports TLS, as the specification of XMPP requires an
     implementation to support TLS.
 
     Maybe there are still some bugs in the handling of TLS in
-    Net::XMPP2::Connection. So keep an eye on TLS with this module. If you
-    encounter any problems it would be very helpful if you could debug them
-    or at least send me a detailed report on how to reproduce the problem.
+    AnyEvent::XMPP::Connection. So keep an eye on TLS with this module. If
+    you encounter any problems it would be very helpful if you could debug
+    them or at least send me a detailed report on how to reproduce the
+    problem.
 
     (As I use this module myself I don't expect TLS to be completly broken,
     but it might break under different circumstances than I have here. Those
@@ -308,10 +182,10 @@ A note about TLS
 
     I mainly expect problems where available data isn't properly read from
     the socket or written to it. You might want to take a look at the
-    "debug_send" and "debug_recv" events in Net::XMPP2::Connection.
+    "debug_send" and "debug_recv" events in AnyEvent::XMPP::Connection.
 
 Supported extensions
-    See Net::XMPP2::Ext for a list.
+    See AnyEvent::XMPP::Ext for a list.
 
 EXAMPLES
     Following examples are included in this distribution:
@@ -325,13 +199,13 @@ EXAMPLES
         installed. It's mostly used by the author to implement
         proof-of-concepts. Currently you start the client like this:
 
-           ../Net-XMPP2/samples/devcl/# perl ./devcl <jid> <password>
+           ../AnyEvent-XMPP/samples/devcl/# perl ./devcl <jid> <password>
 
         The client's main window displays a protocol dump and there is
         currently a service discovery browser implemented.
 
         This might be a valuable source if you look for more real-world
-        applications of Net::XMPP2.
+        applications of AnyEvent::XMPP.
 
     samples/conference_lister
         See below.
@@ -419,18 +293,18 @@ BUGS
 
     Please report any bugs or feature requests to "bug-net-xmpp2 at
     rt.cpan.org", or through the web interface at
-    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-XMPP2>. I will be
-    notified and then you'll automatically be notified of progress on your
-    bug as I make changes.
+    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=AnyEvent-XMPP>. I will
+    be notified and then you'll automatically be notified of progress on
+    your bug as I make changes.
 
 SUPPORT
     You can find documentation for this module with the perldoc command.
 
-        perldoc Net::XMPP2
+        perldoc AnyEvent::XMPP
 
     You can also look for information at:
 
-    *   IRC: Net::XMPP2 IRC Channel
+    *   IRC: AnyEvent::XMPP IRC Channel
 
           IRC Network: http://freenode.net/
           Server     : chat.freenode.net
@@ -438,25 +312,25 @@ SUPPORT
 
           Feel free to join and ask questions!
 
-    *   Net::XMPP2 Project Site
+    *   AnyEvent::XMPP Project Site
 
         <http://www.ta-sa.org/net_xmpp2>
 
     *   AnnoCPAN: Annotated CPAN documentation
 
-        <http://annocpan.org/dist/Net-XMPP2>
+        <http://annocpan.org/dist/AnyEvent-XMPP>
 
     *   CPAN Ratings
 
-        <http://cpanratings.perl.org/d/Net-XMPP2>
+        <http://cpanratings.perl.org/d/AnyEvent-XMPP>
 
     *   RT: CPAN's request tracker
 
-        <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Net-XMPP2>
+        <http://rt.cpan.org/NoAuth/Bugs.html?Dist=AnyEvent-XMPP>
 
     *   Search CPAN
 
-        <http://search.cpan.org/dist/Net-XMPP2>
+        <http://search.cpan.org/dist/AnyEvent-XMPP>
 
 ACKNOWLEDGEMENTS
     Thanks to the XSF for the development of an open instant messaging
@@ -470,9 +344,9 @@ ACKNOWLEDGEMENTS
 
     *   J. Cameijo Cerdeira
 
-        For pointing out a serious bug in "split_jid" in Net::XMPP2::Util
-        and suggesting to add a timeout argument to the "connect" method of
-        Net::XMPP2::SimpleConnection.
+        For pointing out a serious bug in "split_jid" in
+        AnyEvent::XMPP::Util and suggesting to add a timeout argument to the
+        "connect" method of AnyEvent::XMPP::SimpleConnection.
 
     *   Carlo von Loesch (aka lynX) <http://www.psyced.org/>
 

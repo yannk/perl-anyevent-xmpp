@@ -3,12 +3,12 @@
 use strict;
 no warnings;
 use Test::More;
-use Net::XMPP2::TestClient;
-use Net::XMPP2::IM::Message;
-use Net::XMPP2::Util qw/bare_jid/;
+use AnyEvent::XMPP::TestClient;
+use AnyEvent::XMPP::IM::Message;
+use AnyEvent::XMPP::Util qw/bare_jid/;
 
 my $cl =
-   Net::XMPP2::TestClient->new_or_exit (tests => 6, two_accounts => 1, finish_count => 2);
+   AnyEvent::XMPP::TestClient->new_or_exit (tests => 6, two_accounts => 1, finish_count => 2);
 my $C = $cl->client;
 
 my ($src, $dest);
@@ -22,7 +22,7 @@ $C->reg_cb (
       $src  = bare_jid $jid1;
       $dest = bare_jid $jid2;
 
-      my $msg = Net::XMPP2::IM::Message->new (
+      my $msg = AnyEvent::XMPP::IM::Message->new (
          body    => "test body",
          to      => $jid2,
          subject => "Just a test",

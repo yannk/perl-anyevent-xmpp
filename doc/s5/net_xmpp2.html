@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-<title>Net::XMPP2</title>
+<title>AnyEvent::XMPP</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <!-- metadata -->
 <meta name="generator" content="S5" />
@@ -31,7 +31,7 @@
 <div id="header"></div>
 <div id="footer">
 <h1>Deutscher Perl-Workshop 2008</h1>
-<h2>Net::XMPP2 - XMPP Instant Messaging für Perl</h2>
+<h2>AnyEvent::XMPP - XMPP Instant Messaging für Perl</h2>
 </div>
 
 </div>
@@ -40,7 +40,7 @@
 <div class="presentation">
 
 <div class="slide">
-<h1>Net::XMPP2 - XMPP Instant Messaging für Perl</h1>
+<h1>AnyEvent::XMPP - XMPP Instant Messaging für Perl</h1>
 <h3>Robin Redeker</h3>
 <!-- <h4>[affiliation of presenter]</h4> -->
 </div>
@@ -66,7 +66,7 @@
 </div>
 
 <div class="slide">
-   <h1>Zu Net::XMPP2</h1>
+   <h1>Zu AnyEvent::XMPP</h1>
    <ul class="incremental">
       <li>Perl Modul zum Entwickeln von XMPP Clienten und Komponenten.</li>
       <li>Implementiert <i>XML-Stream</i> handling.</li>
@@ -88,7 +88,7 @@
 </div>
 
 <div class="slide">
-   <h1>Was bietet Net::XMPP2</h1>
+   <h1>Was bietet AnyEvent::XMPP</h1>
    <ul class="incremental">
       <li>Event basiert (=&gt; keine Threads notwendig).</li>
       <li>Aktuelle Umsetzung der XMPP RFCs.</li>
@@ -97,25 +97,25 @@
 </div>
 
 <div class="slide">
-   <h1>Net::XMPP2 Überblick</h1>
-   <h2>Wichtigste Net::XMPP2 Module/Klassen:</h2>
+   <h1>AnyEvent::XMPP Überblick</h1>
+   <h2>Wichtigste AnyEvent::XMPP Module/Klassen:</h2>
    <ul class="incremental">
-      <li>Net::XMPP2::Event<br>- Eventmodell, zum registrieren von Callbacks.</li>
-      <li>Net::XMPP2::Connection <br>- Rohe <i>XML-Stream</i> implementation.</li>
-      <li>Net::XMPP2::IM::Connection <br>- API für Nachrichten und Präsenzverwaltung.</li>
-      <li>Net::XMPP2::Client <br>- API für Clienten.</li>
-      <li>Net::XMPP2::IM::Message <br>- Repräsentation von XMPP Nachrichten.</li>
+      <li>AnyEvent::XMPP::Event<br>- Eventmodell, zum registrieren von Callbacks.</li>
+      <li>AnyEvent::XMPP::Connection <br>- Rohe <i>XML-Stream</i> implementation.</li>
+      <li>AnyEvent::XMPP::IM::Connection <br>- API für Nachrichten und Präsenzverwaltung.</li>
+      <li>AnyEvent::XMPP::Client <br>- API für Clienten.</li>
+      <li>AnyEvent::XMPP::IM::Message <br>- Repräsentation von XMPP Nachrichten.</li>
    </ul>
 </div>
 
 <div class="slide">
-   <h1>Net::XMPP2::Event</h1>
-   <h2>Net::XMPP2::Event bietet Methoden zum registrieren von Event-Callbacks:</h2>
+   <h1>AnyEvent::XMPP::Event</h1>
+   <h2>AnyEvent::XMPP::Event bietet Methoden zum registrieren von Event-Callbacks:</h2>
    <ul class="incremental">
       <li><tt>$regid = reg_cb (session_ready =&gt; sub { ... })</tt></li>
       <li><tt>unreg_cb ($regid)</tt> &amp; <tt>unreg_me</tt> (in Callbacks)</li>
       <li><tt>event ($event, @args)</tt> zum Auslösen von Events.</li>
-      <li>Module erben das Interface (z.B. Net::XMPP2::Connection) =&gt; Verf&uuml;gbare Events in Doku.</li>
+      <li>Module erben das Interface (z.B. AnyEvent::XMPP::Connection) =&gt; Verf&uuml;gbare Events in Doku.</li>
    </ul>
 </div>
 
@@ -135,7 +135,7 @@
 <pre>
 #!/opt/perl/bin/perl
 use AnyEvent;
-use Net::XMPP2::IM::Connection;
+use AnyEvent::XMPP::IM::Connection;
 
 die &lt;&lt;USAGE unless @ARGV &gt;= 3;
 
@@ -150,7 +150,7 @@ $dest = $ARGV[2];
 <div class="slide">
    <h1>Beispiel - Connection Objekt</h1>
 <pre>
-$con = Net::XMPP2::IM::Connection-&gt;new (
+$con = AnyEvent::XMPP::IM::Connection-&gt;new (
 
    jid      =&gt; $ARGV[0],
    password =&gt; $ARGV[1],
@@ -169,7 +169,7 @@ $con-&gt;reg_cb ( session_ready =&gt; sub {
    print "Connected as $my_jid\n";
 
    $im_msg =
-      Net::XMPP2::IM::Message-&gt;new (
+      AnyEvent::XMPP::IM::Message-&gt;new (
          to =&gt; $dest, body =&gt; $msg)
 
    $im_msg-&gt;send ($con);

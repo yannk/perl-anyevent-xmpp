@@ -1,11 +1,11 @@
 #!perl
 use strict;
 use Test::More;
-use Net::XMPP2::Parser;
+use AnyEvent::XMPP::Parser;
 
 plan tests => 1;
 
-my $p = Net::XMPP2::Parser->new;
+my $p = AnyEvent::XMPP::Parser->new;
 
 my $recv;
 $p->set_stanza_cb (sub {

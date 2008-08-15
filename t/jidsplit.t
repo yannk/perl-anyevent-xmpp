@@ -1,7 +1,7 @@
 #!perl
 use strict;
 use Test::More;
-use Net::XMPP2::Util qw/split_jid/;
+use AnyEvent::XMPP::Util qw/split_jid/;
 
 my @data = (
    ['msn.im.sapo.pt'        => undef,   'msn.im.sapo.pt', undef],

@@ -3,13 +3,13 @@
 use strict;
 no warnings;
 use Test::More;
-use Net::XMPP2::TestClient;
-use Net::XMPP2::IM::Message;
-use Net::XMPP2::Util qw/bare_jid prep_bare_jid split_jid cmp_jid/;
-use Net::XMPP2::Ext::MUC;
+use AnyEvent::XMPP::TestClient;
+use AnyEvent::XMPP::IM::Message;
+use AnyEvent::XMPP::Util qw/bare_jid prep_bare_jid split_jid cmp_jid/;
+use AnyEvent::XMPP::Ext::MUC;
 
 my $cl =
-   Net::XMPP2::TestClient->new_or_exit (
+   AnyEvent::XMPP::TestClient->new_or_exit (
       tests => 2, two_accounts => 1, muc_test => 1, finish_count => 1
    );
 my $C = $cl->client;

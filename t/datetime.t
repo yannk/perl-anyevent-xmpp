@@ -1,7 +1,7 @@
 #!perl
 use strict;
 use Test::More tests => 21;
-use Net::XMPP2::Util qw/from_xmpp_datetime to_xmpp_datetime to_xmpp_time/;
+use AnyEvent::XMPP::Util qw/from_xmpp_datetime to_xmpp_datetime to_xmpp_time/;
 
 # to conversion
 is (to_xmpp_time (1, 2, 3)          , '03:02:01'      , "basic to_xmpp_time");

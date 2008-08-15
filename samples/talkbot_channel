@@ -2,12 +2,12 @@
 use strict;
 use utf8;
 use AnyEvent;
-use Net::XMPP2::Client;
-use Net::XMPP2::Ext::Disco;
-use Net::XMPP2::Ext::Version;
-use Net::XMPP2::Ext::MUC;
-use Net::XMPP2::Namespaces qw/xmpp_ns/;
-use Net::XMPP2::Util qw/node_jid res_jid/;
+use AnyEvent::XMPP::Client;
+use AnyEvent::XMPP::Ext::Disco;
+use AnyEvent::XMPP::Ext::Version;
+use AnyEvent::XMPP::Ext::MUC;
+use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
+use AnyEvent::XMPP::Util qw/node_jid res_jid/;
 
 my @msgs;
 
@@ -37,9 +37,9 @@ unless (@ARGV >= 3) {
 read_messages ($inputfile);
 
 my $j       = AnyEvent->condvar;
-my $cl      = Net::XMPP2::Client->new (debug => 1);
-my $disco   = Net::XMPP2::Ext::Disco->new;
-my $version = Net::XMPP2::Ext::Version->new;
+my $cl      = AnyEvent::XMPP::Client->new (debug => 1);
+my $disco   = AnyEvent::XMPP::Ext::Disco->new;
+my $version = AnyEvent::XMPP::Ext::Version->new;
 
 $cl->add_extension ($disco);
 $cl->add_extension ($version);
@@ -56,7 +56,7 @@ $cl->reg_cb (
    session_ready => sub {
       my ($cl, $acc) = @_;
       my $con = $acc->connection;
-      $muc = Net::XMPP2::Ext::MUC->new (disco => $disco, connection => $con);
+      $muc = AnyEvent::XMPP::Ext::MUC->new (disco => $disco, connection => $con);
       $con->add_extension ($muc);
       $muc->join_room ($room, node_jid ($acc->jid), sub {
          my ($rhdl, $me, $err) = @_;

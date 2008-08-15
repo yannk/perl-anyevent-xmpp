@@ -45,4 +45,4 @@ sub module_boilerplate_ok {
     );
 }
 
-module_boilerplate_ok('lib/Net/XMPP2.pm');
+module_boilerplate_ok('lib/AnyEvent/XMPP.pm');

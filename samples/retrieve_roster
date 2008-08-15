@@ -1,7 +1,7 @@
 #!/opt/perl/bin/perl
 use strict;
 use AnyEvent;
-use Net::XMPP2::IM::Connection;
+use AnyEvent::XMPP::IM::Connection;
 
 my $DEBUG   = 0;  # set to 1 if you want to see a protocol dump
 my $TIMEOUT = 30; # timeout the whole program after $TIMEOUT seconds
@@ -12,7 +12,7 @@ my ($jid, $pass) = @ARGV;
 
 my $j = AnyEvent->condvar;
 my $con =
-   Net::XMPP2::IM::Connection->new (
+   AnyEvent::XMPP::IM::Connection->new (
       jid              => $jid,
       password         => $pass,
       initial_presence => -5,

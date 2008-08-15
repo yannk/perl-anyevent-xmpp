@@ -2,9 +2,9 @@
 use strict;
 use utf8;
 use AnyEvent;
-use Net::XMPP2::Client;
-use Net::XMPP2::Ext::Registration;
-use Net::XMPP2::Util qw/split_jid/;
+use AnyEvent::XMPP::Client;
+use AnyEvent::XMPP::Ext::Registration;
+use AnyEvent::XMPP::Util qw/split_jid/;
 
 sub result {
    my ($reg, $ok, $error, $form, $comment) = @_;
@@ -36,13 +36,13 @@ die "\n";
 }
 
 my $j = AnyEvent->condvar;
-my $cl = Net::XMPP2::Client->new (debug => 1);
+my $cl = AnyEvent::XMPP::Client->new (debug => 1);
 $cl->add_account ($user, $pw);
 $cl->reg_cb (
    stream_pre_authentication => sub {
       my ($cl, $acc) = @_;
 
-      my $reg = Net::XMPP2::Ext::Registration->new (connection => $acc->connection);
+      my $reg = AnyEvent::XMPP::Ext::Registration->new (connection => $acc->connection);
 
       if ($act eq '') {
          $reg->send_registration_request (sub {
@@ -78,7 +78,7 @@ $cl->reg_cb (
    session_ready => sub {
       my ($cl, $acc) = @_;
 
-      my $reg = Net::XMPP2::Ext::Registration->new (connection => $acc->connection);
+      my $reg = AnyEvent::XMPP::Ext::Registration->new (connection => $acc->connection);
 
       if ($act eq 'unregister') {
          $reg->send_unregistration_request (
