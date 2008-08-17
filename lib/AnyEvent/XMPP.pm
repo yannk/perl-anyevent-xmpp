@@ -28,13 +28,10 @@ or:
 
 =head1 DESCRIPTION
 
-B<NOTE>: L<AnyEvent::XMPP> is deprecated, for the newest version of this module
-look for the L<AnyEvent::XMPP> module!
-
 This is the head module of the L<AnyEvent::XMPP> XMPP client protocol (as described in
 RFC 3920 and RFC 3921) framework.
 
-L<AnyEvent::XMPP::Connection> is a RFC 3920 conformant "XML" stream implementation
+L<AnyEvent::XMPP::Connection> is a RFC 3920 conforming "XML" stream implementation
 for clients, which handles TCP connect up to the resource binding. And provides
 low level access to the XML nodes on the XML stream along with some high
 level methods to send the predefined XML stanzas.
@@ -54,7 +51,7 @@ L<AnyEvent::XMPP::Util>, L<AnyEvent::XMPP::Writer>, L<AnyEvent::XMPP::Parser> an
 forgot :-) Those modules might be helpful and/or required if you want to use
 this framework for XMPP.
 
-See also L<AnyEvent::XMPP::Writer> for a discussion about the brokeness of XML in the XMPP
+See also L<AnyEvent::XMPP::Writer> for a discussion about the brokenness of XML in the XMPP
 specification.
 
 If you have any questions or seek for help look below under L</SUPPORT>.

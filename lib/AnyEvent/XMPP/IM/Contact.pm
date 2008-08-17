@@ -355,7 +355,8 @@ sub subscription_pending {
 
 =item B<nickname>
 
-Returns the nickname of this contact.
+Returns the nickname of this contact (or, if none is set in the
+roster, it returns the node part of the JID)
 
 =cut
 
@@ -364,8 +365,7 @@ sub nickname {
    my $n = $self->name;
 
    if ($n eq '') {
-      my ($user) = split_jid $self->jid;
-      $n = $user;
+      $n = node_jid ($self->jid);
    }
    $n
 }

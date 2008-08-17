@@ -1,7 +1,9 @@
 package AnyEvent::XMPP::IM::Account;
 use strict;
-use AnyEvent::XMPP::Util qw/stringprep_jid prep_bare_jid split_jid/;
+use AnyEvent::XMPP::Util qw/stringprep_jid prep_bare_jid split_jid cmp_jid node_jid/;
 use AnyEvent::XMPP::IM::Connection;
+
+use base Object::Event::;
 
 =head1 NAME
 
@@ -48,9 +50,19 @@ sub spawn_connection {
    );
 
    $self->{con}->reg_cb (
+      ext_before_session_ready => sub {
+         my ($con) = @_;
+         $self->{track} = {};
+      },
       ext_before_message => sub {
          my ($con, $msg) = @_;
-         $self->{track}->{prep_bare_jid $msg->from} = $msg->from;
+         my $t = $self->{track};
+         my $pfrom = prep_bare_jid $msg->from;
+
+         if (not (exists $t->{$pfrom}) || !cmp_jid ($t->{$pfrom}, $msg->from)) {
+            $t->{$pfrom} = $msg->from;
+            $self->event (tracked_message_destination => $pfrom, $msg->from);
+         }
       }
    );
 
@@ -122,6 +134,25 @@ sub nickname {
    $user
 }
 
+=item B<nickname_for_jid ($jid)>
+
+This method transforms the C<$jid> to a nickname. It looks the C<$jid>
+up in the roster and looks for a nickname. If no nickname could be found
+in the roster it returns the node part for the C<$jid>.
+
+=cut
+
+sub nickname_for_jid {
+   my ($self, $jid) = @_;
+
+   if ($self->is_connected) {
+      my $c = $self->connection->get_roster->get_contact ($jid);
+      return $c ? $c->nickname : node_jid ($jid);
+   } else {
+      return node_jid ($jid);
+   }
+}
+
 =item B<send_tracked_message ($msg)>
 
 This method sends the L<AnyEvent::XMPP::IM::Message> object in C<$msg>.
@@ -137,6 +168,24 @@ sub send_tracked_message {
    $msg->to ($self->{track}->{$bjid} || $bjid);
    $msg->send ($self->connection)
 }
+
+=back
+
+=head1 EVENTS
+
+For these events callbacks can be registered (with the L<Object::Event> interface):
+
+=over 4
+
+=item tracked_message_destination => $bare_jid, $full_jid
+
+This event is emitted whenever the message tracking mechanism changes (or sets)
+it's destination resource for the C<$bare_jid> to C<$full_jid>.
+
+=item removed
+
+Whenever the account is removed from the L<AnyEvent::XMPP::Client>
+(eg. when disconnected) this event is emitted before it is destroyed.
 
 =back
 

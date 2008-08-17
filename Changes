@@ -1,5 +1,8 @@
 Revision history for Net-XMPP2
 
+         - improved message tracking api in ::IM::Account
+         - added added_account/removed_account events to ::Client
+         - added set_accounts() function to ::Client
          - removed unneccessary sample (devcl)
          - renamed module from Net::XMPP2 to AnyEvent::XMPP
          - minor additions to ::Ext::Pubsub.

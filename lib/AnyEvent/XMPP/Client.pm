@@ -2,7 +2,7 @@ package AnyEvent::XMPP::Client;
 use strict;
 use AnyEvent;
 use AnyEvent::XMPP::IM::Connection;
-use AnyEvent::XMPP::Util qw/stringprep_jid prep_bare_jid dump_twig_xml bare_jid/;
+use AnyEvent::XMPP::Util qw/stringprep_jid prep_bare_jid dump_twig_xml bare_jid cmp_bare_jid/;
 use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
 use AnyEvent::XMPP::Extendable;
 use AnyEvent::XMPP::IM::Account;
@@ -58,6 +58,12 @@ and how something is being sent more precisely.
 Following arguments can be passed in C<%args>:
 
 =over 4
+
+=item debug => 1
+
+This will install callbacks which produce debugging output. This will
+require L<XML::Twig> to be installed (as it is used for pretty printing
+the "XML" output).
 
 =back
 
@@ -131,6 +137,8 @@ sub add_account {
             args     => $connection_args,
          );
 
+   $self->event (added_account => $acc);
+
    $self->update_connections
       if $self->{started};
 
@@ -193,7 +201,6 @@ sub update_connections {
             disconnect => sub {
                my ($con, $h, $p, $err) = @_;
                $self->event (connect_error => $acc, $err);
-               delete $self->{accounts}->{$acc};
                delete $self->{prep_connections}->{$acc->bare_jid};
                $con->unreg_me;
             },
@@ -231,6 +238,7 @@ sub remove_accounts {
    my ($self, $msg) = @_;
    for my $acc (keys %{$self->{accounts}}) {
       my $acca = $self->{accounts}->{$acc};
+      $self->event (removed_account => $acca);
       if ($acca->is_connected) { $acca->connection ()->disconnect ($msg) }
       delete $self->{accounts}->{$acc};
    }
@@ -245,10 +253,40 @@ The reason for the removal can be given via C<$reason>.
 
 sub remove_account {
    my ($self, $acc, $reason) = @_;
+   $self->event (removed_account => $acc);
    if ($acc->is_connected) {
       $acc->connection ()->disconnect ($reason);
    }
    delete $self->{accounts}->{$acc};
+}
+
+=head2 set_accounts (%$accounts)
+
+Sets the set of (to be connected) accounts. C<$accounts> must be a hash
+reference which contains the JIDs of the accounts as keys and the values for
+C<$password>, C<$host>, C<$port> and C<$connection_args> as described in
+C<add_account> above.
+
+If the account is not yet connected it will be connected on the next call to
+C<update_connections> and if an account is connected that is not in
+C<$accounts> it will be disconnected.
+
+=cut
+
+sub set_accounts {
+   my ($self, $accounts) = @_;
+
+
+   for my $accid (keys %{$self->{accounts}}) {
+      my $acca = $self->{accounts}->{$accid};
+      if (!grep { cmp_bare_jid ($acca->jid, $_) } keys %$accounts) {
+         $self->remove_account ($accid, "removed from set");
+      }
+   }
+
+   for my $acc_jid (keys %$accounts) {
+      $self->add_account ($acc_jid, @{$accounts->{$acc_jid}});
+   }
 }
 
 =head2 send_message ($msg, $dest_jid, $src, $type)
@@ -479,6 +517,14 @@ over the connection to the C<$account> - after a connection was established.
 C<$error> is an error object which is derived from L<AnyEvent::XMPP::Error>.
 It will reveal human readable information about the error by calling the C<string ()>
 method (which returns a descriptive error string about the nature of the error).
+
+=item added_account => $account
+
+Called whenever an account is added.
+
+=item removed_account => $account
+
+Called whenever an account is removed.
 
 =back
 
