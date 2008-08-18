@@ -2,5 +2,5 @@ These people have helped to work on AnyEvent::XMPP:
 
    * melo - minor fixes on AnyEvent::XMPP::Connection
    * Chris Miceli - additional work on the pubsub extension
-   * Johansson Olle E - pointing out documentation errors
-                        and missing from attribute for messages
+   * Johansson Olle E - pointing out documentation errors and typos all 
+                        over the module and missing from attribute for messages

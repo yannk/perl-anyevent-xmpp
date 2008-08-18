@@ -14,7 +14,7 @@ binmode STDOUT, ":utf8";
 my ($jid, $pw) = @ARGV;
 
 unless (@ARGV >= 2) {
-   warn "usage: test_cl2 <jid> <password>\n";
+   warn "usage: pubsub_create <jid> <password>\n";
    exit;
 }
 
