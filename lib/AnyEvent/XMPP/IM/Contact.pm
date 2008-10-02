@@ -1,7 +1,7 @@
 package AnyEvent::XMPP::IM::Contact;
 use strict;
 no warnings;
-use AnyEvent::XMPP::Util qw/split_jid/;
+use AnyEvent::XMPP::Util qw/split_jid node_jid/;
 use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
 use AnyEvent::XMPP::IM::Presence;
 use AnyEvent::XMPP::IM::Message;
