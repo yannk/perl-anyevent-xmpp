@@ -286,7 +286,7 @@ sub check_online {
 }
 
 sub send_join {
-   my ($self, $nick, $password) = @_;
+   my ($self, $nick, $password, $history) = @_;
    $self->check_online or return;
 
    $self->{nick_jid} = _join_jid_nick ($self->{jid}, $nick);
@@ -296,6 +296,17 @@ sub send_join {
    if (defined $password) {
       push @chlds, { name => 'password', childs => [ $password ] };
    }
+
+	if (defined $history) {
+		my $h;
+		push(@{$h->{attrs}}, ('maxchars', $history->{chars})) if (defined $history->{chars});
+		push(@{$h->{attrs}}, ('maxstanzas', $history->{stanzas})) if (defined $history->{stanzas});
+		push(@{$h->{attrs}}, ('seconds', $history->{seconds})) if (defined $history->{seconds});
+		if (defined $h->{attrs}) {
+			$h->{name} = 'history';
+			push(@chlds, $h);
+		}
+	}
 
    my $con = $self->{muc}->{connection};
    $con->send_presence (undef, {

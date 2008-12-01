@@ -158,6 +158,20 @@ C<%args> hash can contain one of the following keys:
 This is the timeout for joining the room.
 The default timeout is 60 seconds if the timeout is not specified.
 
+=item history => {}
+
+Manage MUC-history from XEP-0045 (7.1.16)
+Hash can contain of the following keys: C<chars>, C<stanzas>, C<seconds>
+
+Example:
+
+	history => {chars => 0} # don't load history
+	history => {stanzas => 3} # load last 3 history elements
+	history => {seconds => 300, chars => 500}
+		# load history in last 5 minutes, but max 500 characters
+
+TODO: add C<since> attributes
+
 =item create_instant => $bool
 
 If you set C<$bool> to a true value we try to establish an instant room
@@ -222,7 +236,7 @@ sub join_room {
          if ($error->type eq 'nickname_in_use'
              && exists $args{nickcollision_cb}) {
             $nick = $args{nickcollision_cb}->($nick);
-            $room->send_join ($nick, $args{password});
+            $room->send_join ($nick, $args{password}, $args{history});
             return;
          }
 
@@ -253,7 +267,7 @@ sub join_room {
       }
    );
 
-   $room->send_join ($nick, $args{password});
+   $room->send_join ($nick, $args{password}, $args{history});
 }
 
 sub install_room {
