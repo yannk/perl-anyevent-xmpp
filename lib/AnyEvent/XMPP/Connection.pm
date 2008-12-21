@@ -10,7 +10,6 @@ use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
 use AnyEvent::XMPP::Extendable;
 use AnyEvent::XMPP::Error;
 use Object::Event;
-use Net::DNS;
 use Digest::SHA1 qw/sha1_hex/;
 use Encode;
 
@@ -81,30 +80,10 @@ This is the destination host we are going to connect to.
 As the connection won't be automatically connected use C<connect>
 to initiate the connect.
 
-Note: A SRV RR lookup will be performed to discover the real hostname
-and port to connect to. See also C<connect>. This option is usually not
-very useful if SRV RR lookup is performed, as it is only used as a fallback.
-If you want to force the hostname to a certain value use C<override_host>,
-which also disabled SRV RR lookup.
-
-=item override_host => $host
-
-If this option is set no SRV RR lookup is performed and the C<$host>
-will be used to connect to.
-
-=item override_port => $port
-
-If this option is set the port of the server we are going to connect to
-is forced to C<$port> (even if SRV RR tells us something different).
-
 =item port => $port
 
-This is optional, the default port is 5222.
-
-Note: A SRV RR lookup will be performed to discover the real hostname
-and port to connect to. See also C<connect>. This option is usually not
-very useful if SRV RR lookup is performed, as it is only used as a fallback.
-If you want to force the port to a certain value use C<override_port>.
+This is optional, the default port is 'xmpp', which will used as C<$service>
+argument to C<tcp_connect> of L<AnyEvent::Socket>.
 
 =item connect_timeout => $timeout
 
@@ -170,16 +149,6 @@ is true.
 This will set the whitespace ping interval (in seconds). The default interval
 are 60 seconds.  You can disable the whitespace ping by setting C<$interval> to
 0.
-
-=item blocking_write => $bool
-
-This is a special option which will make all send operations C<send_message>, C<send_iq>
-and C<send_presence> block until the output buffer is empty. If this option is
-enabled every C<send_message>, C<send_iq> and C<send_presence> call will call
-C<drain> internally to block until the output buffer is empty.
-
-This option is DISABLED by default and you should only enable it if you know
-what you are doing.
 
 =back
 
@@ -316,17 +285,9 @@ sub new {
    return $self;
 }
 
-=item B<connect ($no_srv_rr)>
+=item B<connect ()>
 
 Try to connect (non blocking) to the domain and port passed in C<new>.
-
-A SRV RR lookup will be performed on the domain to discover
-the host and port to use. If you don't want this set C<$no_srv_rr>
-to a true value. C<$no_srv_rr> is false by default.
-
-As the SRV RR lookup might return multiple host and you fail to
-connect to one you might just call this function again to try a
-different host.
 
 The connection is performed non blocking, so this method will just
 trigger the connection process. The event C<connect> will be emitted
@@ -341,30 +302,9 @@ was successfully connected.
 =cut
 
 sub connect {
-   my ($self, $no_srv_rr) = @_;
+   my ($self) = @_;
 
-   my ($host, $port) = ($self->{domain}, $self->{port} || 5222);
-   if ($self->{override_host}) {
-      $host = $self->{override_host};
-
-   } else {
-      unless ($no_srv_rr) {
-         my $res = Net::DNS::Resolver->new;
-         my $p   = $res->query ('_xmpp-client._tcp.'.$host, 'SRV');
-         if ($p) {
-            my @srvs = grep { $_->type eq 'SRV' } $p->answer;
-            if (@srvs) {
-               @srvs = sort { $a->priority <=> $b->priority } @srvs;
-               @srvs = sort { $b->weight <=> $a->weight } @srvs; # TODO
-               $port = $srvs[0]->port;
-               $host = $srvs[0]->target;
-            }
-         }
-      }
-   }
-
-   $port = $self->{override_port} if defined $self->{override_port};
-
+   my ($host, $port) = ($self->{domain}, defined $self->{port} ? $self->{port} : 5222);
    $self->SUPER::connect ($host, $port, $self->{connect_timeout});
 }
 
@@ -990,21 +930,6 @@ This is the ID of this stream that was given us by the server.
 =cut
 
 sub stream_id { $_[0]->{stream_id} }
-
-=item B<drain>
-
-This method will block until the output buffer is empty.
-For example if you want to block the program until the message sent
-by C<send_message>, C<send_iq> or C<send_presence> or any other
-sending method, is written out to the kernel completely.
-
-NOTE: Use this method only if you know what you are doing!
-
-Also note that this function will emit the C<send_buffer_empty> event when
-the buffer was emptied successfully. On error the connection is disconnected
-with the error message.
-
-=cut
 
 =back
 

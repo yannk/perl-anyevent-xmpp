@@ -65,7 +65,7 @@ modules to make it work.
 
 =item L<AnyEvent>
 
-For the I/O events and timers.
+For the I/O events, timers, TCP, TLS, DNS and I/O buffering.
 
 =item L<Object::Event>
 
@@ -96,10 +96,6 @@ For stringprep profiles to handle JIDs.
 =item L<Net::SSLeay>
 
 For SSL connections.
-
-=item L<Net::DNS>
-
-For SRV RR lookups.
 
 =item L<Digest::SHA1>
 

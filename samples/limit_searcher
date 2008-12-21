@@ -22,8 +22,6 @@ $cl->reg_cb (
       my ($cl, $acc) = @_;
       my $con = $acc->connection;
 
-      $con->{max_write_length} = 4096;
-
       if (($last_nok_size - $last_ok_size) < $delta) {
          print "Found limit in delta range: $last_ok_size for ".$acc->jid."\n";
          $con->disconnect ("found limit");

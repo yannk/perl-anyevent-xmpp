@@ -32,9 +32,13 @@ $C->reg_cb (
          to      => $jid2,
       );
 
+      $C->reg_cb (send_buffer_empty => sub {
+         my ($C) = @_;
+         $C->unreg_me;
+         $con->disconnect ("done sending");
+      });
+
       $msg->send ($con);
-      $con->drain;
-      $con->disconnect ("done sending");
    },
    disconnect => sub {
       my ($C, $acc, $h, $p, $msg) = @_;

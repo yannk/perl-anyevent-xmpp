@@ -1,5 +1,13 @@
 Revision history for Net-XMPP2
 
+0.2
+         - Using the better tested AnyEvent::Handle and
+           AnyEvent::Socket for DNS resolution, TCP connect and TLS now.
+         - override_host and override_port have been removed.
+         - weird DNS SRV handling and comments have been removed.
+         - removed blocked_write option and drain function, send_buffer_empty event
+           should be used. blocking behaviour should be emulated with send_buffer_empty
+           at the toplevel of the program.
          - improved message tracking api in ::IM::Account
          - added added_account/removed_account events to ::Client
          - added set_accounts() function to ::Client
