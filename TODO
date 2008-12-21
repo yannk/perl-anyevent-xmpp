@@ -1,5 +1,7 @@
 'x' means: is done!
 
+- add MUC history patch from Ky6uk
+
 - add nick_change to documentation
 - Implement XEP-0045: Multi-User Chat
    x store full jid info on entering room
