@@ -260,7 +260,7 @@ Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2007 Robin Redeker, all rights reserved.
+Copyright 2007, 2008 Robin Redeker, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

@@ -5,3 +5,5 @@ These people have helped to work on AnyEvent::XMPP:
    * Johansson Olle E - pointing out documentation errors and typos all 
                         over the module and missing from attribute for messages.
    * Ky6uk            - adding MUC history support.
+   * J. Cameijo Cerdeira - Pointing out bugs and making suggestions.
+   * Carlo von Loesch (aka lynX) - Pointing out typos.

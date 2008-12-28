@@ -309,11 +309,11 @@ Robin Redeker, C<< <elmex at ta-sa.org> >>, JID: C<< <elmex at jabber.org> >>
 =head1 BUGS
 
 Please note that I'm currently (July 2007) the only developer on this project
-and I'm very busy with my studies in Computer Science in Summer 2007. If you
-want to ease my workload or want timely releases, please send me patches instead
-of bug reports or feature requests. I won't forget the reports or requests if
-you can't or didn't send patches, but I can't gurantee immediate response.
-But I will of course try to fix/implement them as soon as possible!
+and I'm very busy with my studies in Computer Science. If you want to ease my
+workload or want timely releases, please send me patches instead of bug reports
+or feature requests. I won't forget the reports or requests if you can't or
+didn't send patches, but I can't gurantee immediate response. But I will of
+course try to fix/implement them as soon as possible!
 
 Also try to be as precise as possible with bug reports, if you can't send a
 patch, it would be best if you find out which code doesn't work and tell me
@@ -387,11 +387,16 @@ L<AnyEvent::XMPP::SimpleConnection>.
 
 For pointing out some typos.
 
+=item * All other people ..
+
+... I mentioned in the CONTRIBUTORS file which comes with the L<AnyEvent::XMPP>
+distribution.
+
 =back
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2007 Robin Redeker, all rights reserved.
+Copyright 2007, 2008 Robin Redeker, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
