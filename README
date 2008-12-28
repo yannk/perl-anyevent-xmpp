@@ -2,7 +2,7 @@ NAME
     AnyEvent::XMPP - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.14
+    Version 0.2
 
 SYNOPSIS
        use AnyEvent::XMPP::Connection;
@@ -16,13 +16,10 @@ SYNOPSIS
        use AnyEvent::XMPP::Client;
 
 DESCRIPTION
-    NOTE: AnyEvent::XMPP is deprecated, for the newest version of this
-    module look for the AnyEvent::XMPP module!
-
     This is the head module of the AnyEvent::XMPP XMPP client protocol (as
     described in RFC 3920 and RFC 3921) framework.
 
-    AnyEvent::XMPP::Connection is a RFC 3920 conformant "XML" stream
+    AnyEvent::XMPP::Connection is a RFC 3920 conforming "XML" stream
     implementation for clients, which handles TCP connect up to the resource
     binding. And provides low level access to the XML nodes on the XML
     stream along with some high level methods to send the predefined XML
@@ -43,7 +40,7 @@ DESCRIPTION
     those I forgot :-) Those modules might be helpful and/or required if you
     want to use this framework for XMPP.
 
-    See also AnyEvent::XMPP::Writer for a discussion about the brokeness of
+    See also AnyEvent::XMPP::Writer for a discussion about the brokenness of
     XML in the XMPP specification.
 
     If you have any questions or seek for help look below under "SUPPORT".
@@ -53,7 +50,7 @@ REQUIREMENTS
     required modules to make it work.
 
     AnyEvent
-        For the I/O events and timers.
+        For the I/O events, timers, TCP, TLS, DNS and I/O buffering.
 
     Object::Event
         The former AnyEvent::XMPP::Event module has been outsourced to the
@@ -78,9 +75,6 @@ REQUIREMENTS
     Net::SSLeay
         For SSL connections.
 
-    Net::DNS
-        For SRV RR lookups.
-
     Digest::SHA1
         For component authentication and old-style authentication.
 
@@ -97,10 +91,19 @@ RELEASE NOTES
     top):
 
   Version
-    *   0.15
+    *   0.2
 
         Renamed module from Net::XMPP2 to AnyEvent::XMPP. Net::XMPP2 is
         herby deprecated!
+
+        Rewrote the low-level socket stuff to use AnyEvent::Socket and
+        AnyEvent::Handle. Removed blocking write functionality, which can't
+        be supported that easily with AnyEvent::Handle (however, if you want
+        to wait until the send-buffer is empty you best use the
+        "send_buffer_empty" event of AnyEvent::XMPP::Connection).
+
+        For more details consult the Changes file of the AnyEvent::XMPP
+        distribution.
 
     *   older
 
@@ -135,7 +138,7 @@ TEST SUITE
     If you find a server that doesn't handle something correctly but you
     need to interact with it you are free to implement workarounds and send
     me a patch, or even ask me whether I might want to look into the issue
-    (I can't gurantee anything here, but I want this module to be as
+    (I can't guarantee anything here, but I want this module to be as
     interoperable as possible. But if the implementation of a workaround for
     some non-conformant software will complicate the code too much I'm
     probably not going to implement it.).
@@ -175,7 +178,7 @@ A note about TLS
     them or at least send me a detailed report on how to reproduce the
     problem.
 
-    (As I use this module myself I don't expect TLS to be completly broken,
+    (As I use this module myself I don't expect TLS to be completely broken,
     but it might break under different circumstances than I have here. Those
     circumstances might be a different load of data pumped through the TLS
     connection.)
@@ -193,19 +196,6 @@ EXAMPLES
     samples/simple_example_1
         This example script just connects to a server and sends a message
         and also displays incoming messages on stdout.
-
-    samples/devcl/devcl
-        This is a more advanced 'example'. It requires you to have Gtk2
-        installed. It's mostly used by the author to implement
-        proof-of-concepts. Currently you start the client like this:
-
-           ../AnyEvent-XMPP/samples/devcl/# perl ./devcl <jid> <password>
-
-        The client's main window displays a protocol dump and there is
-        currently a service discovery browser implemented.
-
-        This might be a valuable source if you look for more real-world
-        applications of AnyEvent::XMPP.
 
     samples/conference_lister
         See below.

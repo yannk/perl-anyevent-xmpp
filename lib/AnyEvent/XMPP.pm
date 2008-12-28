@@ -227,20 +227,6 @@ Following examples are included in this distribution:
 This example script just connects to a server and sends a message and
 also displays incoming messages on stdout.
 
-=item B<samples/devcl/devcl>
-
-This is a more advanced 'example'. It requires you to have L<Gtk2>
-installed. It's mostly used by the author to implement proof-of-concepts.
-Currently you start the client like this:
-
-   ../AnyEvent-XMPP/samples/devcl/# perl ./devcl <jid> <password>
-
-The client's main window displays a protocol dump and there is currently
-a service discovery browser implemented.
-
-This might be a valuable source if you look for more real-world
-applications of L<AnyEvent::XMPP>.
-
 =item B<samples/conference_lister>
 
 See below.
