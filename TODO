@@ -1,7 +1,5 @@
 'x' means: is done!
 
-- add MUC history patch from Ky6uk
-
 - add nick_change to documentation
 - Implement XEP-0045: Multi-User Chat
    x store full jid info on entering room
@@ -82,11 +80,7 @@
    - jabber component
 - fix the inaviodable memoryleaks with the callbacks
   the circular object structs.
-- allow the inclusion of custom (raw) XML into AnyEvent::XMPP::IM::Messages!
-   - eg. by attaching usual $create_cb callbacks which can also be
-     simxml nodes. (sub { $_[0]->raw ("...") } then also works.)
 - put some serious stuff in the synopsises
-- test enable_feature by time
 - look at attribute namespace preservation! (if they got
   prefixes, how to parse this with expat?
   see also http://www.w3.org/TR/REC-xml-names/#scoping-defaulting )
