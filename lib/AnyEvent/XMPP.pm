@@ -8,11 +8,11 @@ AnyEvent::XMPP - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.14
+Version 0.2
 
 =cut
 
-our $VERSION = '0.14';
+our $VERSION = '0.2';
 
 =head1 SYNOPSIS
 
@@ -118,10 +118,17 @@ Here are some notes to the last releases (release of this version is at top):
 
 =over 4
 
-=item * 0.15
+=item * 0.2
 
 Renamed module from L<Net::XMPP2> to L<AnyEvent::XMPP>. L<Net::XMPP2> is herby
 deprecated!
+
+Rewrote the low-level socket stuff to use L<AnyEvent::Socket> and L<AnyEvent::Handle>.
+Removed blocking write functionality, which can't be supported that
+easily with L<AnyEvent::Handle> (however, if you want to wait until the send-buffer
+is empty you best use the C<send_buffer_empty> event of L<AnyEvent::XMPP::Connection>).
+
+For more details consult the Changes file of the AnyEvent::XMPP distribution.
 
 =item * older
 
@@ -157,7 +164,7 @@ consult the L<BUGS> section below.
 
 If you find a server that doesn't handle something correctly but you need to
 interact with it you are free to implement workarounds and send me a patch, or
-even ask me whether I might want to look into the issue (I can't gurantee
+even ask me whether I might want to look into the issue (I can't guarantee
 anything here, but I want this module to be as interoperable as possible. But
 if the implementation of a workaround for some non-conformant software will
 complicate the code too much I'm probably not going to implement it.).
@@ -196,7 +203,7 @@ So keep an eye on TLS with this module. If you encounter any problems it would b
 very helpful if you could debug them or at least send me a detailed report on how
 to reproduce the problem.
 
-(As I use this module myself I don't expect TLS to be completly broken, but it
+(As I use this module myself I don't expect TLS to be completely broken, but it
 might break under different circumstances than I have here.  Those
 circumstances might be a different load of data pumped through the TLS
 connection.)
