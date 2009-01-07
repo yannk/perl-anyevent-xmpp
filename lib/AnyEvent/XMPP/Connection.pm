@@ -79,11 +79,15 @@ to check this.
 This is the destination host we are going to connect to.
 As the connection won't be automatically connected use C<connect>
 to initiate the connect.
+B<NOTE:> To disable DNS SRV lookup you need to specify the port B<number>
+yourself. See C<port> below.
 
 =item port => $port
 
 This is optional, the default port is 'xmpp', which will used as C<$service>
 argument to C<tcp_connect> of L<AnyEvent::Socket>.
+B<NOTE:> If you specify the port number here, B<no> DNS SRV lookup will be done
+when connecting.
 
 =item connect_timeout => $timeout
 

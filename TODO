@@ -1,5 +1,8 @@
 'x' means: is done!
 
+- rename 'domain' parameter to 'host',
+  and rename the internal host/port to peer_host and
+  peer_port.
 - add nick_change to documentation
 - Implement XEP-0045: Multi-User Chat
    x store full jid info on entering room
