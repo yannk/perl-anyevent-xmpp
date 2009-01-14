@@ -5,6 +5,7 @@ Revision history for Net-XMPP2
            AnyEvent::XMPP::IM::Account, also 'host' is used for overriding
            the destination host now (and not 'domain', as it was in version
            0.2).
+         - fixed RT #42194 (Domain vs. host and GSSAPI).
 
 0.2 Sun Dec 28 15:09:25 CET 2008
          - Using the better tested AnyEvent::Handle and

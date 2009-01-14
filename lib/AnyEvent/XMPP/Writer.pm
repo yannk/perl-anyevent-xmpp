@@ -230,23 +230,42 @@ end.
 sub send_sasl_auth {
    my ($self, $mechanisms, $user, $domain, $pass) = @_;
 
-   my $sasl = Authen::SASL->new (
-      mechanism => $mechanisms,
-      callback => {
- # XXX: removed authname, because it ensures maximum connectivitiy
- #      along multiple server implementations - XMPP is such a crap
- #        authname => $user . '@' . $domain,
-         user => $user,
-         pass => $pass,
-      }
-   );
+   my $data;
+   my @mechs = split(' ' , $mechanisms);
+    
+   my $found_mech = 0;
+   while (!$found_mech) {
+      my $sasl = Authen::SASL->new (
+         mechanism => join(' ',  @mechs),
+         callback => {
+            # XXX: removed authname, because it ensures maximum connectivitiy
+            #      along multiple server implementations - XMPP is such a crap
+            #        authname => $user . '@' . $domain,
+            user => $user,
+            pass => $pass,
+         }
+      );
 
-   $self->{sasl} = $sasl->client_new ('xmpp', $domain);
+      my $mech = $sasl->client_new ('xmpp', $domain);
+      $data = $mech->client_start;
+
+      if (my $e = $mech->error) {
+         @mechs = grep { $_ ne $mech->mechanism } @mechs;
+         die "No usable SASL mechanism found (tried: "
+             . join (', ', @mechs)
+             . ")!\n"
+            unless @mechs;
+         next;
+      }
+
+      $found_mech = 1;
+      $self->{sasl} = $mech;
+   }
 
    my $w = $self->{writer};
    $w->addPrefix (xmpp_ns ('sasl'),   '');
    $w->startTag ([xmpp_ns ('sasl'), 'auth'], mechanism => $self->{sasl}->mechanism);
-   $w->characters (MIME::Base64::encode_base64 ($self->{sasl}->client_start, ''));
+   $w->characters (MIME::Base64::encode_base64 ($data, ''));
    $w->endTag;
    $self->flush;
 }
@@ -264,8 +283,9 @@ sub send_sasl_response {
    my $ret = '';
    unless ($challenge =~ /rspauth=/) { # rspauth basically means: we are done
       $ret = $self->{sasl}->client_step ($challenge);
-      unless ($ret) {
-         die "Error in SASL authentication in client step with challenge: '$challenge'\n";
+      if (my $e = $self->{sasl}->error) {
+         #die "Error in SASL authentication in client step with challenge: '$challenge'\n";
+         die "Error in SASL authentication in client step with challenge: '" . $e . "'\n";
       }
    }
    my $w = $self->{writer};
