@@ -1,5 +1,9 @@
 Revision history for Net-XMPP2
 
+         - fixed a bug in disconnect error reporting.
+         - fixed bad parameter passing of AnyEvent::XMPP::Client to
+           AnyEvent::XMPP::IM::Account.
+
 0.2 Sun Dec 28 15:09:25 CET 2008
          - Using the better tested AnyEvent::Handle and
            AnyEvent::Socket for DNS resolution, TCP connect and TLS now.

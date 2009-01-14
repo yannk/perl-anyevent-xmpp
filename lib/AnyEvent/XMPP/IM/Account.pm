@@ -43,8 +43,8 @@ sub spawn_connection {
    $self->{con} = AnyEvent::XMPP::IM::Connection->new (
       jid      => $self->jid,
       password => $self->{password},
-      ($self->{host} ? (override_host => $self->{host}) : ()),
-      ($self->{port} ? (override_port => $self->{port}) : ()),
+      (defined $self->{domain} ? (domain => $self->{host}) : ()),
+      (defined $self->{port}   ? (port   => $self->{port}) : ()),
       %args,
       %{$self->{args} || {}},
    );

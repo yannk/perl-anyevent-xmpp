@@ -86,8 +86,8 @@ yourself. See C<port> below.
 
 This is optional, the default port is 'xmpp', which will used as C<$service>
 argument to C<tcp_connect> of L<AnyEvent::Socket>.
-B<NOTE:> If you specify the port number here, B<no> DNS SRV lookup will be done
-when connecting.
+B<NOTE:> If you specify the port number here (instead of just 'xmpp'),
+B<no> DNS SRV lookup will be done when connecting.
 
 =item connect_timeout => $timeout
 
@@ -308,7 +308,7 @@ was successfully connected.
 sub connect {
    my ($self) = @_;
 
-   my ($host, $port) = ($self->{domain}, defined $self->{port} ? $self->{port} : 5222);
+   my ($host, $port) = ($self->{domain}, defined $self->{port} ? $self->{port} : 'xmpp');
    $self->SUPER::connect ($host, $port, $self->{connect_timeout});
 }
 
