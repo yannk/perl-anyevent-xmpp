@@ -230,7 +230,6 @@ sub send_sasl_auth {
    my ($self, $mechs, $user, $host, $pass) = @_;
 
    my $data;
-   warn "SASL[@$mechs]\n";
     
    my $found_mech = 0;
    while (!$found_mech) {
