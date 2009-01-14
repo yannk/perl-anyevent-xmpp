@@ -252,6 +252,9 @@ sub new {
       $self->{resource} = $res if defined $res;
    }
 
+   $self->{host} = $self->{domain} unless defined $self->{host};
+   $self->{port} = 'xmpp-client'   unless defined $self->{port};
+
    my $proxy_cb = sub {
       my ($self, $er) = @_;
       $self->event (error => $er);
@@ -323,15 +326,7 @@ was successfully connected.
 
 sub connect {
    my ($self) = @_;
-
-   my ($host, $port) = (
-      (defined $self->{host}
-         ? $self->{host}
-         : $self->{domain}),
-      (defined $self->{port}
-         ? $self->{port} : 'xmpp-client')
-   );
-   $self->SUPER::connect ($host, $port, $self->{connect_timeout});
+   $self->SUPER::connect ($self->{host}, $self->{port}, $self->{connect_timeout});
 }
 
 sub connected {
@@ -624,8 +619,7 @@ sub send_sasl_auth {
    }
 
    $self->{writer}->send_sasl_auth (
-      (join ' ', map { $_->text } @mechs),
-      $self->{username}, $self->{domain}, $self->{password}
+      [map { $_->text } @mechs], $self->{username}, $self->{host}, $self->{password}
    );
 }
 

@@ -219,24 +219,23 @@ sub send_end_of_stream {
    $self->flush;
 }
 
-=item B<send_sasl_auth ($mechanisms)>
+=item B<send_sasl_auth ($mechanisms, $user, $host, $pass)>
 
 This methods sends the start of a SASL authentication. C<$mechanisms> is
-a string with space seperated mechanisms that are supported by the other
-end.
+an array reference, containing the mechanism names that are to be tryed.
 
 =cut
 
 sub send_sasl_auth {
-   my ($self, $mechanisms, $user, $domain, $pass) = @_;
+   my ($self, $mechs, $user, $host, $pass) = @_;
 
    my $data;
-   my @mechs = split(' ' , $mechanisms);
+   warn "SASL[@$mechs]\n";
     
    my $found_mech = 0;
    while (!$found_mech) {
       my $sasl = Authen::SASL->new (
-         mechanism => join(' ',  @mechs),
+         mechanism => join(' ',  @$mechs),
          callback => {
             # XXX: removed authname, because it ensures maximum connectivitiy
             #      along multiple server implementations - XMPP is such a crap
@@ -246,15 +245,15 @@ sub send_sasl_auth {
          }
       );
 
-      my $mech = $sasl->client_new ('xmpp', $domain);
+      my $mech = $sasl->client_new ('xmpp', $host);
       $data = $mech->client_start;
 
       if (my $e = $mech->error) {
-         @mechs = grep { $_ ne $mech->mechanism } @mechs;
+         @$mechs = grep { $_ ne $mech->mechanism } @$mechs;
          die "No usable SASL mechanism found (tried: "
-             . join (', ', @mechs)
+             . join (', ', @$mechs)
              . ")!\n"
-            unless @mechs;
+            unless @$mechs;
          next;
       }
 
