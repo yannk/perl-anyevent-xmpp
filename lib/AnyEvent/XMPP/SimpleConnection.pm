@@ -51,7 +51,7 @@ sub connect {
       my ($fh, $peerhost, $peerport) = @_;
 
       unless ($fh) {
-         $self->disconnect ("Couldn't create socket to $self->{host}:$self->{port}: $!");
+         $self->disconnect ("Couldn't create socket to $host:$service: $!");
          return;
       }
 
