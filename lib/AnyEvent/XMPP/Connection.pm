@@ -619,7 +619,7 @@ sub send_sasl_auth {
    }
 
    $self->{writer}->send_sasl_auth (
-      [map { $_->text } @mechs], $self->{username}, $self->{host}, $self->{password}
+      [map { $_->text } @mechs], $self->{username}, $self->{domain}, $self->{password}
    );
 }
 

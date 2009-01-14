@@ -219,7 +219,7 @@ sub send_end_of_stream {
    $self->flush;
 }
 
-=item B<send_sasl_auth ($mechanisms, $user, $host, $pass)>
+=item B<send_sasl_auth ($mechanisms, $user, $domain, $pass)>
 
 This methods sends the start of a SASL authentication. C<$mechanisms> is
 an array reference, containing the mechanism names that are to be tryed.
@@ -227,7 +227,7 @@ an array reference, containing the mechanism names that are to be tryed.
 =cut
 
 sub send_sasl_auth {
-   my ($self, $mechs, $user, $host, $pass) = @_;
+   my ($self, $mechs, $user, $domain, $pass) = @_;
 
    my $data;
     
@@ -244,7 +244,7 @@ sub send_sasl_auth {
          }
       );
 
-      my $mech = $sasl->client_new ('xmpp', $host);
+      my $mech = $sasl->client_new ('xmpp', $domain);
       $data = $mech->client_start;
 
       if (my $e = $mech->error) {
