@@ -76,9 +76,23 @@ to check this.
 
 =item domain => $domain
 
-This is the destination host we are going to connect to.
+If you didn't provide a C<jid> (see above) you have to set the
+C<username> which you want to connect as (see below) and the
+C<$domain> to connect to.
+
+If you want to override the destination host, use the C<host>
+field described below.
+
+B<NOTE:> This field has no effect if C<jid> is given!
+
+=item host => $host
+
+Per default the C<domain> of the C<jid> is used to 
+
+This overrides the destination host we are going to connect to.
 As the connection won't be automatically connected use C<connect>
 to initiate the connect.
+
 B<NOTE:> To disable DNS SRV lookup you need to specify the port B<number>
 yourself. See C<port> below.
 
@@ -103,6 +117,8 @@ Note: You have to take care that the stringprep profile for
 nodes can be applied at: C<$username>. Otherwise the server
 might signal an error. See L<AnyEvent::XMPP::Util> for utility functions
 to check this.
+
+B<NOTE:> This field has no effect if C<jid> is given!
 
 =item password => $password
 
@@ -308,14 +324,20 @@ was successfully connected.
 sub connect {
    my ($self) = @_;
 
-   my ($host, $port) = ($self->{domain}, defined $self->{port} ? $self->{port} : 'xmpp');
+   my ($host, $port) = (
+      (defined $self->{host}
+         ? $self->{host}
+         : $self->{domain}),
+      (defined $self->{port}
+         ? $self->{port} : 'xmpp')
+   );
    $self->SUPER::connect ($host, $port, $self->{connect_timeout});
 }
 
 sub connected {
    my ($self) = @_;
    $self->init;
-   $self->event (connect => $self->{host}, $self->{port});
+   $self->event (connect => $self->{peer_host}, $self->{peer_port});
 }
 
 sub send_buffer_empty {

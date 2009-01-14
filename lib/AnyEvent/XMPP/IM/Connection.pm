@@ -287,7 +287,7 @@ for the first time.
 
 =item roster_error => $error
 
-If an error happened during retrival of the roster this event will
+If an error happened during retrieval of the roster this event will
 be generated.
 C<$error> will be an L<AnyEvent::XMPP::Error::IQ> error object.
 

@@ -98,15 +98,15 @@ sub add_extension {
    });
 }
 
-=head2 add_account ($jid, $password, $domain, $port, $connection_args)
+=head2 add_account ($jid, $password, $host, $port, $connection_args)
 
 This method adds a jabber account for connection with the JID C<$jid>
 and the password C<$password>.
 
-C<$domain> and C<$port> are optional and can be undef. C<$domain> overrides the
-domain in the C<$jid>, and C<$port> would override the default port (service name 'xmpp',
-which will be used for SRV lookup. See also L<AnyEvent::XMPP::Connection> about possible
-values of C<$port>).
+C<$host> and C<$port> are optional and can be undef. C<$host> overrides the
+host which we are connecting to and C<$port> would override
+the default port (service name 'xmpp', which will be used for SRV lookup.
+See also L<AnyEvent::XMPP::Connection> about possible values of C<$port>).
 
 C<$connection_args> must either be undef or a hash reference to
 additional arguments for the constructor of the L<AnyEvent::XMPP::IM::Connection>
@@ -117,13 +117,13 @@ Returns 1 on success and undef when the account already exists.
 =cut
 
 sub add_account {
-   my ($self, $jid, $password, $domain, $port, $connection_args) = @_;
+   my ($self, $jid, $password, $host, $port, $connection_args) = @_;
    my $bj = prep_bare_jid $jid;
 
    my $acc = $self->{accounts}->{$bj};
    if ($acc) {
       $acc->{password} = $password;
-      $acc->{domain}   = $domain;
+      $acc->{host}     = $host;
       $acc->{port}     = $port;
       $acc->{args}     = $connection_args;
       return;
@@ -134,7 +134,7 @@ sub add_account {
          AnyEvent::XMPP::IM::Account->new (
             jid      => $jid,
             password => $password,
-            domain   => $domain,
+            host     => $host,
             port     => $port,
             args     => $connection_args,
          );
