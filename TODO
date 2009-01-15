@@ -1,5 +1,6 @@
 'x' means: is done!
 
+- map the domain part correctly w.r.t. IDNA
 - rename 'domain' parameter to 'host',
   and rename the internal host/port to peer_host and
   peer_port.

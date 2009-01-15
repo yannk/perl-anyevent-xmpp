@@ -234,7 +234,7 @@ sub send_sasl_auth {
    my $found_mech = 0;
    while (!$found_mech) {
       my $sasl = Authen::SASL->new (
-         mechanism => join(' ',  @$mechs),
+         mechanism => join (' ', @$mechs),
          callback => {
             # XXX: removed authname, because it ensures maximum connectivitiy
             #      along multiple server implementations - XMPP is such a crap
