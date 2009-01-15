@@ -114,7 +114,6 @@ This sets the connection timeout. If the socket connect takes too long
 a C<disconnect> event will be generated with an appropriate error message.
 If this argument is not given no timeout is installed for the connects.
 
-
 =item password => $password
 
 This is the password for the C<username> above.
@@ -614,7 +613,7 @@ sub send_sasl_auth {
    }
 
    $self->{writer}->send_sasl_auth (
-      [map { $_->text } @mechs], $self->{username}, $self->{domain}, $self->{password}
+      [map { $_->text } @mechs], $self->{username}, $self->{host}, $self->{password}
    );
 }
 
