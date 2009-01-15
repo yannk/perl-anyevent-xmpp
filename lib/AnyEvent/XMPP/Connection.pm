@@ -98,9 +98,9 @@ yourself. See C<port> below.
 
 =item port => $port
 
-This is optional, the default port is 'xmpp-client', which will used as C<$service>
-argument to C<tcp_connect> of L<AnyEvent::Socket>.
-B<NOTE:> If you specify the port number here (instead of just 'xmpp-client'),
+This is optional, the default value for C<$port> is 'xmpp-client=5222', which
+will used as C<$service> argument to C<tcp_connect> of L<AnyEvent::Socket>.
+B<NOTE:> If you specify the port number here (instead of just 'xmpp-client=5222'),
 B<no> DNS SRV lookup will be done when connecting.
 
 =item connect_timeout => $timeout
@@ -252,8 +252,8 @@ sub new {
       $self->{resource} = $res if defined $res;
    }
 
-   $self->{host} = $self->{domain} unless defined $self->{host};
-   $self->{port} = 'xmpp-client'   unless defined $self->{port};
+   $self->{host} = $self->{domain}    unless defined $self->{host};
+   $self->{port} = 'xmpp-client=5222' unless defined $self->{port};
 
    my $proxy_cb = sub {
       my ($self, $er) = @_;

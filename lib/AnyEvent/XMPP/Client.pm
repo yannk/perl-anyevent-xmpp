@@ -104,9 +104,9 @@ This method adds a jabber account for connection with the JID C<$jid>
 and the password C<$password>.
 
 C<$host> and C<$port> are optional and can be undef. C<$host> overrides the
-host which we are connecting to and C<$port> would override
-the default port (service name 'xmpp-client', which will be used for SRV lookup.
-See also L<AnyEvent::XMPP::Connection> about possible values of C<$port>).
+host which we are connecting to and C<$port> would override the default port
+(service name 'xmpp-client=5222', which will be used for SRV lookup.  See also
+L<AnyEvent::XMPP::Connection> about possible values of C<$port>).
 
 C<$connection_args> must either be undef or a hash reference to
 additional arguments for the constructor of the L<AnyEvent::XMPP::IM::Connection>
