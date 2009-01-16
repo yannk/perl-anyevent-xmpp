@@ -1,5 +1,6 @@
 'x' means: is done!
 
+- remove XML::Twig dependency from debug => ...
 - map the domain part correctly w.r.t. IDNA
 - rename 'domain' parameter to 'host',
   and rename the internal host/port to peer_host and
