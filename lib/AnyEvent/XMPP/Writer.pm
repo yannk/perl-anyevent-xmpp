@@ -397,8 +397,10 @@ Or something completly different if you don't like the RFC 3921 :-)
 C<%attrs> contains further attributes for the presence tag or may contain one of the
 following exceptional keys:
 
-If C<%attrs> contains a 'show' key: a child xml tag with that name will be geenerated
+If C<%attrs> contains a 'show' key: a child xml tag with that name will be generated
 with the value as the content, which should be one of 'away', 'chat', 'dnd' and 'xa'.
+If it contains an undefined value no such tag will be generated, which usually means
+that the 'available' presence is meant.
 
 If C<%attrs> contains a 'status' key: a child xml tag with that name will be generated
 with the value as content. If the value of the 'status' key is an hash reference
