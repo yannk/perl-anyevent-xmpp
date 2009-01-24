@@ -8,6 +8,8 @@ Revision history for Net-XMPP2
          - half fixed RT #42194 (Domain vs. host and GSSAPI),
            passing the hostname specified by 'host' for ::Connection to
            Authen::SASL's client_new method.
+         - fixed bug in ::XMPP::Client where remove_account didn't work
+           as expected (and set_accounts).
 
 0.2 Sun Dec 28 15:09:25 CET 2008
          - Using the better tested AnyEvent::Handle and

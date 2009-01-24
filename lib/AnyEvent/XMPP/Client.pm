@@ -229,19 +229,17 @@ sub disconnect {
    }
 }
 
-=head2 remove_accounts ($msg)
+=head2 remove_accounts ($reason)
 
-Removes all accounts and disconnects.
+Removes all accounts and disconnects. C<$reason> should be some descriptive
+reason why this account was removed (just for logging purposes).
 
 =cut
 
 sub remove_accounts {
-   my ($self, $msg) = @_;
+   my ($self, $reason) = @_;
    for my $acc (keys %{$self->{accounts}}) {
-      my $acca = $self->{accounts}->{$acc};
-      $self->event (removed_account => $acca);
-      if ($acca->is_connected) { $acca->connection ()->disconnect ($msg) }
-      delete $self->{accounts}->{$acc};
+      $self->remove_account ($acc, $reason);
    }
 }
 
@@ -254,10 +252,9 @@ The reason for the removal can be given via C<$reason>.
 
 sub remove_account {
    my ($self, $acc, $reason) = @_;
-   $self->event (removed_account => $acc);
-   if ($acc->is_connected) {
-      $acc->connection ()->disconnect ($reason);
-   }
+   my $acca = $self->{accounts}->{$acc};
+   $self->event (removed_account => $acca);
+   if ($acca->is_connected) { $acca->connection ()->disconnect ($reason) }
    delete $self->{accounts}->{$acc};
 }
 
