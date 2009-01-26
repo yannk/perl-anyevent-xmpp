@@ -1,7 +1,6 @@
 package AnyEvent::XMPP::Connection;
 use strict;
 use AnyEvent;
-use IO::Socket::INET;
 use AnyEvent::XMPP::Parser;
 use AnyEvent::XMPP::Writer;
 use AnyEvent::XMPP::Util qw/split_jid join_jid simxml/;

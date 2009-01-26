@@ -4,8 +4,6 @@ no warnings;
 
 use AnyEvent;
 use IO::Handle;
-use IO::Socket;
-use IO::Socket::INET;
 use Encode;
 use AnyEvent::Socket;
 use AnyEvent::Handle;
