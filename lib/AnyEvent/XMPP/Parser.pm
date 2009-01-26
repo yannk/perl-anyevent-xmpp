@@ -1,5 +1,5 @@
 package AnyEvent::XMPP::Parser;
-use warnings;
+no warnings;
 use strict;
 use AnyEvent::XMPP::Node;
 # OMFG!!!111 THANK YOU FOR THIS MODULE TO HANDLE THE XMPP INSANITY:

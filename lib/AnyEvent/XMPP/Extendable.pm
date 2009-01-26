@@ -1,5 +1,5 @@
 package AnyEvent::XMPP::Extendable;
-use warnings;
+no warnings;
 use strict;
 
 =head1 NAME

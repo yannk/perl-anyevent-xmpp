@@ -1,5 +1,5 @@
 package AnyEvent::XMPP::Namespaces;
-use warnings;
+no warnings;
 use strict;
 require Exporter;
 our @EXPORT_OK = qw/xmpp_ns set_xmpp_ns_alias xmpp_ns_maybe/;
