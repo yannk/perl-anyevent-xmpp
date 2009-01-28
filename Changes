@@ -1,5 +1,6 @@
 Revision history for Net-XMPP2
 
+0.3
          - fixed a bug in disconnect error reporting.
          - fixed bad parameter passing of AnyEvent::XMPP::Client to
            AnyEvent::XMPP::IM::Account, also 'host' is used for overriding
