@@ -2,7 +2,7 @@ NAME
     AnyEvent::XMPP - An implementation of the XMPP Protocol
 
 VERSION
-    Version 0.2
+    Version 0.3
 
 SYNOPSIS
        use AnyEvent::XMPP::Connection;
@@ -91,6 +91,11 @@ RELEASE NOTES
     top):
 
   Version
+    *   0.3
+
+        Fixed some small bugs and improved documentation a bit, especially
+        w.r.t. parameter passing of host and ports.
+
     *   0.2
 
         Renamed module from Net::XMPP2 to AnyEvent::XMPP. Net::XMPP2 is
