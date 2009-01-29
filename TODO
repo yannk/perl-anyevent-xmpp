@@ -1,5 +1,6 @@
 'x' means: is done!
 
+- make exponential falloff in Client.pm when an account couldn't be connected.
 - remove XML::Twig dependency from debug => ...
 - map the domain part correctly w.r.t. IDNA
 - rename 'domain' parameter to 'host',
