@@ -5,6 +5,7 @@
   => introduce storing the 'last sent presence' and offer a 'send_presence_update'
   method (at least internally), to repeat the last sent presence (be careful
   not to repeat directed presences!).
+   - think more about $dont_retrieve_vcard.
 - make exponential falloff in Client.pm when an account couldn't be connected.
 - remove XML::Twig dependency from debug => ...
 - map the domain part correctly w.r.t. IDNA
