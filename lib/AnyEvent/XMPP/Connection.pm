@@ -1033,7 +1033,7 @@ to test this.
 
 =item connect => $host, $port
 
-This event is generated when a successful connect was performed to
+This event is generated when a successful TCP connect was performed to
 the domain passed to C<new>.
 
 Note: C<$host> and C<$port> might be different from the domain you passed to
@@ -1044,7 +1044,7 @@ C<$host> and C<$port>.
 
 =item disconnect => $host, $port, $message
 
-This event is generated when the connection was lost or another error
+This event is generated when the TCP connection was lost or another error
 occurred while writing or reading from it.
 
 C<$message> is a human readable error message for the failure.
