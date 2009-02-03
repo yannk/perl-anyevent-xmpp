@@ -121,6 +121,16 @@ This is the password for the C<username> above.
 
 If C<$bool> is true no SSL will be used.
 
+=item old_style_ssl => $bool
+
+If C<$bool> is true the TLS handshake will be initiated when the TCP
+connection was established. This is useful if you have to connect to
+an old Jabber server, with old-style SSL connections on port 5223.
+
+But that practice has been discouraged in XMPP, and a TLS handshake is done
+after the XML stream has been established. Only use this option if you know
+what you are doing.
+
 =item disable_sasl => $bool
 
 If C<$bool> is true SASL will NOT be used to authenticate with the server, even
@@ -324,6 +334,11 @@ sub connect {
 
 sub connected {
    my ($self) = @_;
+
+   if ($self->{old_style_ssl}) {
+      $self->enable_ssl;
+   }
+
    $self->init;
    $self->event (connect => $self->{peer_host}, $self->{peer_port});
 }
