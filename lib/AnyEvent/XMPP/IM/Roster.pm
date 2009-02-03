@@ -71,17 +71,26 @@ sub update_presence {
    my $type = $node->attr ('type');
    my $contact = $self->touch_jid ($jid);
 
+
+   my %stati;
+   $stati{$_->attr ('lang') || ''} = $_->text
+      for $node->find_all ([qw/client status/]);
+
    if ($type eq 'subscribe') {
-      $self->{connection}->event (contact_request_subscribe => $self, $contact);
+      $self->{connection}->event (
+         contact_request_subscribe => $self, $contact, $stati{''});
 
    } elsif ($type eq 'subscribed') {
-      $self->{connection}->event (contact_subscribed => $self, $contact);
+      $self->{connection}->event (
+         contact_subscribed => $self, $contact, $stati{''});
 
    } elsif ($type eq 'unsubscribe') {
-      $self->{connection}->event (contact_did_unsubscribe => $self, $contact);
+      $self->{connection}->event (
+         contact_did_unsubscribe => $self, $contact, $stati{''});
 
    } elsif ($type eq 'unsubscribed') {
-      $self->{connection}->event (contact_unsubscribed => $self, $contact);
+      $self->{connection}->event (
+         contact_unsubscribed => $self, $contact, $stati{''});
 
    } else {
       return $contact->update_presence ($node)

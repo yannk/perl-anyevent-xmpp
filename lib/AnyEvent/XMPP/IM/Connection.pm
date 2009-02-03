@@ -317,7 +317,7 @@ C<$msg> is a L<AnyEvent::XMPP::IM::Message> object.
 This event is emitted when a message stanza error was received.
 C<$error> will be an L<AnyEvent::XMPP::Error::Message> error object.
 
-=item contact_request_subscribe => $roster, $contact
+=item contact_request_subscribe => $roster, $contact, $message
 
 This event is generated when the C<$contact> wants to subscribe
 to your presence.
@@ -330,23 +330,37 @@ If you want to start a mutual subscription you have to call C<send_subscribe>
 B<AFTER> you accepted or declined with C<send_subscribed>/C<send_unsubscribed>.
 Calling it in the opposite order gets some servers confused!
 
-=item contact_subscribed => $roster, $contact
+If a C<status> element was transmitted with the subscription
+it's contents will be in C<$message>. Which is usually a text written
+from the one who requests subscription.
 
-This event is generated when C<$contact> subscribed to your presence successfully.
+=item contact_subscribed => $roster, $contact, $message
 
-=item contact_did_unsubscribe => $roster, $contact
+This event is generated when C<$contact> subscribed you to his presence successfully.
+
+If a C<status> element was transmitted with the subscribed presence
+it's contents will be in C<$message>.
+
+=item contact_did_unsubscribe => $roster, $contact, $message
 
 This event is generated when C<$contact> unsubscribes from your presence.
 
 If you want to unsubscribe from him call the C<send_unsubscribe> method
 of L<AnyEvent::XMPP::IM::Contact> on C<$contact>.
 
-=item contact_unsubscribed => $roster, $contact
+If a C<status> element was transmitted with the unsubscription
+it's contents will be in C<$message>. Which is usually a text written
+from the one who unsubscribes.
+
+=item contact_unsubscribed => $roster, $contact, $message
 
 This event is generated when C<$contact> unsubscribed you from his presence.
 
 If you want to unsubscribe him from your presence call the C<send_unsubscribed>
 method of L<AnyEvent::XMPP::IM::Contact> on C<$contact>.
+
+If a C<status> element was transmitted with the unsubscription
+it's contents will be in C<$message>.
 
 =back
 
