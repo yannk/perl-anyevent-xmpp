@@ -321,7 +321,7 @@ You can also look for information at:
 
   IRC Network: http://freenode.net/
   Server     : chat.freenode.net
-  Channel    : #net_xmpp2
+  Channel    : #ae_xmpp
 
   Feel free to join and ask questions!
 
