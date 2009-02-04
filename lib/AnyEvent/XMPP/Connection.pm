@@ -167,6 +167,14 @@ the server.
 Please note that the old authentication method will fail if C<disable_iq_auth>
 is true.
 
+=item stream_version_override => $version
+
+B<NOTE:> Only use if you B<really> know what you are doing!
+
+This will override the stream version which is sent in the XMPP stream
+initiation element. This is currently only used by the tests which
+set C<$version> to '0.9' for testing IQ authentication with ejabberd.
+
 =item whitespace_ping_interval => $interval
 
 This will set the whitespace ping interval (in seconds). The default interval
@@ -424,7 +432,7 @@ sub handle_stanza {
 
 sub init {
    my ($self) = @_;
-   $self->{writer}->send_init_stream ($self->{language}, $self->{domain}, $self->{stream_namespace});
+   $self->{writer}->send_init_stream ($self->{language}, $self->{domain}, $self->{stream_namespace}, $self->{stream_version_override});
 }
 
 =item B<is_connected ()>
