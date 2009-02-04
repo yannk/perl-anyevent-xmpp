@@ -8,11 +8,11 @@ AnyEvent::XMPP - An implementation of the XMPP Protocol
 
 =head1 VERSION
 
-Version 0.3
+Version 0.4
 
 =cut
 
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 =head1 SYNOPSIS
 
@@ -113,6 +113,12 @@ Here are some notes to the last releases (release of this version is at top):
 =head2 Version
 
 =over 4
+
+=item * 0.4
+
+Minor fixes and feature enhancements: Added old_style_ssl option for direct
+port 5223 SSL connections. Providing 'get_own_contact' for keeping
+track of own resources.
 
 =item * 0.3
 

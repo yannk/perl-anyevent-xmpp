@@ -1,5 +1,6 @@
 Revision history for Net-XMPP2
 
+0.4
          - added a $dont_retrieve_vcard to ::Ext::VCard, to
            prevent retrieval when session_ready event comes.
          - implemented support for old-style (tcp port 5223) SSL connections,
