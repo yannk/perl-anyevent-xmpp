@@ -233,6 +233,11 @@ Returns the contact on the roster with the JID C<$jid>.
 (If C<$jid> is not bare the resource part will be stripped
 before searching)
 
+B<NOTE:> This method will also return contacts that we
+have only presence for. To be sure the contact is on the
+users roster you need to call the C<is_on_roster> method on the
+contact.
+
 The return value is an instance of L<AnyEvent::XMPP::IM::Contact>.
 
 =cut
@@ -240,6 +245,11 @@ The return value is an instance of L<AnyEvent::XMPP::IM::Contact>.
 sub get_contact {
    my ($self, $jid) = @_;
    my $bjid = AnyEvent::XMPP::Util::prep_bare_jid ($jid);
+
+   if (cmp_bare_jid ($bjid, $self->{connection}->jid)) {
+      return $self->get_own_contact;
+   }
+
    $self->{contacts}->{$bjid}
 }
 
