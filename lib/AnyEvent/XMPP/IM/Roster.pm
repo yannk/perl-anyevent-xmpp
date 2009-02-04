@@ -1,7 +1,7 @@
 package AnyEvent::XMPP::IM::Roster;
 use AnyEvent::XMPP::IM::Contact;
 use AnyEvent::XMPP::IM::Presence;
-use AnyEvent::XMPP::Util qw/prep_bare_jid bare_jid/;
+use AnyEvent::XMPP::Util qw/prep_bare_jid bare_jid cmp_bare_jid/;
 use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
 use strict;
 no warnings;
@@ -71,7 +71,6 @@ sub update_presence {
    my $type = $node->attr ('type');
    my $contact = $self->touch_jid ($jid);
 
-
    my %stati;
    $stati{$_->attr ('lang') || ''} = $_->text
       for $node->find_all ([qw/client status/]);
@@ -102,12 +101,23 @@ sub touch_jid {
    my ($self, $jid, $contact) = @_;
    my $bjid = prep_bare_jid ($jid);
 
+   if (cmp_bare_jid ($jid, $self->{connection}->jid)) {
+      $self->{myself} =
+         $contact
+         || AnyEvent::XMPP::IM::Contact->new (
+               connection => $self->{connection},
+               jid        => AnyEvent::XMPP::Util::bare_jid ($jid),
+               is_me      => 1,
+            );
+      return $self->{myself}
+   }
+
    unless ($self->{contacts}->{$bjid}) {
       $self->{contacts}->{$bjid} =
          $contact
          || AnyEvent::XMPP::IM::Contact->new (
                connection => $self->{connection},
-               jid        => AnyEvent::XMPP::Util::bare_jid ($jid)
+               jid        => AnyEvent::XMPP::Util::bare_jid ($jid),
             )
    }
 
@@ -264,6 +274,19 @@ See also documentation of C<get_contacts> method of L<AnyEvent::XMPP::IM::Roster
 sub get_contacts_off_roster {
    my ($self) = @_;
    grep { not $_->is_on_roster } values %{$self->{contacts}}
+}
+
+=item B<get_own_contact>
+
+This method returns a L<AnyEvent::XMPP::IM::Contact> object
+which stands for ourself. It will be used to keep track of
+our own presences.
+
+=cut
+
+sub get_own_contact {
+   my ($self) = @_;
+   $self->touch_jid ($self->{connection}->jid);
 }
 
 =item B<debug_dump>
