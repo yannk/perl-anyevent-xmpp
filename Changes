@@ -9,6 +9,7 @@ Revision history for Net-XMPP2
            comes from the <status> elements in the presence stanza.
          - made special contact for keeping track of the presences of our own
            resources. See ::IM::Roster::get_own_contact() and ::IM::Contact::is_me().
+         - minor fixes in ::Ext::MUC.
 
 0.3 Mon Jan 28 23:00:58 CET 2009
          - fixed a bug in disconnect error reporting.

@@ -204,6 +204,12 @@ sub we_left_room {
    delete $self->{me};
 }
 
+sub disconnected {
+   my ($self) = @_;
+   $self->event ('leave');
+   $self->we_left_room;
+}
+
 =item B<get_user ($nick)>
 
 This method returns the user with the C<$nick> in the room.
@@ -480,7 +486,8 @@ C<$timeout> seconds. The default for C<$timeout> is 60.
 
 The first argument to the call of C<$cb> will be undef if
 we successfully parted, or a true value when the timeout hit.
-Even if we timeout we consider ourself parted.
+Even if we timeout we consider ourself parted (and a 'leave' event
+is generated).
 
 =cut
 
@@ -490,18 +497,20 @@ sub send_part {
    $timeout ||= 60;
 
    my $con = $self->{muc}->{connection};
+   my $timeouted = 0;
 
    if ($cb) {
       $self->{_part_timeout} =
          AnyEvent->timer (after => $timeout, cb => sub {
             delete $self->{_part_timeout};
-            $cb->(1);
+            $timeouted = 1;
+            $self->event ('leave');
          });
 
-      $self->reg_cb (leave => sub {
+      $self->reg_cb (ext_after_leave => sub {
          my ($self) = @_;
          delete $self->{_part_timeout};
-         $cb->(undef) if $cb;
+         $cb->($timeouted) if $cb;
          $self->unreg_me;
       });
    }

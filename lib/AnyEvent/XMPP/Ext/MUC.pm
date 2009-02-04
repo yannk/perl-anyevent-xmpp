@@ -54,7 +54,7 @@ sub new {
 sub init {
    my ($self) = @_;
 
-   $self->reg_cb (
+   $self->{cbregs} = $self->reg_cb (
       ext_before_presence_xml => sub {
          my ($self, $con, $node) = @_;
          my $from_jid = $node->attr ('from');
@@ -82,7 +82,13 @@ sub init {
 
 sub cleanup {
    my ($self) = @_;
+
+   for my $r (values %{$self->{room_evs}}) {
+      $r->disconnected;
+   }
+
    $self->{room_evs} = {};
+   $self->unreg_cb ($self->{cbregs});
 }
 
 =item B<is_conference ($jid, $cb)>
@@ -272,6 +278,7 @@ sub join_room {
 
 sub install_room {
    my ($self, $room_jid) = @_;
+
    my $room
       = $self->{room_evs}->{prep_bare_jid $room_jid}
          = AnyEvent::XMPP::Ext::MUC::Room->new (muc => $self, jid => $room_jid);
@@ -284,7 +291,7 @@ sub install_room {
    $room->reg_cb (
       ext_after_leave => sub {
          my ($room) = @_;
-         $room->remove_forward ($self);
+         $self->uninstall_room ($room);
       }
    );
 
@@ -294,6 +301,7 @@ sub install_room {
 sub uninstall_room {
    my ($self, $room) = @_;
    my $jid = $room->{jid};
+   $room->remove_forward ($self);
    delete $self->{room_evs}->{prep_bare_jid $jid};
    delete $room->{muc};
 }
@@ -330,7 +338,7 @@ sub is_connected {
 
 All events from L<AnyEvent::XMPP::Ext::MUC::Room> instances that were
 joined with this MUC are forwarded to this object. The events
-from the room are prefixed with 'room_' and the first argument
+from the room are postfixed with '_room' and the first argument
 is always the L<AnyEvent::XMPP::Connection> the MUC operates on, the
 second is always the L<AnyEvent::XMPP::Ext::MUC::Room> object and
 the rest of the argument corresponds to the arguments of the event of
