@@ -162,7 +162,7 @@ called after the roster was retrieved.
 
 The first argument of the callback in C<$cb> will be the roster
 and the second will be a L<AnyEvent::XMPP::Error::IQ> object when
-an error occured while retrieving the roster.
+an error occurred while retrieving the roster.
 
 =cut
 
