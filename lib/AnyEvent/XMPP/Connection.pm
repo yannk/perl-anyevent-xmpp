@@ -312,8 +312,12 @@ when the connection was successfully established.
 If the connection try was not successful a C<disconnect> event
 will be generated with an error message.
 
+NOTE: Please note that you can't reconnect a L<AnyEvent::XMPP::Connection>
+object. You need to recreate it if you want to reconnect.
+
 NOTE: The "XML" stream initiation is sent when the connection
 was successfully connected.
+
 
 =cut
 
