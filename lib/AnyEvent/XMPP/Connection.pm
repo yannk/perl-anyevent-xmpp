@@ -121,6 +121,16 @@ This is the password for the C<username> above.
 
 If C<$bool> is true no SSL will be used.
 
+=item old_style_ssl => $bool
+
+If C<$bool> is true the TLS handshake will be initiated when the TCP
+connection was established. This is useful if you have to connect to
+an old Jabber server, with old-style SSL connections on port 5223.
+
+But that practice has been discouraged in XMPP, and a TLS handshake is done
+after the XML stream has been established. Only use this option if you know
+what you are doing.
+
 =item disable_sasl => $bool
 
 If C<$bool> is true SASL will NOT be used to authenticate with the server, even
@@ -156,6 +166,14 @@ the server.
 
 Please note that the old authentication method will fail if C<disable_iq_auth>
 is true.
+
+=item stream_version_override => $version
+
+B<NOTE:> Only use if you B<really> know what you are doing!
+
+This will override the stream version which is sent in the XMPP stream
+initiation element. This is currently only used by the tests which
+set C<$version> to '0.9' for testing IQ authentication with ejabberd.
 
 =item whitespace_ping_interval => $interval
 
@@ -328,6 +346,11 @@ sub connect {
 
 sub connected {
    my ($self) = @_;
+
+   if ($self->{old_style_ssl}) {
+      $self->enable_ssl;
+   }
+
    $self->init;
    $self->event (connect => $self->{peer_host}, $self->{peer_port});
 }
@@ -413,7 +436,7 @@ sub handle_stanza {
 
 sub init {
    my ($self) = @_;
-   $self->{writer}->send_init_stream ($self->{language}, $self->{domain}, $self->{stream_namespace});
+   $self->{writer}->send_init_stream ($self->{language}, $self->{domain}, $self->{stream_namespace}, $self->{stream_version_override});
 }
 
 =item B<is_connected ()>
@@ -1037,7 +1060,7 @@ to test this.
 
 =item connect => $host, $port
 
-This event is generated when a successful connect was performed to
+This event is generated when a successful TCP connect was performed to
 the domain passed to C<new>.
 
 Note: C<$host> and C<$port> might be different from the domain you passed to
@@ -1048,7 +1071,7 @@ C<$host> and C<$port>.
 
 =item disconnect => $host, $port, $message
 
-This event is generated when the connection was lost or another error
+This event is generated when the TCP connection was lost or another error
 occurred while writing or reading from it.
 
 C<$message> is a human readable error message for the failure.

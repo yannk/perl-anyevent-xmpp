@@ -14,6 +14,7 @@ my $cl =
       tests => 1,
       connection_args => {
          disable_sasl => 1,
+         stream_version_override => '0.9',
          resource => "AnyEvent::XMPP::TestClient",
          ($ANAL ? (anal_iq_auth => 1) : ())
       }

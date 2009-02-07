@@ -1,5 +1,21 @@
 Revision history for Net-XMPP2
 
+0.4
+         - added a $dont_retrieve_vcard to ::Ext::VCard, to
+           prevent retrieval when session_ready event comes.
+         - implemented support for old-style (tcp port 5223) SSL connections,
+           use the old_style_ssl option for ::Connection to enable TLS handshaking
+           upon TCP connect.
+         - added $message argument to subscription related events. the contents
+           comes from the <status> elements in the presence stanza.
+         - made special contact for keeping track of the presences of our own
+           resources. See ::IM::Roster::get_own_contact() and ::IM::Contact::is_me().
+         - minor fixes in ::Ext::MUC.
+         - added 'stream_version_override' parameter to ::Connection, mostly
+           for testing purposes with ejabberd (to enforce old-jabber-style
+           authentication).
+
+0.3 Mon Jan 28 23:00:58 CET 2009
          - fixed a bug in disconnect error reporting.
          - fixed bad parameter passing of AnyEvent::XMPP::Client to
            AnyEvent::XMPP::IM::Account, also 'host' is used for overriding

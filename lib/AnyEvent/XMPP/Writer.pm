@@ -159,7 +159,7 @@ the C<client> namespace will be used.
 =cut
 
 sub send_init_stream {
-   my ($self, $language, $domain, $ns) = @_;
+   my ($self, $language, $domain, $ns, $vers_override) = @_;
 
    $ns ||= 'client';
 
@@ -171,7 +171,7 @@ sub send_init_stream {
    $w->startTag (
       [xmpp_ns ('stream'), 'stream'],
       to      => $domain,
-      version => '1.0',
+      version => (defined $vers_override ? $vers_override : '1.0'),
       [xmpp_ns ('xml'), 'lang'] => $language
    );
    $self->flush;

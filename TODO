@@ -1,5 +1,19 @@
 'x' means: is done!
 
+- make the MUC extension not be tied to a specific connection.
+  Let it discover new connections itself.
+  => for this the join_room function might need a connection argument
+     to discover the right connection. => maybe use the %args hash for this,
+     as the default should be 'the first' connection we can grab.
+  => think about get_room and the implications in general that 'multiple'
+     connections are handled by one extension.
+- vcard retrieve sends out presence, but the 'last sent presence' info
+  isn't available in the connection or to the vcard extension.
+  => introduce storing the 'last sent presence' and offer a 'send_presence_update'
+  method (at least internally), to repeat the last sent presence (be careful
+  not to repeat directed presences!).
+   - think more about $dont_retrieve_vcard.
+- make exponential falloff in Client.pm when an account couldn't be connected.
 - remove XML::Twig dependency from debug => ...
 - map the domain part correctly w.r.t. IDNA
 - rename 'domain' parameter to 'host',

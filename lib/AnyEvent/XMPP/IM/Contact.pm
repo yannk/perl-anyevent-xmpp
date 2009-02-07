@@ -24,6 +24,20 @@ AnyEvent::XMPP::IM::Contact - Instant messaging roster contact
 This module represents a class for contact objects which populate
 a roster (L<AnyEvent::XMPP::IM::Roster>.
 
+There are two types of 'contacts' that are managed by this class.
+The first are contacts that are on the users roster, and the second
+are contacts that are B<not> on the users roster.
+
+To find our whether this is a contact which is actually available
+as roster item in the users roster, you should consult the C<is_on_roster>
+method (see below). 
+
+Another special kind of contact is the contact which stands for ourself
+and is mostly only used for keeping track of our own presences and resources.
+But note that even if the C<is_me> method returns true, the C<is_on_roster>
+method might also return a true value, in case we have a roster item
+of ourself on the roster (which might happen in rare cases :).
+
 You can get an instance of this class only by calling the C<get_contact>
 function on a roster object.
 
@@ -56,11 +70,11 @@ Updates the name of the contact. C<$name> = '' erases the contact.
 
 =item add_group => $groups
 
-Addes the contact to the groups in the arrayreference C<$groups>.
+Adds the contact to the groups in the array reference C<$groups>.
 
 =item remove_group => $groups
 
-Removes the contact from the groups in the arrayreference C<$groups>.
+Removes the contact from the groups in the array reference C<$groups>.
 
 =item groups => $groups
 
@@ -311,6 +325,18 @@ for.
 sub is_on_roster {
    my ($self) = @_;
    $self->{subscription} && $self->{subscription} ne ''
+}
+
+=item B<is_me>
+
+Returns a true value when this contacts stands for ourself
+and is only used for receiving presences of our own resources.
+
+=cut
+
+sub is_me {
+   my ($self) = @_;
+   $self->{is_me}
 }
 
 =item B<subscription>

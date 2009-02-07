@@ -94,7 +94,7 @@ sub init {
       );
 }
 
-=item B<hook_on ($con)>
+=item B<hook_on ($con, $dont_retrieve_vcard)>
 
 C<$con> must be an object of the class L<AnyEvent::XMPP::Connection> (or derived).
 Once the vCard extension has been hooked up on a connection it will add
@@ -104,9 +104,10 @@ IMPORTANT: You need to hook on the connection B<BEFORE> it was connected. The
 initial presence stanza needs to contain the information that we support
 avatars. The vcard will automatically retrieved if the session wasn't already
 started. Otherwise you will have to retrieve the vcard manually if you hook it
-up after the C<session_ready> event was received. However, just make sure to
-hook up on any connection before it is connected if you want to offer avatar
-support on it.
+up after the C<session_ready> event was received. You can prevent the automatic
+retrieval by giving a true value in C<$dont_retrieve_vcard>.  However, just
+make sure to hook up on any connection before it is connected if you want to
+offer avatar support on it.
 
 Best is probably to do it like this:
 
@@ -118,7 +119,7 @@ Best is probably to do it like this:
 =cut
 
 sub hook_on {
-   my ($self, $con) = @_;
+   my ($self, $con, $dont_retrieve_vcard) = @_;
 
    Scalar::Util::weaken $self;
 
@@ -153,17 +154,19 @@ sub hook_on {
          ext_after_session_ready => sub {
             my ($con) = @_;
 
-            $self->retrieve ($con, undef, sub {
-               my ($jid, $vc, $error) = @_;
+            if (not $dont_retrieve_vcard) {
+               $self->retrieve ($con, undef, sub {
+                  my ($jid, $vc, $error) = @_;
 
-               if ($error) {
-                  $self->event (retrieve_vcard_error => $error);
-               }
+                  if ($error) {
+                     $self->event (retrieve_vcard_error => $error);
+                  }
 
-               # the own vcard was already set by retrieve
-               # this will push out an updated presence
-               $self->_publish_avatar;
-            });
+                  # the own vcard was already set by retrieve
+                  # this will push out an updated presence
+                  $self->_publish_avatar;
+               });
+            }
          }
       );
 
