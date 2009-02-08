@@ -1,6 +1,6 @@
 package AnyEvent::XMPP::Ext::MUC;
 use strict;
-use AnyEvent::XMPP::Util qw/prep_bare_jid bare_jid/;
+use AnyEvent::XMPP::Util qw/prep_bare_jid bare_jid stringprep_jid/;
 use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
 use AnyEvent::XMPP::Ext;
 use AnyEvent::XMPP::Ext::MUC::Room;
@@ -16,9 +16,7 @@ AnyEvent::XMPP::Ext::MUC - Implements XEP-0045: Multi-User Chat
 
    my $con = AnyEvent::XMPP::Connection->new (...);
    $con->add_extension (my $disco = AnyEvent::XMPP::Ext::Disco->new);
-   $con->add_extension (
-      my $muc = AnyEvent::XMPP::Ext::MUC->new (disco => $disco, connection => $con)
-   );
+   $con->add_extension (my $muc = AnyEvent::XMPP::Ext::MUC->new (disco => $disco));
    ...
 
 =head1 DESCRIPTION
@@ -38,7 +36,7 @@ discovery.
 
 =item B<new>
 
-This is the constructor for a pubsub object.
+This is the constructor for a MUC extension object.
 It takes no further arguments.
 
 =cut
@@ -54,54 +52,60 @@ sub new {
 sub init {
    my ($self) = @_;
 
-   $self->{cbregs} = $self->reg_cb (
+   $self->reg_cb (
       ext_before_presence_xml => sub {
          my ($self, $con, $node) = @_;
-         my $from_jid = $node->attr ('from');
 
-         if (exists $self->{room_evs}->{prep_bare_jid $from_jid}) {
+         if ($self->get_room ($con, $node->attr ('from'))) {
             $self->stop_event;
-            $self->{room_evs}->{prep_bare_jid $from_jid}->handle_presence ($node);
+            $self->handle_presence ($room, $node);
          }
       },
       ext_before_message_xml => sub {
          my ($self, $con, $node) = @_;
-         my $from_jid = $node->attr ('from');
 
-         if (exists $self->{room_evs}->{prep_bare_jid $from_jid}) {
+         if ($self->get_room ($con, $node->attr ('from'))) {
             $self->stop_event;
-            $self->{room_evs}->{prep_bare_jid $from_jid}->handle_message ($node);
+            $self->handle_message ($room, $node);
          }
       },
       disconnect => sub {
-         my ($self) = @_;
-         $self->cleanup
+         my ($self, $con, $h, $p, $msg) = @_;
+         $self->cleanup_rooms ($con, "$h:$p: $msg");
       }
    );
 }
 
-sub cleanup {
-   my ($self) = @_;
-
-   for my $r (values %{$self->{room_evs}}) {
-      $r->disconnected;
-   }
-
-   $self->{room_evs} = {};
-   $self->unreg_cb ($self->{cbregs});
+sub get_room {
+   my ($self, $con, $jid) = @_;
+   my $conjid  = stringprep_jid $con->jid;
+   my $roomjid = prep_bare_jid $jid;
+   $self->{rooms}->{$conjid}->{$roomjid}
 }
 
-=item B<is_conference ($jid, $cb)>
+sub cleanup_rooms {
+   my ($self, $con, $msg) = @_;
+
+   my $conjid = stringprep_jid $con->jid;
+
+   for (keys %{$self->{rooms}->{$conjid}}) {
+      my $room = delete $self->{rooms}->{$conjid}->{$_};
+      $self->event (leave_room => $room, "disconnected from server $msg");
+   }
+}
+
+=item B<is_conference ($con, $jid, $cb)>
 
 TODO
 
 =cut
 
 sub is_conference {
-   my ($self, $jid, $cb) = @_;
+   my ($self, $con, $jid, $cb) = @_;
 
-   $self->{disco}->request_info ($self->{connection}, $jid, undef, sub {
+   $self->{disco}->request_info ($con, $jid, undef, sub {
       my ($disco, $info, $error) = @_;
+
       if ($error || !$info->features ()->{xmpp_ns ('muc')}) {
          $cb->(undef, $error);
       } else {
@@ -110,11 +114,11 @@ sub is_conference {
    });
 }
 
-=item B<is_room ($jid, $cb)>
+=item B<is_room ($con, $jid, $cb)>
 
-This method sends a information discovery to the C<$jid>.
-C<$cb> is called when the information arrives or with an error
-after the usual IQ timeout.
+This method sends a information discovery to the C<$jid>, via the connection
+C<$con>.  C<$cb> is called when the information arrives or with an error after
+the usual IQ timeout.
 
 When the C<$jid> was a room C<$cb> is called with the first argument
 being a L<AnyEvent::XMPP::Ext::MUC::RoomInfo> object. If the destination
@@ -125,9 +129,9 @@ object.
 =cut
 
 sub is_room {
-   my ($self, $jid, $cb) = @_;
+   my ($self, $con, $jid, $cb) = @_;
 
-   $self->{disco}->request_info ($self->{connection}, $jid, undef, sub {
+   $self->{disco}->request_info ($con, $jid, undef, sub {
       my ($disco, $info, $error) = @_;
 
       if ($error || !$info->features ()->{xmpp_ns ('muc')}) {
@@ -139,20 +143,22 @@ sub is_room {
    });
 }
 
-=item B<join_room ($jid, $nick, $cb, %args)>
+=item B<join_room ($con, $jid, $nick, $cb, %args)>
 
 This method joins a room.
 
-C<$jid> should be the bare jid of the room.
+C<$con> should be the L<AnyEvent::XMPP::IM::Connection> object that
+is to be used to send the necessary stanzas.
+C<$jid> should be the bare JID of the room.
 C<$nick> should be your desired nickname in the room.
 
 C<$cb> is called upon successful entering the room or
-if an error occured. If no error occured the first
+if an error occurred. If no error occurred the first
 argument is a L<AnyEvent::XMPP::Ext::MUC::Room> object (the
 one of the joined room) and the second is a L<AnyEvent::XMPP::Ext::MUC::User>
 object, the one of yourself. And the third argument is undef.
 
-If an error occured and we couldn't join the room, the first two arguments are
+If an error occurred and we couldn't join the room, the first two arguments are
 undef and the third is a L<AnyEvent::XMPP::Error::MUC> object signalling the error.
 
 C<%args> hash can contain one of the following keys:
@@ -212,101 +218,93 @@ should take care of possible endless retries.
 =cut
 
 sub join_room {
-   my ($self, $jid, $nick, $cb, %args) = @_;
+   my ($self, $con, $jid, $nick, $cb, %args) = @_;
 
    unless (exists $args{create_instant}) {
       $args{create_instant} = 1;
    }
+
    my $timeout = $args{timeout} || $self->{join_timeout};
 
-   my $room = $self->install_room ($jid);
+   my $room = $self->install_room ($con, $jid);
 
    my $pbj = prep_bare_jid $jid;
 
-   $self->{room_join_timer}->{$pbj} =
-      AnyEvent->timer (after => $timeout, cb => sub{
-         $self->uninstall_room ($room);
+   $room->{room_join_timer} =
+      AnyEvent->timer (after => $timeout, cb => sub {
+         $self->uninstall_room ($con, $room);
+         delete $room->{room_join_timer};
          my $muce = AnyEvent::XMPP::Error::MUC->new (
             type => 'join_timeout',
             text => "Couldn't join room in time, timeout after $timeout\n"
          );
-         delete $self->{room_join_timer}->{$pbj};
          $cb->(undef, undef, $muce);
       });
 
-   my $rcb_id;
-   $rcb_id = $room->reg_cb (
-      join_error => sub {
-         my ($room, $error) = @_;
+   #my $rcb_id;
+   #$rcb_id = $room->reg_cb (
+   #   join_error => sub {
+   #      my ($room, $error) = @_;
 
-         if ($error->type eq 'nickname_in_use'
-             && exists $args{nickcollision_cb}) {
-            $nick = $args{nickcollision_cb}->($nick);
-            $room->send_join ($nick, $args{password}, $args{history});
-            return;
-         }
+   #      if ($error->type eq 'nickname_in_use'
+   #          && exists $args{nickcollision_cb}) {
+   #         $nick = $args{nickcollision_cb}->($nick);
+   #         $room->send_join ($nick, $args{password}, $args{history});
+   #         return;
+   #      }
 
-         delete $self->{room_join_timer}->{$pbj};
-         $self->uninstall_room ($room);
-         $room->unreg_cb ($rcb_id);
-         $cb->(undef, undef, $error);
-      },
-      enter => sub {
-         my ($room, $user) = @_;
+   #      delete $self->{room_join_timer}->{$pbj};
+   #      $self->uninstall_room ($room);
+   #      $room->unreg_cb ($rcb_id);
+   #      $cb->(undef, undef, $error);
+   #   },
+   #   enter => sub {
+   #      my ($room, $user) = @_;
 
-         delete $self->{room_join_timer}->{$pbj};
-         $room->unreg_cb ($rcb_id);
+   #      delete $self->{room_join_timer}->{$pbj};
+   #      $room->unreg_cb ($rcb_id);
 
-         if ($user->did_create_room && $args{create_instant}) {
-            $room->make_instant (sub {
-               my ($room, $error) = @_;
-               if ($error) {
-                  $cb->(undef, undef, $error);
-               } else {
-                  $cb->($room, $user, undef);
-               }
-            });
+   #      if ($user->did_create_room && $args{create_instant}) {
+   #         $room->make_instant (sub {
+   #            my ($room, $error) = @_;
+   #            if ($error) {
+   #               $cb->(undef, undef, $error);
+   #            } else {
+   #               $cb->($room, $user, undef);
+   #            }
+   #         });
 
-         } else {
-            $cb->($room, $user, undef);
-         }
-      }
-   );
+   #      } else {
+   #         $cb->($room, $user, undef);
+   #      }
+   #   }
+   #);
 
-   $room->send_join ($nick, $args{password}, $args{history});
+   #$room->send_join ($nick, $args{password}, $args{history});
 }
 
 sub install_room {
-   my ($self, $room_jid) = @_;
+   my ($self, $con, $room_jid) = @_;
 
    my $room
-      = $self->{room_evs}->{prep_bare_jid $room_jid}
-         = AnyEvent::XMPP::Ext::MUC::Room->new (muc => $self, jid => $room_jid);
-
-   $room->add_forward ($self, sub {
-      my ($room, $self, $ev, @args) = @_;
-      $self->_event ($ev . '_room', $self->{connection}, $room, @args);
-   });
-
-   $room->reg_cb (
-      ext_after_leave => sub {
-         my ($room) = @_;
-         $self->uninstall_room ($room);
-      }
-   );
+      = $self->{rooms}->{stringprep_jid $con->jid}->{prep_bare_jid $room_jid}
+         = AnyEvent::XMPP::Ext::MUC::Room->new (
+            muc        => $self,
+            connection => $con,
+            jid        => $room_jid
+         );
 
    $room
 }
 
 sub uninstall_room {
-   my ($self, $room) = @_;
-   my $jid = $room->{jid};
-   $room->remove_forward ($self);
-   delete $self->{room_evs}->{prep_bare_jid $jid};
+   my ($self, $con, $room) = @_;
+   my $room = delete $self->{rooms}->{stringprep_jid $con->jid}->{prep_bare_jid $room_jid}
    delete $room->{muc};
+   delete $room->{connection};
 }
 
-=item B<get_room ($jid)>
+=item B<get_room ($con, $jid)>
 
 This returns the L<AnyEvent::XMPP::Ext::MUC::Room> object
 for the bare part of the C<$jid> if we are joining or have
@@ -317,41 +315,15 @@ If we are not joined undef is returned.
 =cut
 
 sub get_room {
-   my ($self, $jid) = @_;
-   $self->{room_evs}->{prep_bare_jid $jid}
-}
-
-=item B<is_connected>
-
-This returns whether we are still connected and can send messages.
-
-=cut
-
-sub is_connected {
-   my ($self) = @_;
-   $self->{connection}->is_connected
+   my ($self, $con, $jid) = @_;
+   $self->{rooms}->{stringprep_jid $con->jid}->{prep_bare_jid $jid}
 }
 
 =back
 
 =head1 EVENTS
 
-All events from L<AnyEvent::XMPP::Ext::MUC::Room> instances that were
-joined with this MUC are forwarded to this object. The events
-from the room are postfixed with '_room' and the first argument
-is always the L<AnyEvent::XMPP::Connection> the MUC operates on, the
-second is always the L<AnyEvent::XMPP::Ext::MUC::Room> object and
-the rest of the argument corresponds to the arguments of the event of
-the room. See the event description for L<AnyEvent::XMPP::Ext::MUC::Room>
-for details which events are generated. Generally, if you want for example
-to get the joined event:
-
-   $muc->reg_cb (room_enter => sub {
-      my ($muc, $con, $room) = @_;
-      # ...
-   });
-
-These additional events can be registered on with C<reg_cb>:
+These are the events that are issued by this MUC extension:
 
 =over 4
 

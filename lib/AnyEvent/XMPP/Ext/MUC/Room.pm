@@ -314,7 +314,7 @@ sub send_join {
 		}
 	}
 
-   my $con = $self->{muc}->{connection};
+   my $con = $self->{connection};
    $con->send_presence (undef, {
       defns => 'muc', node => { ns => 'muc', name => 'x', childs => [ @chlds ] }
    }, to => $self->{nick_jid});
@@ -344,7 +344,7 @@ sub make_instant {
    $df->set_form_type ('submit');
    my $sxl = $df->to_simxml;
 
-   $self->{muc}->{connection}->send_iq (
+   $self->{connection}->send_iq (
       set => {
          defns => 'muc_owner', node => {
             name => 'query', childs => [ $sxl ]
@@ -368,7 +368,7 @@ form or an error arrives C<$cb> will be called.
 The first argument to the callback will be a L<AnyEvent::XMPP::Ext::DataForm>
 with the room configuration form or undef in case of an error.
 The second argument will be a L<AnyEvent::XMPP::Error::MUC> error object if an
-error occured or undef if no error occured.
+error occurred or undef if no error occurred.
 
 If you made an answer form you can send it via the C<send_configuration>
 method below.
@@ -395,7 +395,7 @@ sub request_configuration {
    my ($self, $cb) = @_;
    $self->check_online or return;
 
-   $self->{muc}->{connection}->send_iq (
+   $self->{connection}->send_iq (
       get => {
          defns => 'muc_owner', node => { name => 'query' }
       }, sub {
@@ -436,7 +436,7 @@ sub send_configuration {
    my ($self, $form, $cb) = @_;
    $self->check_online or return;
 
-   $self->{muc}->{connection}->send_iq (
+   $self->{connection}->send_iq (
       set => {
          defns => 'muc_owner', node => { name => 'query', childs => [
             $form->to_simxml
@@ -468,6 +468,7 @@ C<type> will be 'groupchat'.
 
 sub make_message {
    my ($self, %args) = @_;
+
    $self->message_class ()->new (
       room       => $self,
       to         => $self->jid,
@@ -496,7 +497,7 @@ sub send_part {
    $self->check_online or return;
    $timeout ||= 60;
 
-   my $con = $self->{muc}->{connection};
+   my $con = $self->{connection};
    my $timeouted = 0;
 
    if ($cb) {
@@ -583,7 +584,7 @@ This method lets you change your nickname in this room.
 sub change_nick {
    my ($self, $newnick) = @_;
    my ($room, $srv) = split_jid $self->jid;
-   $self->{muc}->{connection}->send_presence (
+   $self->{connection}->send_presence (
       undef, undef, to => join_jid ($room, $srv, $newnick)
    );
 }
