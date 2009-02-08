@@ -100,6 +100,15 @@ to connect to. The default for this is the C<domain> of the C<jid>.
 B<NOTE:> To disable DNS SRV lookup you need to specify the port B<number>
 yourself. See C<port> below.
 
+=item use_host_as_sasl_hostname => $bool
+
+This is a special parameter for people who might want to use GSSAPI SASL
+mechanism. It will cause the value of the C<host> parameter (see above) to be
+passed to the SASL mechanisms, instead of the C<domain> of the JID.
+
+This flag is provided until support for XEP 0233 is deployed, which
+will fix the hostname issue w.r.t. GSSAPI SASL.
+
 =item port => $port
 
 This is optional, the default value for C<$port> is 'xmpp-client=5222', which
@@ -330,8 +339,12 @@ when the connection was successfully established.
 If the connection try was not successful a C<disconnect> event
 will be generated with an error message.
 
+NOTE: Please note that you can't reconnect a L<AnyEvent::XMPP::Connection>
+object. You need to recreate it if you want to reconnect.
+
 NOTE: The "XML" stream initiation is sent when the connection
 was successfully connected.
+
 
 =cut
 
@@ -635,7 +648,12 @@ sub send_sasl_auth {
    }
 
    $self->{writer}->send_sasl_auth (
-      [map { $_->text } @mechs], $self->{username}, $self->{host}, $self->{password}
+      [map { $_->text } @mechs],
+      $self->{username},
+      ($self->{use_host_as_sasl_hostname}
+         ? $self->{host}
+         : $self->{domain}),
+      $self->{password}
    );
 }
 

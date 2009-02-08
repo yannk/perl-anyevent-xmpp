@@ -14,6 +14,9 @@ Revision history for Net-XMPP2
          - added 'stream_version_override' parameter to ::Connection, mostly
            for testing purposes with ejabberd (to enforce old-jabber-style
            authentication).
+         - partially reversed a patch w.r.t. hostname usage for SASL mechanism.
+           A flag 'use_host_as_sasl_hostname' is provided for giving the hostname
+           to SASL.
 
 0.3 Mon Jan 28 23:00:58 CET 2009
          - fixed a bug in disconnect error reporting.
