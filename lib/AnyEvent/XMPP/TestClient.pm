@@ -123,77 +123,78 @@ sub init {
    my $cl = $self->{client} = AnyEvent::XMPP::Client->new (debug => $self->{debug} || 0);
    my ($jid, $password) = split /:/, $ENV{NET_XMPP2_TEST}, 2;
 
-   $self->{jid} = $jid;
+   $self->{jid}      = $jid;
+   $self->{jid2}     = "2nd_" . $jid;
    $self->{password} = $password;
    $cl->add_account ($jid, $password, undef, undef, $self->{connection_args});
 
    if ($self->{two_accounts}) {
-      $self->{connected_accounts} = {};
-
+      my $cnt = 0;
       $cl->reg_cb (session_ready => sub {
          my ($cl, $acc) = @_;
-         $self->{connected_accounts}->{$acc->bare_jid} = $acc->jid;
-         my (@jids) = values %{$self->{connected_accounts}};
-         my $cnt = scalar @jids;
-         if ($cnt > 1) {
-            $cl->event (two_accounts_ready => $acc, @jids);
+
+         if (++$cnt > 1) {
+            $self->{acc}  = $cl->get_account ($self->{jid});
+            $self->{acc2} = $cl->get_account ($self->{jid2});
+            $cl->event ('two_accounts_ready', $acc);
          }
       });
 
       $cl->add_account ("2nd_".$jid, $password, undef, undef, $self->{connection_args});
-   }
 
+   } else {
+      $cl->reg_cb (before_session_ready => sub {
+         my ($cl, $acc) = @_;
+         $self->{acc} = $acc;
+      });
+   }
 
    if ($self->{muc_test} && $ENV{NET_XMPP2_TEST_MUC}) {
       $self->{muc_room} = "test_nxmpp2@" . $ENV{NET_XMPP2_TEST_MUC};
 
-      my $disco = $self->instance_ext ('AnyEvent::XMPP::Ext::Disco');
-      $self->{disco} = $disco;
+      my $disco = $self->{disco} = $self->instance_ext ('AnyEvent::XMPP::Ext::Disco');
+      my $muc   = $self->{muc}   = $self->instance_ext ('AnyEvent::XMPP::Ext::MUC', disco => $disco);
 
       $cl->reg_cb (
-         before_session_ready => sub {
-            my ($cl, $acc) = @_;
-            my $con = $acc->connection;
-            $con->add_extension (
-               $self->{mucs}->{$acc->bare_jid}
-                  = AnyEvent::XMPP::Ext::MUC->new (disco => $disco, connection => $con)
-            );
-         },
          two_accounts_ready => sub {
-            my ($cl, $acc, $jid1, $jid2) = @_;
+            my ($cl, $acc) = @_;
             my $cnt = 0;
             my ($room1, $room2);
-            my $muc = $self->{muc1} = $self->{mucs}->{prep_bare_jid $jid1};
 
-            $muc->join_room ($self->{muc_room}, "test1", sub {
+            $muc->join_room ($self->{acc}->connection, $self->{muc_room}, "test1", sub {
                my ($room, $user, $error) = @_;
                $room1 = $room;
+
                if ($error) {
                   $self->{error} .= "Error: Couldn't join $self->{muc_room} as 'test1': ".$error->string."\n";
                   $self->{condvar}->broadcast;
+
                } else {
-                  my $muc = $self->{muc2} = $self->{mucs}->{prep_bare_jid $jid2};
-                  $muc->join_room ($self->{muc_room}, "test2", sub {
-                     my ($room, $user, $error) = @_;
-                     my $room2 = $room;
+                  $muc->join_room ($self->{acc2}->connection, $self->{muc_room}, "test2", sub {
+                     my ($room, $user2, $error) = @_;
+                     $room2 = $room;
+
                      if ($error) {
                         $self->{error} .= "Error: Couldn't join $self->{muc_room} as 'test2'".$error->string."\n";
                         $self->{condvar}->broadcast;
+
                      } else {
-                        $cl->event (two_rooms_joined => $acc, $jid1, $jid2, $room1, $room2)
+                        $self->{user}  = $user;
+                        $self->{user2} = $user2;
+                        $self->{room}  = $room1;
+                        $self->{room2} = $room2;
+                        $cl->event ('two_rooms_joined', $acc);
                      }
                   });
                }
             });
-
-
          }
       );
    }
 
-
    $cl->reg_cb (error => sub {
       my ($cl, $acc, $error) = @_;
+
       $self->{error} .= "Error: " . $error->string . "\n";
       $self->finish unless $self->{continue_on_error};
    });
@@ -210,6 +211,7 @@ sub reached_checkpoint {
    my ($self, $name) = @_;
    my $chp = $self->{checkpoints}->{$name}
       or die "no such checkpoint defined: $name";
+
    $chp->[0]--;
    if ($chp->[0] <= 0) {
       $chp->[1]->();
@@ -225,6 +227,7 @@ sub tests { $_[0]->{tests} }
 
 sub instance_ext {
    my ($self, $ext, @args) = @_;
+
    eval "require $ext; 1";
    if ($@) { die "Couldn't load '$ext': $@" }
    my $eo = $ext->new (@args);
@@ -234,6 +237,7 @@ sub instance_ext {
 
 sub finish {
    my ($self) = @_;
+
    $self->{_cur_finish_cnt}++;
    if ($self->{finish_count} <= $self->{_cur_finish_cnt}) {
       $self->{condvar}->broadcast;

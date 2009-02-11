@@ -54,13 +54,12 @@ my @seq = (
 
 $C->reg_cb (
    two_accounts_ready => sub {
-      my ($C, $acc, $jid1, $jid2) = @_;
-      my $srcacc = $C->get_account ($jid1);
+      my ($C) = @_;
 
-      $src  = prep_bare_jid $jid1;
-      $dest = prep_bare_jid $jid2;
-      $src_full  = $jid1;
-      $dest_full = $jid2;
+      $src  = prep_bare_jid $cl->{jid};
+      $dest = prep_bare_jid $cl->{jid2};
+      $src_full  = $cl->{jid};
+      $dest_full = $cl->{jid2};
 
       my $msg = AnyEvent::XMPP::IM::Message->new (
          body    => "start\n",
@@ -68,7 +67,7 @@ $C->reg_cb (
          type    => 'chat',
       );
 
-      $srcacc->send_tracked_message ($msg);
+      $cl->{acc}->send_tracked_message ($msg);
       $cl->finish;
    },
    message => sub {
@@ -78,6 +77,7 @@ $C->reg_cb (
 
       if (my $seq = shift @seq) {
         $seq->($sacc, $dacc, $msg, cmp_bare_jid ($msg->from, $src));
+
       } else {
         $cl->finish;
       }

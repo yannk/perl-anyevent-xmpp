@@ -18,16 +18,19 @@ my $newsubject = '';
 
 $C->reg_cb (
    two_rooms_joined => sub {
-      my ($C, $acc, $jid1, $jid2, $room1, $room2) = @_;
-      $room2->reg_cb (
+      my ($C) = @_;
+
+      $cl->{muc}->reg_cb (
          subject_change => sub {
-            my ($room2, $msg, $is_echo) = @_;
+            my ($muc, $room, $msg, $is_echo) = @_;
             return if $is_echo;
+            return unless cmp_jid ($room->nick_jid, $cl->{room2}->nick_jid);
             $newsubject = $msg->any_subject;
             $cl->finish;
          }
       );
-      $room1->change_subject ("TEST ABC");
+
+      $cl->{room}->change_subject ("TEST ABC");
    }
 );
 

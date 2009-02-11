@@ -24,12 +24,12 @@ my $dest;
 
 $C->reg_cb (
    two_accounts_ready => sub {
-      my ($C, $acc, $jid1, $jid2) = @_;
-      my $con = $C->get_account ($jid1)->connection;
+      my ($C) = @_;
+      my $con = $cl->{acc}->connection;
 
-      $dest = $jid2;
+      $dest = $cl->{jid2};
 
-      $vers->request_version ($con, $jid2, sub {
+      $vers->request_version ($con, $cl->{jid2}, sub {
          my ($version, $error) = @_;
 
          if ($error) {
@@ -50,7 +50,7 @@ $C->reg_cb (
          my ($n, $e) = @_;
          $recv_error_2 = $e;
          $cl->finish;
-      }, to => $jid2);
+      }, to => $cl->{jid2});
    }
 );
 

@@ -36,7 +36,7 @@ sub new {
    my $this = shift;
    my $class = ref($this) || $this;
    my $self = $class->SUPER::new (@_);
-   $self->{connection} = $self->{room}->{muc}->{connection};
+   $self->{connection} = $self->{room}->{connection};
    $self
 }
 
@@ -67,7 +67,7 @@ sub send {
 
    if ($room) {
       $self->{room} = $room;
-      $self->{connection} = $self->{room}->{muc}->{connection};
+      $self->{connection} = $self->{room}->{connection};
    }
 
    my @add;

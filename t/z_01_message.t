@@ -8,7 +8,9 @@ use AnyEvent::XMPP::IM::Message;
 use AnyEvent::XMPP::Util qw/bare_jid/;
 
 my $cl =
-   AnyEvent::XMPP::TestClient->new_or_exit (tests => 6, two_accounts => 1, finish_count => 2);
+   AnyEvent::XMPP::TestClient->new_or_exit (
+      tests => 6, two_accounts => 1, finish_count => 2
+   );
 my $C = $cl->client;
 
 my ($src, $dest);
@@ -16,15 +18,15 @@ my $recv_message = "";
 
 $C->reg_cb (
    two_accounts_ready => sub {
-      my ($C, $acc, $jid1, $jid2) = @_;
-      my $con = $C->get_account ($jid1)->connection;
+      my ($C) = @_;
+      my $con = $cl->{acc}->connection;
 
-      $src  = bare_jid $jid1;
-      $dest = bare_jid $jid2;
+      $src  = bare_jid $cl->{jid};
+      $dest = bare_jid $cl->{jid2};
 
       my $msg = AnyEvent::XMPP::IM::Message->new (
          body    => "test body",
-         to      => $jid2,
+         to      => $cl->{jid2},
          subject => "Just a test",
          type    => 'headline',
       );

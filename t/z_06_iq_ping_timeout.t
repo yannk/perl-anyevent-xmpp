@@ -17,7 +17,6 @@ my $ping  = $cl->instance_ext ('AnyEvent::XMPP::Ext::Ping');
 
 $disco->enable_feature ($ping->disco_feature);
 
-
 my $disconnect_reason = '';
 my @ignore_ids;
 

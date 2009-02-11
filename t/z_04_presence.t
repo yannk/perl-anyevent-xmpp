@@ -28,13 +28,12 @@ sub jid_user($) { my ($u) = split_jid $_[0]; $u }
 
 $C->reg_cb (
    two_accounts_ready => sub {
-      my ($C, $acc, $jid1, $jid2) = @_;
-      my $con1 = $C->get_account ($src  = $jid1)->connection;
-      my $con2 = $C->get_account ($dest = $jid2)->connection;
-      $src = prep_bare_jid $src;
-      $dest = prep_bare_jid $dest;
+      my ($C) = @_;
+      $src = prep_bare_jid $cl->{jid};
+      $dest = prep_bare_jid $cl->{jid2};
 
-      $con1->get_roster ()->new_contact ($jid2, undef, "friend", sub {
+      $cl->{acc}->connection->get_roster ()->new_contact (
+         $cl->{jid2}, undef, "friend", sub {
          my ($con, $err) = @_;
          $roster_push = 1 if $con;
          if ($con) {

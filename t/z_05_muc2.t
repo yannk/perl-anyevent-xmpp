@@ -19,25 +19,16 @@ my $ROOM = "test_nxmpp2@".$MUC;
 
 my $cl =
    AnyEvent::XMPP::TestClient->new_or_exit (
-      tests => 26, two_accounts => 1, finish_count => 2
+      tests => 25, two_accounts => 1, finish_count => 2
    );
 my $C     = $cl->client;
 my $disco = $cl->instance_ext ('AnyEvent::XMPP::Ext::Disco');
-
-my %muc;
+my $muc   = $cl->instance_ext ('AnyEvent::XMPP::Ext::MUC', disco => $disco);
 
 $C->reg_cb (
-   before_session_ready => sub {
-      my ($C, $acc) = @_;
-      my $con = $acc->connection;
-      $con->add_extension (
-         $muc{$acc->bare_jid} =
-            AnyEvent::XMPP::Ext::MUC->new (disco => $disco, connection => $con)
-      );
-   },
    two_accounts_ready => sub {
       my ($C, $acc, $jid1, $jid2) = @_;
-      step_join_rooms ($C, \%muc, $jid1, $jid2);
+      step_join_rooms ();
    }
 );
 
@@ -45,17 +36,17 @@ my $sjr_error   = '';
 my $sjr_created = '';
 
 sub step_join_rooms {
-   my ($C, $mucs, $jid1, $jid2) = @_;
-
-   my $muc1 = $mucs->{prep_bare_jid $jid1};
-   $muc1->join_room ($ROOM, "test1owner", sub {
+   $muc->join_room ($cl->{acc}->connection, $ROOM, "test1owner", sub {
       my ($room, $user, $error) = @_;
+
       if ($error) {
          $sjr_error = $error->string;
+
       } else {
          if ($user->did_create_room) {
             $sjr_created = 1;
-            step_rejoin ($C, $mucs, $jid1, $jid2, $room, $user);
+            step_rejoin ($room, $user);
+
          } else {
             $cl->finish;
          }
@@ -69,12 +60,10 @@ my $sr_pass_field = 0;
 my $sr_config_ok  = 0;
 
 sub step_rejoin {
-   my ($C, $mucs, $jid1, $jid2, $room1, $user1) = @_;
+   my ($room1, $user1) = @_;
 
    $room1->send_part ("rejoin", sub {
-
-      my $muc1 = $mucs->{prep_bare_jid $jid1};
-      $muc1->join_room ($ROOM, "test1owner", sub {
+      $muc->join_room ($cl->{acc}->connection, $ROOM, "test1owner", sub {
          my ($room, $user, $error) = @_;
 
          if ($error) {
@@ -104,7 +93,7 @@ sub step_rejoin {
                         $room->send_configuration ($af, sub {
                            my ($ok, $error) = @_;
                            $sr_config_ok = 1 if $ok;
-                           step_join_occupant ($C, $mucs, $jid1, $jid2, $room, $user);
+                           step_join_occupant ($room, $user);
                         });
 
                      } else {
@@ -124,18 +113,20 @@ sub step_rejoin {
 my $sjo_join_error_type = '';
 
 sub step_join_occupant {
-   my ($C, $mucs, $jid1, $jid2, $room1, $user1) = @_;
+   my ($room1, $user1) = @_;
 
-   my $muc2 = $mucs->{prep_bare_jid $jid2};
-   $muc2->join_room ($ROOM, "test2user", sub {
+   $muc->join_room ($cl->{acc2}->connection, $ROOM, "test2user", sub {
       my ($room, $user, $error) = @_;
+
       if ($error) {
          $sjo_join_error_type = $error->type;
+
          if ($sjo_join_error_type eq 'password_required') {
-            step_join_occupant_password ($C, $mucs, $jid1, $jid2, $room1, $user1);
+            step_join_occupant_password ($room1, $user1);
             return;
          }
       }
+
       $cl->finish;
    });
 }
@@ -144,17 +135,18 @@ my $sjop_error = '';
 my $sjop_join  = 0;
 
 sub step_join_occupant_password {
-   my ($C, $mucs, $jid1, $jid2, $room1, $user1) = @_;
+   my ($room1, $user1) = @_;
 
-   my $muc2 = $mucs->{prep_bare_jid $jid2};
-   $muc2->join_room ($ROOM, "test2user", sub {
+   $muc->join_room ($cl->{acc2}->connection, $ROOM, "test2user", sub {
       my ($room, $user, $error) = @_;
+
       if ($error) {
          $sjop_error = $error->string;
          $cl->finish;
+
       } else {
          $sjop_join++;
-         step_change_nick ($C, $mucs, $jid1, $jid2, $room1, $user1, $room, $user);
+         step_change_nick ($room1, $user1, $room, $user);
       }
    }, password => 'abc123');
 }
@@ -163,7 +155,7 @@ my $nick_info = {};
 my $second = 0;
 
 sub step_change_nick {
-   my ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2) = @_;
+   my ($room1, $user1, $room2, $user2) = @_;
 
    my $ni = $nick_info;
    if ($second == 1) {
@@ -172,62 +164,55 @@ sub step_change_nick {
 
    my $cnt = 0;
 
-   $room1->reg_cb (
+   $muc->reg_cb (
       nick_change => sub {
-         my ($room1, $user, $oldnick, $newnick) = @_;
+         my ($muc, $room, $user, $oldnick, $newnick) = @_;
+
+         return unless cmp_jid ($room->nick_jid, $room1->nick_jid);
+
          my (@other) = grep $_->jid ne $room1->get_me->jid, $room1->users;
 
-         $ni->{user1}->{own}      = $user1->jid;
+         $ni->{user1}->{own}      = $room1->get_me->jid;
          $ni->{user1}->{other}    = $other[0]->jid;
          $ni->{user1}->{old_nick} = $oldnick;
          $ni->{user1}->{new_nick} = $newnick;
-         $room1->unreg_me;
+
+         $muc->unreg_me;
       }
    );
-   $room1->reg_cb (
+
+   $muc->reg_cb (
+      nick_change => sub {
+         my ($muc, $room, $user, $oldnick, $newnick) = @_;
+
+         return unless cmp_jid ($room->nick_jid, $room2->nick_jid);
+
+         my (@other) = grep $_->jid ne $room2->get_me->jid, $room2->users;
+
+         $ni->{user2}->{own}      = $room2->get_me->jid;
+         $ni->{user2}->{other}    = $other[0]->jid;
+         $ni->{user2}->{old_nick} = $oldnick;
+         $ni->{user2}->{new_nick} = $newnick;
+
+         $muc->unreg_me;
+      }
+   );
+
+   $muc->reg_cb (
       after_nick_change => sub {
-         my ($room1) = @_;
+         my ($muc, $room) = @_;
 
          if (not $second) {
             $cnt++;
             if ($cnt >= 2) {
                $second = 1;
-               step_change_nick ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2, 1);
+               step_change_nick ($room1, $user1, $room2, $user2, 1);
             }
          } else {
             $cl->finish;
          }
       }
    ) if not $second;
-
-   $room2->reg_cb (
-      nick_change => sub {
-         my ($room2, $user, $oldnick, $newnick) = @_;
-         my (@other) = grep $_->jid ne $room2->get_me->jid, $room2->users;
-
-         $ni->{user2}->{own}      = $user2->jid;
-         $ni->{user2}->{other}    = $other[0]->jid;
-         $ni->{user2}->{old_nick} = $oldnick;
-         $ni->{user2}->{new_nick} = $newnick;
-         $room2->unreg_me;
-      }
-   );
-
-   $room2->reg_cb (
-      after_nick_change => sub {
-         my ($room2) = @_;
-
-         if (not $second) {
-            $cnt++;
-            if ($cnt >= 2) {
-               $second = 1;
-               step_change_nick ($C, $mucs, $jid1, $jid2, $room1, $user1, $room2, $user2, 1);
-            }
-         } else {
-            $cl->finish;
-         }
-      }
-   ) if not $second;;
 
    if ($second == 1) {
       $room2->change_nick ("test2nd");
@@ -238,7 +223,6 @@ sub step_change_nick {
 
 $cl->wait;
 
-is ((scalar keys %muc),         2, "MUC extensions initialized");
 is ($sjr_error        ,        '', "creator joined without error");
 ok ($sjr_created                 , "creator created room");
 ok ($sr_created                  , "rejoin created room");
@@ -253,15 +237,18 @@ is ($nick_info->{user1}->{own}     , "$ROOM/test1owner", 'observed own JID of us
 is ($nick_info->{user1}->{other}   , "$ROOM/test2"     , 'observed other JID of user1');
 is ($nick_info->{user1}->{old_nick}, "test2user"       , 'observed old nick of user1');
 is ($nick_info->{user1}->{new_nick}, "test2"           , 'observed new nick of user1');
+
 is ($nick_info->{user2}->{own}     , "$ROOM/test2"     , 'observed own JID of user2');
 is ($nick_info->{user2}->{other}   , "$ROOM/test1owner", 'observed other JID of user2');
 is ($nick_info->{user2}->{old_nick}, "test2user"       , 'observed old nick of user2');
 is ($nick_info->{user2}->{new_nick}, "test2"           , 'observed new nick of user2');
+
 $nick_info = $nick_info->{second};
 is ($nick_info->{user1}->{own}     , "$ROOM/test1owner", '2nd observed own JID of user1');
 is ($nick_info->{user1}->{other}   , "$ROOM/test2nd"   , '2nd observed other JID of user1');
 is ($nick_info->{user1}->{old_nick}, "test2"           , '2nd observed old nick of user1');
 is ($nick_info->{user1}->{new_nick}, "test2nd"         , '2nd observed new nick of user1');
+
 is ($nick_info->{user2}->{own}     , "$ROOM/test2nd"   , '2nd observed own JID of user2');
 is ($nick_info->{user2}->{other}   , "$ROOM/test1owner", '2nd observed other JID of user2');
 is ($nick_info->{user2}->{old_nick}, "test2"           , '2nd observed old nick of user2');

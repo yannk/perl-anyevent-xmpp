@@ -1,6 +1,7 @@
 package AnyEvent::XMPP::Ext::MUC;
 use strict;
-use AnyEvent::XMPP::Util qw/prep_bare_jid bare_jid stringprep_jid/;
+no warnings;
+use AnyEvent::XMPP::Util qw/prep_bare_jid bare_jid stringprep_jid cmp_jid/;
 use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
 use AnyEvent::XMPP::Ext;
 use AnyEvent::XMPP::Ext::MUC::Room;
@@ -52,21 +53,32 @@ sub new {
 sub init {
    my ($self) = @_;
 
+   my $proxy = sub {
+      my ($self, @args) = @_;
+      $self->event (@args);
+   };
+
+   $self->reg_cb (
+      join_error           => $proxy,
+      subject_change_error => $proxy,
+      message_error        => $proxy,
+   );
+
    $self->reg_cb (
       ext_before_presence_xml => sub {
          my ($self, $con, $node) = @_;
 
-         if ($self->get_room ($con, $node->attr ('from'))) {
+         if (my $room = $self->get_room ($con, $node->attr ('from'))) {
             $self->stop_event;
-            $self->handle_presence ($room, $node);
+            $room->handle_presence ($node);
          }
       },
       ext_before_message_xml => sub {
          my ($self, $con, $node) = @_;
 
-         if ($self->get_room ($con, $node->attr ('from'))) {
+         if (my $room = $self->get_room ($con, $node->attr ('from'))) {
             $self->stop_event;
-            $self->handle_message ($room, $node);
+            $room->handle_message ($node);
          }
       },
       disconnect => sub {
@@ -241,46 +253,49 @@ sub join_room {
          $cb->(undef, undef, $muce);
       });
 
-   #my $rcb_id;
-   #$rcb_id = $room->reg_cb (
-   #   join_error => sub {
-   #      my ($room, $error) = @_;
+   my $rcb_id;
+   $rcb_id = $self->reg_cb (
+      join_error => sub {
+         my ($muc, $eroom, $error) = @_;
+         return unless cmp_jid ($eroom->nick_jid, $room->nick_jid);
 
-   #      if ($error->type eq 'nickname_in_use'
-   #          && exists $args{nickcollision_cb}) {
-   #         $nick = $args{nickcollision_cb}->($nick);
-   #         $room->send_join ($nick, $args{password}, $args{history});
-   #         return;
-   #      }
+         if ($error->type eq 'nickname_in_use'
+             && exists $args{nickcollision_cb}) {
+            $nick = $args{nickcollision_cb}->($nick);
+            $room->send_join ($nick, $args{password}, $args{history});
+            return;
+         }
 
-   #      delete $self->{room_join_timer}->{$pbj};
-   #      $self->uninstall_room ($room);
-   #      $room->unreg_cb ($rcb_id);
-   #      $cb->(undef, undef, $error);
-   #   },
-   #   enter => sub {
-   #      my ($room, $user) = @_;
+         delete $self->{room_join_timer}->{$pbj};
+         $self->uninstall_room ($con, $room);
+         $muc->unreg_cb ($rcb_id);
+         $cb->(undef, undef, $error);
+      },
+      enter => sub {
+         my ($muc, $eroom, $user) = @_;
+         return unless cmp_jid ($eroom->nick_jid, $room->nick_jid);
 
-   #      delete $self->{room_join_timer}->{$pbj};
-   #      $room->unreg_cb ($rcb_id);
+         delete $self->{room_join_timer}->{$pbj};
+         $muc->unreg_cb ($rcb_id);
 
-   #      if ($user->did_create_room && $args{create_instant}) {
-   #         $room->make_instant (sub {
-   #            my ($room, $error) = @_;
-   #            if ($error) {
-   #               $cb->(undef, undef, $error);
-   #            } else {
-   #               $cb->($room, $user, undef);
-   #            }
-   #         });
+         if ($user->did_create_room && $args{create_instant}) {
+            $room->make_instant (sub {
+               my ($room, $error) = @_;
 
-   #      } else {
-   #         $cb->($room, $user, undef);
-   #      }
-   #   }
-   #);
+               if ($error) {
+                  $cb->(undef, undef, $error);
+               } else {
+                  $cb->($room, $user, undef);
+               }
+            });
 
-   #$room->send_join ($nick, $args{password}, $args{history});
+         } else {
+            $cb->($room, $user, undef);
+         }
+      }
+   );
+
+   $room->send_join ($nick, $args{password}, $args{history});
 }
 
 sub install_room {
@@ -299,9 +314,10 @@ sub install_room {
 
 sub uninstall_room {
    my ($self, $con, $room) = @_;
-   my $room = delete $self->{rooms}->{stringprep_jid $con->jid}->{prep_bare_jid $room_jid}
-   delete $room->{muc};
-   delete $room->{connection};
+   my $r =
+      delete $self->{rooms}->{stringprep_jid $con->jid}->{prep_bare_jid $room->jid};
+   delete $r->{muc};
+   delete $r->{connection};
 }
 
 =item B<get_room ($con, $jid)>
@@ -325,7 +341,73 @@ sub get_room {
 
 These are the events that are issued by this MUC extension:
 
+C<$room> is the L<AnyEvent::XMPP::Ext::MUC::Room> object which
+the event belongs to.
+
 =over 4
+
+=item message => $room, $msg, $is_echo
+
+This event is emitted when a message was received from the room.
+C<$msg> is a L<AnyEvent::XMPP::Ext::MUC::Message> object and C<$is_echo>
+is true if the message is an echo.
+
+=item subject_change => $room, $msg, $is_echo
+
+This event is emitted when a user changes the room subject.
+C<$msg> is a L<AnyEvent::XMPP::Ext::MUC::Message> object and C<$is_echo>
+is true if the message is an echo.
+
+The room subject is the subject of that C<$msg>.
+
+=item subject_change_error => $room, $error
+
+If you weren't allowed to change the subject or some other error
+occurred you will receive this event.
+C<$error> is a L<AnyEvent::XMPP::Error::MUC> object.
+
+=item error => $room, $error
+
+This event is emitted when any error occurred.
+C<$error> is a L<AnyEvent::XMPP::Error::MUC> object.
+
+=item join_error => $room, $error
+
+This event is emitted when a error occurred when joining a room.
+C<$error> is a L<AnyEvent::XMPP::Error::MUC> object.
+
+=item enter => $room, $user
+
+This event is emitted when we successfully joined the room.
+C<$user> is a L<AnyEvent::XMPP::Ext::MUC::User> object which is
+the user handle for ourself.
+
+=item join => $room, $user
+
+This event is emitted when a new user joins the room.
+C<$user> is the L<AnyEvent::XMPP::Ext::MUC::User> object of that user.
+
+=item nick_change => $room, $user, $oldnick, $newnick
+
+This event is emitted when a user changed his nickname.
+C<$user> is the L<AnyEvent::XMPP::Ext::MUC::User> object of that user.
+C<$oldnick> is the old nickname and C<$newnick> is the new nickname.
+
+=item presence => $room, $user
+
+This event is emitted when a user changes it's presence status
+(eg. affiliation or role, or away status).
+C<$user> is the L<AnyEvent::XMPP::Ext::MUC::User> object of that user.
+
+=item part => $room, $user
+
+This event is emitted when a user leaves the channel.  C<$user> is the
+L<AnyEvent::XMPP::Ext::MUC::User> of that user, but please note that you shouldn't
+send any messages to this user anymore.
+
+=item leave => $room
+
+This event is emitted when we leave the room.
 
 =back
 

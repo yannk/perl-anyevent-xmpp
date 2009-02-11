@@ -21,15 +21,15 @@ my $dconmsg      = "";
 
 $C->reg_cb (
    two_accounts_ready => sub {
-      my ($C, $acc, $jid1, $jid2) = @_;
-      my $con = $C->get_account ($jid1)->connection;
+      my ($C) = @_;
+      my $con = $cl->{acc}->connection;
 
-      $src  = bare_jid $jid1;
+      $src = bare_jid $cl->{jid};
 
       my $msg = AnyEvent::XMPP::IM::Message->new (
          body    => "test body",
          type    => 'normal',
-         to      => $jid2,
+         to      => $cl->{jid2},
       );
 
       $C->reg_cb (send_buffer_empty => sub {

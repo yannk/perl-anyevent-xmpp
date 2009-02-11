@@ -18,13 +18,14 @@ my $disco_error = '';
 
 $C->reg_cb (
    two_accounts_ready => sub {
-      my ($C, $acc, $jid1, $jid2) = @_;
-      my $con = $C->get_account ($jid1)->connection;
+      my ($C) = @_;
 
-      $disco->request_info ($con, $jid2, undef, sub {
+      $disco->request_info ($cl->{acc}->connection, $cl->{jid2}, undef, sub {
          my ($disco, $info, $error) = @_;
+
          if ($error) {
             $disco_error = $error->string;
+
          } else {
             my (@ids) = $info->identities ();
             ok (
@@ -35,6 +36,7 @@ $C->reg_cb (
                } @ids),
                "has bot identity"
             );
+
             ok (
                (grep {
                   $_->{category} eq 'client'

@@ -24,16 +24,16 @@ my $feature = 0;
 
 $C->reg_cb (
    two_accounts_ready => sub {
-      my ($C, $acc, $jid1, $jid2) = @_;
-      my $con = $C->get_account ($jid1)->connection;
+      my ($C) = @_;
+      my $con = $cl->{acc}->connection;
 
-      $disco->request_info ($con, $jid2, undef, sub {
+      $disco->request_info ($con, $cl->{jid2}, undef, sub {
          my ($disco, $info, $error) = @_;
          $feature = ! ! ($info->features->{xmpp_ns ('ping')});
          $cl->finish;
       });
 
-      $ping->ping ($con, $jid2, sub {
+      $ping->ping ($con, $cl->{jid2}, sub {
          my ($time, $error) = @_;
          if ($error) {
             $ping_error = $error->string;

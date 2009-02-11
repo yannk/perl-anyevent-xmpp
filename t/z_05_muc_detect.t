@@ -23,21 +23,15 @@ my $cl =
    );
 my $C     = $cl->client;
 my $disco = $cl->instance_ext ('AnyEvent::XMPP::Ext::Disco');
+my $muc   = $cl->instance_ext ('AnyEvent::XMPP::Ext::MUC', disco => $disco);
 
 my $muc_is_conference     = 0;
-my $muc;
 
 $C->reg_cb (
-   before_session_ready => sub {
-      my ($C, $acc) = @_;
-      my $con = $acc->connection;
-      $con->add_extension (
-         $muc = AnyEvent::XMPP::Ext::MUC->new (disco => $disco, connection => $con)
-      );
-   },
    session_ready => sub {
-      my ($C, $acc, $jid1, $jid2) = @_;
-      $muc->is_conference ($MUC, sub {
+      my ($C, $acc) = @_;
+
+      $muc->is_conference ($cl->{acc}->connection, $MUC, sub {
          my ($conf, $err) = @_;
          if ($conf) { $muc_is_conference = 1 }
          $cl->finish

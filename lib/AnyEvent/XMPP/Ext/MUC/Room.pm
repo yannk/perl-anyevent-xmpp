@@ -9,15 +9,12 @@ use AnyEvent::XMPP::Util qw/
 use AnyEvent::XMPP::Ext::MUC::User;
 use AnyEvent::XMPP::Ext::DataForm;
 use AnyEvent::XMPP::Error::MUC;
-use Object::Event;
 
 use constant {
    JOIN_SENT => 1,
    JOINED    => 2,
    LEFT      => 3,
 };
-
-our @ISA = qw/Object::Event/;
 
 =head1 NAME
 
@@ -48,17 +45,11 @@ sub new {
 sub init {
    my ($self) = @_;
    $self->{jid} = bare_jid ($self->{jid});
+}
 
-   my $proxy = sub {
-      my ($self, $error) = @_;
-      $self->event (error => $error);
-   };
-
-   $self->reg_cb (
-      join_error           => $proxy,
-      subject_change_error => $proxy,
-      message_error        => $proxy,
-   );
+sub event {
+   my ($self, $ev, @args) = @_;
+   $self->{muc}->event ($ev, $self, @args);
 }
 
 sub handle_message {
@@ -102,7 +93,7 @@ sub handle_presence {
    my $type = $node->attr ('type');
 
    my $error;
-   if ($node->attr ('type') eq 'error') {
+   if ($type eq 'error') {
       $error = AnyEvent::XMPP::Error::Presence->new (node => $node);
    }
 
@@ -191,7 +182,7 @@ sub handle_presence {
                $self->event (presence => $user);
             }
          } else {
-            $self->event (join     => $user);
+            $self->event (join => $user);
          }
       }
    }
@@ -303,16 +294,20 @@ sub send_join {
       push @chlds, { name => 'password', childs => [ $password ] };
    }
 
-	if (defined $history) {
-		my $h;
-		push(@{$h->{attrs}}, ('maxchars', $history->{chars})) if (defined $history->{chars});
-		push(@{$h->{attrs}}, ('maxstanzas', $history->{stanzas})) if (defined $history->{stanzas});
-		push(@{$h->{attrs}}, ('seconds', $history->{seconds})) if (defined $history->{seconds});
-		if (defined $h->{attrs}) {
-			$h->{name} = 'history';
-			push(@chlds, $h);
-		}
-	}
+   if (defined $history) {
+      my $h;
+      push @{$h->{attrs}}, ('maxchars', $history->{chars})
+         if defined $history->{chars};
+      push @{$h->{attrs}}, ('maxstanzas', $history->{stanzas})
+         if defined $history->{stanzas};
+      push @{$h->{attrs}}, ('seconds', $history->{seconds})
+         if defined $history->{seconds};
+
+      if (defined $h->{attrs}) {
+         $h->{name} = 'history';
+         push @chlds, $h;
+      }
+   }
 
    my $con = $self->{connection};
    $con->send_presence (undef, {
@@ -508,11 +503,13 @@ sub send_part {
             $self->event ('leave');
          });
 
-      $self->reg_cb (ext_after_leave => sub {
-         my ($self) = @_;
+      $self->{muc}->reg_cb (ext_after_leave => sub {
+         my ($muc, $room) = @_;
+         return unless cmp_jid ($room->nick_jid, $self->nick_jid);
+
          delete $self->{_part_timeout};
          $cb->($timeouted) if $cb;
-         $self->unreg_me;
+         $muc->unreg_me;
       });
    }
 
@@ -559,8 +556,7 @@ Returns true if this room is still connected (but maybe not joined (yet)).
 
 sub is_connected {
    my ($self) = @_;
-   $self->{muc}
-   && $self->{muc}->is_connected
+   $self->{connection} && $self->{connection}->is_connected
 }
 
 =item B<is_joined>
@@ -600,77 +596,6 @@ sub change_subject {
    my $msg = $self->make_message (subject => $newsubject);
    $msg->send;
 }
-
-=back
-
-=head1 EVENTS
-
-These events can be registered on with C<reg_cb>:
-
-=over 4
-
-=item message => $msg, $is_echo
-
-This event is emitted when a message was received from the room.
-C<$msg> is a L<AnyEvent::XMPP::Ext::MUC::Message> object and C<$is_echo>
-is true if the message is an echo.
-
-=item subject_change => $msg, $is_echo
-
-This event is emitted when a user changes the room subject.
-C<$msg> is a L<AnyEvent::XMPP::Ext::MUC::Message> object and C<$is_echo>
-is true if the message is an echo.
-
-The room subject is the subject of that C<$msg>.
-
-=item subject_change_error => $error
-
-If you weren't allowed to change the subject or some other error
-occured you will receive this event.
-C<$error> is a L<AnyEvent::XMPP::Error::MUC> object.
-
-=item error => $error
-
-This event is emitted when any error occured.
-C<$error> is a L<AnyEvent::XMPP::Error::MUC> object.
-
-=item join_error => $error
-
-This event is emitted when a error occured when joining a room.
-C<$error> is a L<AnyEvent::XMPP::Error::MUC> object.
-
-=item enter => $user
-
-This event is emitted when we successfully joined the room.
-C<$user> is a L<AnyEvent::XMPP::Ext::MUC::User> object which is
-the user handle for ourself.
-
-=item join => $user
-
-This event is emitted when a new user joins the room.
-C<$user> is the L<AnyEvent::XMPP::Ext::MUC::User> object of that user.
-
-=item nick_change => $user, $oldnick, $newnick
-
-This event is emitted when a user changed his nickname.
-C<$user> is the L<AnyEvent::XMPP::Ext::MUC::User> object of that user.
-C<$oldnick> is the old nickname and C<$newnick> is the new nickname.
-
-=item presence => $user
-
-This event is emitted when a user changes it's presence status
-(eg. affiliation or role, or away status).
-C<$user> is the L<AnyEvent::XMPP::Ext::MUC::User> object of that user.
-
-=item part => $user
-
-This event is emitted when a user leaves the channel.  C<$user> is the
-L<AnyEvent::XMPP::Ext::MUC::User> of that user, but please note that you shouldn't
-send any messages to this user anymore.
-
-=item leave
-
-This event is emitted when we leave the room.
 
 =back
 

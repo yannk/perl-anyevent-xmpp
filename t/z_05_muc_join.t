@@ -18,10 +18,10 @@ my ($nickjids, $users_r1, $users_r2) = ("nonickjids", "nousers", "nootherusers")
 
 $C->reg_cb (
    two_rooms_joined => sub {
-      my ($C, $acc, $jid1, $jid2, $room1, $room2) = @_;
-      $nickjids = join '', sort ($room1->nick_jid, $room2->nick_jid);
-      $users_r1 = join '', sort map { $_->jid } $room1->users;
-      $users_r2 = join '', sort map { $_->jid } $room1->users;
+      my ($C) = @_;
+      $nickjids = join '', sort ($cl->{room}->nick_jid, $cl->{room2}->nick_jid);
+      $users_r1 = join '', sort map { $_->jid } $cl->{room}->users;
+      $users_r2 = join '', sort map { $_->jid } $cl->{room2}->users;
       $cl->finish;
    }
 );
