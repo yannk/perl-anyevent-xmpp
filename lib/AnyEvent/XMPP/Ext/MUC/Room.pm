@@ -125,7 +125,17 @@ sub handle_presence {
             my $user = $self->add_user_xml ($node);
             $self->{status} = JOINED;
             $self->{me} = $user;
-            $self->event (enter => $user);
+
+            if ($user->did_create_room) {
+               if ($self->{locked_cb}) {
+                  (delete $self->{locked_cb})->($self);
+
+               } else {
+                  $self->event ('locked');
+               }
+            } else {
+               $self->event (enter => $user);
+            }
 
          } else {
             $self->add_user_xml ($node);
@@ -325,9 +335,10 @@ C<create_instant> argument of the C<join_room> method of L<AnyEvent::XMPP::Ext::
 
 See also the C<request_configuration> method below for the reserved room config.
 
-C<$cb> is the callback that will be called when the instant room creation is finished.
-If successful the first argument will be this room object (C<$self>), if unsuccessful
-the first argument will be undef and the second will be a L<AnyEvent::XMPP::Error::IQ> object.
+C<$cb> is the callback that will be called when the instant room creation is
+finished.  If successful the first argument will be this room object
+(C<$self>), if unsuccessful the first argument will be undef and the second
+will be a L<AnyEvent::XMPP::Error::IQ> object.
 
 =cut
 
@@ -346,6 +357,7 @@ sub make_instant {
          }
       }, sub {
          my ($n, $e) = @_;
+
          if ($e) {
             $cb->(undef, $e);
          } else {

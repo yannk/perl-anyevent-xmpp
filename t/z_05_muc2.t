@@ -19,165 +19,175 @@ my $ROOM = "test_nxmpp2@".$MUC;
 
 my $cl =
    AnyEvent::XMPP::TestClient->new_or_exit (
-      tests => 25, two_accounts => 1, finish_count => 2
+      tests => 25, two_accounts => 1, finish_count => 1
    );
 my $C     = $cl->client;
 my $disco = $cl->instance_ext ('AnyEvent::XMPP::Ext::Disco');
 my $muc   = $cl->instance_ext ('AnyEvent::XMPP::Ext::MUC', disco => $disco);
 
-$C->reg_cb (
-   two_accounts_ready => sub {
-      my ($C, $acc, $jid1, $jid2) = @_;
-      step_join_rooms ();
-   }
-);
-
 my $sjr_error   = '';
 my $sjr_created = '';
-
-sub step_join_rooms {
-   $muc->join_room ($cl->{acc}->connection, $ROOM, "test1owner", sub {
-      my ($room, $user, $error) = @_;
-
-      if ($error) {
-         $sjr_error = $error->string;
-
-      } else {
-         if ($user->did_create_room) {
-            $sjr_created = 1;
-            step_rejoin ($room, $user);
-
-         } else {
-            $cl->finish;
-         }
-      }
-   });
-}
 
 my $sr_error      = '';
 my $sr_created    = 0;
 my $sr_pass_field = 0;
 my $sr_config_ok  = 0;
 
-sub step_rejoin {
-   my ($room1, $user1) = @_;
-
-   $room1->send_part ("rejoin", sub {
-      $muc->join_room ($cl->{acc}->connection, $ROOM, "test1owner", sub {
-         my ($room, $user, $error) = @_;
-
-         if ($error) {
-            $sjr_error = $error->string;
-
-         } else {
-
-            if ($user->did_create_room) {
-               $sr_created = 1;
-
-               $room->request_configuration (sub {
-                  my ($form, $error) = @_;
-
-                  if ($form) {
-
-                     if ($form->get_field ('muc#roomconfig_passwordprotectedroom')
-                         && $form->get_field ('muc#roomconfig_roomsecret')) {
-
-                        $sr_pass_field = 1;
-
-                        my $af = AnyEvent::XMPP::Ext::DataForm->new;
-                        $af->make_answer_form ($form);
-                        $af->set_field_value ('muc#roomconfig_passwordprotectedroom', 1);
-                        $af->set_field_value ('muc#roomconfig_roomsecret', "abc123");
-                        $af->clear_empty_fields;
-
-                        $room->send_configuration ($af, sub {
-                           my ($ok, $error) = @_;
-                           $sr_config_ok = 1 if $ok;
-                           step_join_occupant ($room, $user);
-                        });
-
-                     } else {
-                        $cl->finish;
-                     }
-                  }
-               });
-
-            } else {
-               $cl->finish;
-            }
-         }
-      }, create_instant => 0);
-   });
-}
-
 my $sjo_join_error_type = '';
-
-sub step_join_occupant {
-   my ($room1, $user1) = @_;
-
-   $muc->join_room ($cl->{acc2}->connection, $ROOM, "test2user", sub {
-      my ($room, $user, $error) = @_;
-
-      if ($error) {
-         $sjo_join_error_type = $error->type;
-
-         if ($sjo_join_error_type eq 'password_required') {
-            step_join_occupant_password ($room1, $user1);
-            return;
-         }
-      }
-
-      $cl->finish;
-   });
-}
 
 my $sjop_error = '';
 my $sjop_join  = 0;
 
-sub step_join_occupant_password {
-   my ($room1, $user1) = @_;
-
-   $muc->join_room ($cl->{acc2}->connection, $ROOM, "test2user", sub {
-      my ($room, $user, $error) = @_;
-
-      if ($error) {
-         $sjop_error = $error->string;
-         $cl->finish;
-
-      } else {
-         $sjop_join++;
-         step_change_nick ($room1, $user1, $room, $user);
-      }
-   }, password => 'abc123');
-}
-
 my $nick_info = {};
 my $second = 0;
 
-sub step_change_nick {
-   my ($room1, $user1, $room2, $user2) = @_;
+$cl->state (['two_accounts_ready'], step_join => {}, undef, sub {
+   $muc->join_room ($cl->{acc}->connection, $ROOM, "test1owner");
+   $muc->reg_cb (
+      enter => sub {
+         my ($muc, $room, $user) = @_;
 
-   my $ni = $nick_info;
-   if ($second == 1) {
-      $ni = $nick_info->{second} = {};
-   }
+         if ($user->did_create_room) {
+            $sjr_created = 1;
+            $cl->{room} = $room;
+            $cl->state_done ('step_join_done');
+         } else {
+            $cl->finish;
+         }
 
+         $muc->unreg_my_set;
+      }, join_error => sub {
+         my ($muc, $room, $error) = @_;
+
+         $sjr_error = $error->string;
+         $muc->unreg_my_set;
+      }
+   );
+});
+
+$cl->state (['step_join_done'], step_rejoin => {}, undef, sub {
+   $cl->{room}->send_part ("rejoin");
+   $muc->reg_cb (
+      enter => sub {
+         my ($muc, $room, $user) = @_;
+
+         $cl->finish; # error!
+         $muc->unreg_my_set;
+      },
+      leave => sub {
+         my ($muc, $room) = @_;
+
+         $muc->join_room ($cl->{acc}->connection, $ROOM, "test1owner",
+                          create_instant => 0);
+      },
+      locked => sub {
+         my ($muc, $room) = @_;
+
+         $cl->{room} = $room;
+         $sr_created = 1;
+         $room->request_configuration (sub {
+            my ($form, $error) = @_;
+
+            if ($form) {
+
+               if ($form->get_field ('muc#roomconfig_passwordprotectedroom')
+                   && $form->get_field ('muc#roomconfig_roomsecret')) {
+
+                  $sr_pass_field = 1;
+
+                  my $af = AnyEvent::XMPP::Ext::DataForm->new;
+                  $af->make_answer_form ($form);
+                  $af->set_field_value ('muc#roomconfig_passwordprotectedroom', 1);
+                  $af->set_field_value ('muc#roomconfig_roomsecret', "abc123");
+                  $af->clear_empty_fields;
+
+                  $room->send_configuration ($af, sub {
+                     my ($ok, $error) = @_;
+                     if ($error) {
+                        $sr_error = $error->string;
+                        $cl->finish;
+                     } else {
+                        $sr_config_ok = 1;
+                        $cl->state_done ('step_rejoin_done');
+                     }
+                  });
+
+               } else {
+                  $cl->finish;
+               }
+            }
+         });
+
+         $muc->unreg_my_set;
+      },
+      join_error => sub {
+         my ($muc, $room, $error) = @_;
+         $sr_error = $error->string;
+         $muc->unreg_my_set;
+         $cl->finish;
+      }
+   );
+
+});
+
+$cl->state (['step_rejoin_done'], 'step_join_occ', {}, undef, sub {
+   $muc->join_room ($cl->{acc2}->connection, $ROOM, "test2user");
+   $muc->reg_cb (
+      enter => sub {
+         my ($muc, $room, $user) = @_;
+         $muc->unreg_my_set;
+         $cl->finish
+      },
+      join_error => sub {
+         my ($muc, $room, $error) = @_;
+         $muc->unreg_my_set;
+
+         $sjo_join_error_type = $error->type;
+
+         if ($sjo_join_error_type eq 'password_required') {
+            $cl->state_done ('step_join_occ_done');
+         }
+      }
+   );
+});
+
+$cl->state (['step_join_occ_done'], 'step_join_occ_pass', {}, undef, sub {
+   $muc->join_room ($cl->{acc2}->connection, $ROOM, "test2user", password => 'abc123');
+
+   $muc->reg_cb (
+      enter => sub {
+         my ($muc, $room, $user) = @_;
+         $sjop_join++;
+         $cl->{room2} = $room;
+         $cl->state_done ('step_join_occ_pass_done');
+         $muc->unreg_my_set;
+      }, join_error => sub {
+         my ($muc, $room, $error) = @_;
+         $sjop_error = $error->string;
+         $cl->finish;
+         $muc->unreg_my_set;
+      }
+   );
+});
+
+my $ni = $nick_info;
+
+$cl->state (['step_join_occ_pass_done'], 'step_change_nick1', {}, undef, sub {
    my $cnt = 0;
 
    $muc->reg_cb (
       nick_change => sub {
          my ($muc, $room, $user, $oldnick, $newnick) = @_;
 
-         return unless cmp_jid ($room->nick_jid, $room1->nick_jid);
+         return unless cmp_jid ($room->nick_jid, $cl->{room}->nick_jid);
 
-         my (@other) = grep $_->jid ne $room1->get_me->jid, $room1->users;
+         my (@other) = grep $_->jid ne $cl->{room}->get_me->jid, $cl->{room}->users;
 
-         $ni->{user1}->{own}      = $room1->get_me->jid;
+         $ni->{user1}->{own}      = $cl->{room}->get_me->jid;
          $ni->{user1}->{other}    = $other[0]->jid;
          $ni->{user1}->{old_nick} = $oldnick;
          $ni->{user1}->{new_nick} = $newnick;
-
-         $muc->unreg_me;
+         $cl->state_check;
       }
    );
 
@@ -185,41 +195,34 @@ sub step_change_nick {
       nick_change => sub {
          my ($muc, $room, $user, $oldnick, $newnick) = @_;
 
-         return unless cmp_jid ($room->nick_jid, $room2->nick_jid);
+         return unless cmp_jid ($room->nick_jid, $cl->{room2}->nick_jid);
 
-         my (@other) = grep $_->jid ne $room2->get_me->jid, $room2->users;
+         my (@other) = grep $_->jid ne $cl->{room2}->get_me->jid, $cl->{room2}->users;
 
-         $ni->{user2}->{own}      = $room2->get_me->jid;
+         $ni->{user2}->{own}      = $cl->{room2}->get_me->jid;
          $ni->{user2}->{other}    = $other[0]->jid;
          $ni->{user2}->{old_nick} = $oldnick;
          $ni->{user2}->{new_nick} = $newnick;
-
-         $muc->unreg_me;
+         $cl->state_check;
       }
    );
 
-   $muc->reg_cb (
-      after_nick_change => sub {
-         my ($muc, $room) = @_;
+   $cl->{room2}->change_nick ("test2");
+});
 
-         if (not $second) {
-            $cnt++;
-            if ($cnt >= 2) {
-               $second = 1;
-               step_change_nick ($room1, $user1, $room2, $user2, 1);
-            }
-         } else {
-            $cl->finish;
-         }
-      }
-   ) if not $second;
+$cl->state ('step_change_nick2', {}, sub {
+   $nick_info->{user1} && $nick_info->{user2}
+}, sub {
+   $ni = $nick_info->{second} = {};
+   $cl->{room2}->change_nick ("test2nd");
+});
 
-   if ($second == 1) {
-      $room2->change_nick ("test2nd");
-   } else {
-      $room2->change_nick ("test2");
-   }
-}
+$cl->state (['step_change_nick2'], 'step_end', {}, sub {
+      $nick_info->{user1}
+   && $nick_info->{user2}
+   && $nick_info->{second}->{user1}
+   && $nick_info->{second}->{user2}
+}, sub { $cl->finish });
 
 $cl->wait;
 

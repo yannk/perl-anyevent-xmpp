@@ -17,6 +17,8 @@ Revision history for Net-XMPP2
          - partially reversed a patch w.r.t. hostname usage for SASL mechanism.
            A flag 'use_host_as_sasl_hostname' is provided for giving the hostname
            to SASL.
+         - rewrote AnyEvent::XMPP::Ext::MUC a bit and made the API more sane.
+           for example: join_room doesn't take a callback anymore.
 
 0.3 Mon Jan 28 23:00:58 CET 2009
          - fixed a bug in disconnect error reporting.
