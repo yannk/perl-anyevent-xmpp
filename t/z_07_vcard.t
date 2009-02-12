@@ -10,10 +10,11 @@ use AnyEvent::XMPP::IM::Message;
 use AnyEvent::XMPP::Util qw/bare_jid prep_bare_jid/;
 
 my $cl =
-   AnyEvent::XMPP::TestClient->new_or_exit (tests => 4, finish_count => 1);
+   AnyEvent::XMPP::TestClient->new_or_exit (tests => 5, finish_count => 2);
 my $C = $cl->client;
 my $disco = $cl->instance_ext ('AnyEvent::XMPP::Ext::Disco');
 my $vcard = $cl->instance_ext ('AnyEvent::XMPP::Ext::VCard');
+$disco->enable_feature ($vcard->disco_feature);
 
 my $test_vcard = {
    ADR      => [{ HOME => undef, LOCALITY => 'Hannover', PCODE => '23422' }],
@@ -27,6 +28,7 @@ my $test_vcard = {
 my $error_free_store = 0;
 my $returned_vcard;
 my $cached_vcard;
+my $discofeature;
 
 $C->reg_cb (
    session_ready => sub {
@@ -43,6 +45,16 @@ $C->reg_cb (
             if ($error) { diag ("Couldn't retrieve vcard: " . $error->string) }
             $cl->finish;
          });
+      });
+
+      $disco->request_info ($acc->connection, $acc->jid, undef, sub {
+         my ($disco, $info, $error) = @_;
+
+         unless ($error) {
+            ($discofeature) = grep { xmpp_ns ('vcard') eq $_ } keys %{$info->features};
+         }
+
+         $cl->finish;
       });
    }
 );
@@ -89,3 +101,4 @@ ok ($error_free_store, 'stored the vcard error free');
 ok ($returned_vcard,   'got a vcard back');
 ok (match_struct ($test_vcard, $returned_vcard), 'the returned vcard has the same fields as the sent vcard');
 ok (match_struct ($test_vcard, $cached_vcard), 'the cached vcard has the same fields as the sent vcard');
+is ($discofeature, 'vcard-temp', 'vcard feature present on disco');

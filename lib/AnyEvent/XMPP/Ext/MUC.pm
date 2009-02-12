@@ -50,6 +50,8 @@ sub new {
    $self
 }
 
+sub disco_feature { xmpp_ns ('muc') }
+
 sub init {
    my ($self) = @_;
 
@@ -57,6 +59,8 @@ sub init {
       my ($self, @args) = @_;
       $self->event (@args);
    };
+
+   $self->{disco}->enable_feature ($self->disco_feature);
 
    $self->reg_cb (
       join_error           => $proxy,

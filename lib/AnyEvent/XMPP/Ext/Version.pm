@@ -14,6 +14,13 @@ AnyEvent::XMPP::Ext::Version - Software version
 
    use AnyEvent::XMPP::Ext::Version;
 
+   my $version = AnyEvent::XMPP::Ext::Version->new;
+   $version->set_name    ("My client");
+   $version->set_version ("0.3");
+   $version->set_os      (`uname -a`);
+
+   $disco->enable_feature ($version->disco_feature);
+
 =head1 DESCRIPTION
 
 This module defines an extension to provide the abilities
@@ -43,6 +50,8 @@ sub new {
    $self->init;
    $self
 }
+
+sub disco_feature { xmpp_ns ('version') }
 
 sub init {
    my ($self) = @_;

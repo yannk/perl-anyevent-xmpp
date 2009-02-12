@@ -8,7 +8,7 @@ use AnyEvent::XMPP::Util qw/bare_jid/;
 
 my $cl =
    AnyEvent::XMPP::TestClient->new_or_exit (
-      tests => 2, two_accounts => 1, finish_count => 2
+      tests => 3, two_accounts => 1, finish_count => 2
    );
 my $C = $cl->client;
 my $disco = $cl->instance_ext ('AnyEvent::XMPP::Ext::Disco');
@@ -44,6 +44,11 @@ $C->reg_cb (
                   && $_->{name} eq 'net xmpp2 test'
                } @ids),
                "has default identity"
+            );
+
+            ok (
+               (grep { 'jabber:x:data' eq $_ } keys %{$info->features}),
+               "has data forms feature"
             );
          }
          $cl->finish;

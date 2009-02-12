@@ -1,6 +1,7 @@
 'x' means: is done!
 
-- make the MUC extension not be tied to a specific connection.
+- keep an eye on disco_feature stuff.
+X make the MUC extension not be tied to a specific connection.
   Let it discover new connections itself.
   => for this the join_room function might need a connection argument
      to discover the right connection. => maybe use the %args hash for this,

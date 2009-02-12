@@ -44,6 +44,8 @@ AnyEvent::XMPP::Ext::VCard - VCards (XEP-0054 & XEP-0084)
       }
    });
 
+   $disco->enable_feature ($vcard->disco_feature);
+
 
 =head1 DESCRIPTION
 
@@ -93,6 +95,8 @@ sub init {
          }
       );
 }
+
+sub disco_feature { xmpp_ns ('vcard') }
 
 =item B<hook_on ($con, $dont_retrieve_vcard)>
 

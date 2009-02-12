@@ -1,9 +1,9 @@
 package AnyEvent::XMPP::Ext;
 no warnings;
 use strict;
-use Object::Event;
+use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
 
-our @ISA = qw/Object::Event/;
+use base qw/Object::Event/;
 
 =head1 NAME
 
@@ -11,14 +11,35 @@ AnyEvent::XMPP::Ext - Extension baseclass and documentation
 
 =head1 DESCRIPTION
 
-This module has documentation about the supported extensions
+This module also has documentation about the supported extensions
 and also is a base class for all extensions that can be added
 via the C<add_extension> method of the classes that derive from
 L<AnyEvent::XMPP::Extendable>. (That are: L<AnyEvent::XMPP::Client>,
 L<AnyEvent::XMPP::Connection> and L<AnyEvent::XMPP::IM::Connection>)
 
-Basically C<add_extension> makes the extension an event receiver
-for all events that the extended object receives.
+=head1 Methods
+
+=over 4
+
+=item B<disco_feature>
+
+This method can be overwritten by the extension and should return
+a list of namespace URIs of the features that the extension enables.
+
+=cut
+
+sub disco_feature {
+
+}
+
+sub disco_feature_standard {
+   (
+      xmpp_ns ('data_form'),
+   )
+}
+
+
+=back
 
 =head1 Supportet extensions
 
@@ -46,7 +67,7 @@ as defined in XEP-0054. It is implemented by L<AnyEvent::XMPP::Ext::VCard>.
 =item XEP-0066 - Out of Band Data (Version 1.5)
 
 This extension allows to receive and send out of band data URLs
-and provides helperfunctions to handle jabber:x:oob data.
+and provides helper functions to handle jabber:x:oob data.
 See also L<AnyEvent::XMPP::Ext::OOB>.
 
 =item XEP-0077 - In-Band Registration (Version 2.2)
@@ -60,13 +81,13 @@ After lots of sweat and curses I implemented finally iq auth.
 Unfortunately the XEP-0078 specifies things that are not implemented,
 in fact the only server that worked was openfire and psyced.org.
 
-So I de-analized the iq auth and now it just barfs the IQ set out
+So I de-analyzed the iq auth and now it just barfs the IQ set out
 on the stream with the username and the password.
 
 If you insist on XEP-0078 behaviour enable the C<anal_iq_auth> option
 when creating the stream.
 
-You can also completly disable iq auth, well, just see the documentation
+You can also completely disable iq auth, well, just see the documentation
 of L<AnyEvent::XMPP::Connection>
 
 =item XEP-0082 - XMPP Date and Time Profiles (Version 1.0)

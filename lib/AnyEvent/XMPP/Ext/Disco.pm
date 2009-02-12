@@ -66,6 +66,9 @@ sub init {
    $self->enable_feature (xmpp_ns ('disco_info'));
    $self->enable_feature (xmpp_ns ('disco_items'));
 
+   # and features supported by AnyEvent::XMPP in general:
+   $self->enable_feature (AnyEvent::XMPP::Ext::disco_feature_standard ());
+
    $self->{cb_id} = $self->reg_cb (
       iq_get_request_xml => sub {
          my ($self, $con, $node) = @_;
