@@ -562,7 +562,7 @@ Returns true if this room is still connected (but maybe not joined (yet)).
 
 sub is_connected {
    my ($self) = @_;
-   $self->{connection} && $self->{connection}->is_connected
+   $self->{muc} && $self->{connection} && $self->{connection}->is_connected
 }
 
 =item B<connection>

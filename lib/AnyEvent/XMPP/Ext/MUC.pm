@@ -324,7 +324,6 @@ sub uninstall_room {
    my $r =
       delete $self->{rooms}->{stringprep_jid $con->jid}->{prep_bare_jid $room->jid};
    delete $r->{muc};
-   delete $r->{connection};
 }
 
 =item B<get_room ($con, $jid)>
