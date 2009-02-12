@@ -72,7 +72,8 @@ sub handle_message {
 
    } else {
       $msg->from_node ($node);
-      my $is_echo = cmp_jid ($msg->from, $self->nick_jid);
+      my $is_echo = cmp_jid ($msg->from, $self->nick_jid)
+                    && $msg->type eq 'groupchat';
 
       if (not (defined $msg->any_body)
           && defined $msg->any_subject) { # subject change
