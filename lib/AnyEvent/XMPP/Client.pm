@@ -94,6 +94,7 @@ sub add_extension {
    my ($self, $ext) = @_;
    $self->add_forward ($ext, sub {
       my ($self, $ext, $ev, $acc, @args) = @_;
+      return if $ext->{inhibit_forward}->{$ev};
       $ext->_event ($ev, $acc->connection (), @args);
    });
 }

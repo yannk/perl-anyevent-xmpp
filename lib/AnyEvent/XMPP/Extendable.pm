@@ -30,6 +30,7 @@ sub add_extension {
    my ($self, $ext) = @_;
    $self->add_forward ($ext, sub {
       my ($self, $ext, $ev, @args) = @_;
+      return if $ext->{inhibit_forward}->{$ev};
       $ext->_event ($ev, $self, @args);
    });
 }

@@ -46,6 +46,7 @@ sub new {
    my $this = shift;
    my $class = ref($this) || $this;
    my $self = bless { join_timeout => 60, @_ }, $class;
+   $self->{inhibit_forward} = { map { ($_ => 1) } qw/message presence/ };
    $self->init;
    $self
 }
@@ -103,7 +104,7 @@ sub cleanup_rooms {
 
    for (keys %{$self->{rooms}->{$conjid}}) {
       my $room = delete $self->{rooms}->{$conjid}->{$_};
-      $self->event (leave_room => $room, "disconnected from server $msg");
+      $self->event (leave => $room, $room->get_me, "disconnected from server $msg");
    }
 }
 
