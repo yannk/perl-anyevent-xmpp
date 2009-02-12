@@ -109,6 +109,10 @@ sub new {
    $self
 }
 
+sub default_namespace {
+   return 'component';
+}
+
 sub authenticate {
    warn "authenticate called! Please read the documentation of "
        ."AnyEvent::XMPP::Component why this is an error!"
