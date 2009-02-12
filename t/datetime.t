@@ -27,6 +27,9 @@ is (1*$year,  107, "old format year");
 ok ((not defined $tz)     , "no tz defined");
 ok ((not defined $secfrac), "no secfrac defined");
 
+my $ts = xmpp_datetime_as_timestamp ("20070730T18:51:40-02:10");
+is ($ts, '1185813700', "timestamp is UTC located");
+
 # new format
 ($sec, $min, $hour, $mday, $mon, $year, $tz, $secfrac)
    = from_xmpp_datetime ("03:02:01.123+01:10");
@@ -39,7 +42,3 @@ ok ((not defined $mday),     "new format no mday defined");
 ok ((not defined $mon) ,     "new format no mon defined");
 ok ((not defined $year),     "new format no year defined");
 is ($tz,        '+01:10',    "new format tz");
-
-my $ts = xmpp_datetime_as_timestamp ("03:02:01.123+01:10");
-
-is ($ts, POSIX::mktime ($sec, $min, $hour, $mday, $mon, $year) - 60 - 10, "timestamp is UTC located");

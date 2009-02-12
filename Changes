@@ -22,7 +22,7 @@ Revision history for Net-XMPP2
          - added more C<disco_feature> methods to the extensions, so that
            they can be registered to an ::Ext::Disco extension to display
            support for certain features.
-         - xmpp_datetime_as_timestamp now returns always UTC.
+         - xmpp_datetime_as_timestamp fixed w.r.t. UTC based timestamps.
 
 0.3 Mon Jan 28 23:00:58 CET 2009
          - fixed a bug in disconnect error reporting.

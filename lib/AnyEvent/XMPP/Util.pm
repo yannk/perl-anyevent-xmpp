@@ -489,8 +489,7 @@ sub from_xmpp_datetime {
 =item B<xmpp_datetime_as_timestamp ($string)>
 
 This function takes the same arguments as C<from_xmpp_datetime>, but returns a
-unix timestamp, like C<time ()> would. The return value will be a timestamp
-which will be located in the UTC timezone.
+unix timestamp, like C<time ()> would.
 
 This function requires the L<POSIX> module.
 
@@ -500,13 +499,20 @@ sub xmpp_datetime_as_timestamp {
    my ($string) = @_;
    require POSIX;
    my ($s, $m, $h, $md, $mon, $year, $tz) = from_xmpp_datetime ($string);
+
+   my $otz = $ENV{TZ};
+   $ENV{TZ} = ($tz =~ /^([+-])(\d{2}):(\d{2})$/ ? "UTC $tz" : "");
+   POSIX::tzset ();
+
    my $ts = POSIX::mktime ($s, $m, $h, $md, $mon, $year);
 
-   if ($tz =~ /^([+-])(\d{2}):(\d{2})$/) {
-      my ($h, $m) = ($2, $3);
-      if ($1 eq '-') { $h *= -1; $m *= -1 }
-      $ts -= ($h * 60) + $m;
+   if (defined $otz) {
+      $ENV{TZ} = $otz;
+   } else {
+      delete $ENV{TZ};
    }
+
+   POSIX::tzset ();
 
    $ts
 }
