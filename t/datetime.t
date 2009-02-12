@@ -1,17 +1,18 @@
 #!perl
 use strict;
-use Test::More tests => 21;
-use AnyEvent::XMPP::Util qw/from_xmpp_datetime to_xmpp_datetime to_xmpp_time/;
+use Test::More tests => 22;
+use AnyEvent::XMPP::Util qw/from_xmpp_datetime to_xmpp_datetime to_xmpp_time
+                           xmpp_datetime_as_timestamp/;
 
 # to conversion
 is (to_xmpp_time (1, 2, 3)          , '03:02:01'      , "basic to_xmpp_time");
-is (to_xmpp_time (1, 2, 3, "UTC")   , '03:02:01UTC'   , "utc to_xmpp_time");
+is (to_xmpp_time (1, 2, 3, "Z")     , '03:02:01Z'     , "utc to_xmpp_time");
 is (to_xmpp_time (1, 2, 3, "+01:10"), '03:02:01+01:10', "+01:10 to_xmpp_time");
 is (to_xmpp_time (1, 2, 3, "+01:10", 0.123),
     '03:02:01.123+01:10'                              , "+01:10 with frac to_xmpp_time");
 
-is (to_xmpp_datetime (23, 3, 4, 13, 5, 108, 'UTC', 0.32),
-    '2008-06-13T04:03:23.320UTC',                      "to_xmpp_datetime");
+is (to_xmpp_datetime (23, 3, 4, 13, 5, 108, 'Z', 0.32),
+    '2008-06-13T04:03:23.320Z',                         "to_xmpp_datetime");
 
 # old format
 my ($sec, $min, $hour, $mday, $mon, $year, $tz, $secfrac)
@@ -38,3 +39,7 @@ ok ((not defined $mday),     "new format no mday defined");
 ok ((not defined $mon) ,     "new format no mon defined");
 ok ((not defined $year),     "new format no year defined");
 is ($tz,        '+01:10',    "new format tz");
+
+my $ts = xmpp_datetime_as_timestamp ("03:02:01.123+01:10");
+
+is ($ts, POSIX::mktime ($sec, $min, $hour, $mday, $mon, $year) - 60 - 10, "timestamp is UTC located");
