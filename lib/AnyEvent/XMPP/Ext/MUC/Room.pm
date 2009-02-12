@@ -152,7 +152,7 @@ sub handle_presence {
 
       } elsif (!$nick_change && $type eq 'unavailable') {
          if (cmp_jid ($from, $self->nick_jid)) {
-            $self->event ('leave');
+            $self->event ('leave', $self->get_me);
             $self->we_left_room ();
 
          } else {
@@ -203,12 +203,6 @@ sub we_left_room {
    $self->{users}  = {};
    $self->{status} = LEFT;
    delete $self->{me};
-}
-
-sub disconnected {
-   my ($self) = @_;
-   $self->event ('leave');
-   $self->we_left_room;
 }
 
 =item B<get_user ($nick)>
@@ -512,7 +506,7 @@ sub send_part {
          AnyEvent->timer (after => $timeout, cb => sub {
             delete $self->{_part_timeout};
             $timeouted = 1;
-            $self->event ('leave');
+            $self->event ('leave', $self->get_me);
          });
 
       $self->{muc}->reg_cb (ext_after_leave => sub {

@@ -445,9 +445,10 @@ This event is emitted when a user leaves the channel.  C<$user> is the
 L<AnyEvent::XMPP::Ext::MUC::User> of that user, but please note that you shouldn't
 send any messages to this user anymore.
 
-=item leave => $room
+=item leave => $room, $user
 
-This event is emitted when we leave the room.
+This event is emitted when we leave the room. C<$user> is your
+L<AnyEvent::XMPP::Ext::MUC::User> handle.
 
 =back
 
