@@ -565,6 +565,18 @@ sub is_connected {
    $self->{connection} && $self->{connection}->is_connected
 }
 
+=item B<connection>
+
+If the room is still joined this method will return the connection
+on which the room is connected.
+
+=cut
+
+sub connection {
+   my ($self) = @_;
+   $self->{connection}
+}
+
 =item B<is_joined>
 
 Returns true if this room is still joined (and connected).
