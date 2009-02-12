@@ -92,13 +92,6 @@ sub init {
    );
 }
 
-sub get_room {
-   my ($self, $con, $jid) = @_;
-   my $conjid  = stringprep_jid $con->jid;
-   my $roomjid = prep_bare_jid $jid;
-   $self->{rooms}->{$conjid}->{$roomjid}
-}
-
 sub cleanup_rooms {
    my ($self, $con, $msg) = @_;
 
@@ -343,6 +336,18 @@ If we are not joined undef is returned.
 sub get_room {
    my ($self, $con, $jid) = @_;
    $self->{rooms}->{stringprep_jid $con->jid}->{prep_bare_jid $jid}
+}
+
+=item B<get_rooms ($con)>
+
+Returns a list of L<AnyEvent::XMPP::Ext::MUC::Room> objects
+for the connection C<$con>.
+
+=cut
+
+sub get_rooms {
+   my ($self, $con) = @_;
+   values %{$self->{rooms}->{stringprep_jid $con->jid} || {}}
 }
 
 =back
