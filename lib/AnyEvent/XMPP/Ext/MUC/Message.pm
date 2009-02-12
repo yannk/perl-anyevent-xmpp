@@ -1,7 +1,7 @@
 package AnyEvent::XMPP::Ext::MUC::Message;
 use strict;
 use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
-use AnyEvent::XMPP::Util qw/bare_jid/;
+use AnyEvent::XMPP::Util qw/bare_jid res_jid/;
 use AnyEvent::XMPP::IM::Message;
 
 our @ISA = qw/AnyEvent::XMPP::IM::Message/;
@@ -119,6 +119,30 @@ sub make_reply {
    $msg->type ($self->type);
 
    $msg
+}
+
+=item B<from_nick>
+
+This method returns the nickname of the source
+of this message.
+
+=cut
+
+sub from_nick {
+   my ($self) = @_;
+   res_jid ($self->from)
+}
+
+=item B<is_private>
+
+This method returns true when the message was not directed to the
+room, but privately to you.
+
+=cut
+
+sub is_private {
+   my ($self) = @_;
+   $self->type ne 'groupchat'
 }
 
 =back
