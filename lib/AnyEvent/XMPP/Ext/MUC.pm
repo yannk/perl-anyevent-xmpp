@@ -85,6 +85,10 @@ sub init {
             $room->handle_message ($node);
          }
       },
+      ext_before_leave => sub {
+         my ($self, $room) = @_;
+         $self->uninstall_room ($room->connection, $room);
+      },
       disconnect => sub {
          my ($self, $con, $h, $p, $msg) = @_;
          $self->cleanup_rooms ($con, "$h:$p: $msg");

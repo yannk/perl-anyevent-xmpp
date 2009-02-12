@@ -19,7 +19,7 @@ my $ROOM = "test_nxmpp2@".$MUC;
 
 my $cl =
    AnyEvent::XMPP::TestClient->new_or_exit (
-      tests => 25, two_accounts => 1, finish_count => 1
+      tests => 26, two_accounts => 1, finish_count => 1
    );
 my $C     = $cl->client;
 my $disco = $cl->instance_ext ('AnyEvent::XMPP::Ext::Disco');
@@ -65,6 +65,8 @@ $cl->state (['two_accounts_ready'], step_join => {}, undef, sub {
    );
 });
 
+my $room_cnt_after_leave;
+
 $cl->state (['step_join_done'], step_rejoin => {}, undef, sub {
    $cl->{room}->send_part ("rejoin");
    $muc->reg_cb (
@@ -74,11 +76,16 @@ $cl->state (['step_join_done'], step_rejoin => {}, undef, sub {
          $cl->finish; # error!
          $muc->unreg_my_set;
       },
-      leave => sub {
+      after_leave => sub {
          my ($muc, $room) = @_;
 
          $muc->join_room ($cl->{acc}->connection, $ROOM, "test1owner",
                           create_instant => 0);
+      },
+      leave => sub {
+         my ($muc, $room) = @_;
+
+         $room_cnt_after_leave = scalar ($muc->get_rooms ($cl->{acc}->connection));
       },
       locked => sub {
          my ($muc, $room) = @_;
@@ -256,3 +263,4 @@ is ($nick_info->{user2}->{own}     , "$ROOM/test2nd"   , '2nd observed own JID o
 is ($nick_info->{user2}->{other}   , "$ROOM/test1owner", '2nd observed other JID of user2');
 is ($nick_info->{user2}->{old_nick}, "test2"           , '2nd observed old nick of user2');
 is ($nick_info->{user2}->{new_nick}, "test2nd"         , '2nd observed new nick of user2');
+is ($room_cnt_after_leave,           0,                , 'after leaving the room list was empty');
