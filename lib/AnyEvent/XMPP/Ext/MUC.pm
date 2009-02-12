@@ -371,6 +371,11 @@ This event is emitted when a message was received from the room.
 C<$msg> is a L<AnyEvent::XMPP::Ext::MUC::Message> object and C<$is_echo>
 is true if the message is an echo.
 
+B<NOTE:> Please note that some conferences send messages already
+before you have finished joining a room. That means that you might
+already get a C<message> event for a room that you haven't got an C<enter>
+for event yet. That means that methods like C<get_me> might return undef.
+
 =item subject_change => $room, $msg, $is_echo
 
 This event is emitted when a user changes the room subject.
