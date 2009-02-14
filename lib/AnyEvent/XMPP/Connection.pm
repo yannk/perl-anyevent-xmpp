@@ -300,6 +300,7 @@ sub new {
             AnyEvent::XMPP::Error->new (text => 'tls_error: tls negotiation failed')
          );
       },
+      iq_xml => sub { shift @_; $self->handle_iq (@_) }
    );
 
    if ($self->{whitespace_ping_interval} > 0) {
@@ -434,7 +435,6 @@ sub handle_stanza {
 
    } elsif ($node->eq ($def_ns => 'iq')) {
       $self->event (iq_xml => $node);
-      $self->handle_iq ($node);
 
    } elsif ($node->eq ($def_ns => 'message')) {
       $self->event (message_xml => $node);
@@ -1160,15 +1160,38 @@ Here is an example:
 This event is sent when a presence stanza is received. C<$node> is the
 L<AnyEvent::XMPP::Node> object that represents the <presence> tag.
 
+If you want to overtake the handling of the stanza, see C<iq_xml>
+below.
+
 =item message_xml => $node
 
 This event is sent when a message stanza is received. C<$node> is the
 L<AnyEvent::XMPP::Node> object that represents the <message> tag.
 
+If you want to overtake the handling of the stanza, see C<iq_xml>
+below.
+
 =item iq_xml => $node
 
 This event is emitted when a iq stanza arrives. C<$node> is the
 L<AnyEvent::XMPP::Node> object that represents the <iq> tag.
+
+If you want to overtake the handling of a stanza, you should
+register a callback for the C<before_iq_xml> event and call the
+C<stop_event> method. See also L<Object::Event>. This is an example:
+
+   $con->reg_cb (before_iq_xml => sub {
+      my ($con, $node) = @_;
+
+      if (...) {
+         # and stop_event will stop internal handling of the stanza:
+         $con->stop_event;
+      }
+   });
+
+Please note that if you overtake handling of a stanza none of the internal
+handling of that stanza will be done. That means you won't get events
+like C<iq_set_request_xml> anymore.
 
 =item iq_set_request_xml => $node
 
