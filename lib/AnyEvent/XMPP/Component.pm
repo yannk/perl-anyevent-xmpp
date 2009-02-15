@@ -14,7 +14,7 @@ AnyEvent::XMPP::Component - "XML" stream that implements the XEP-0114
 
    my $con = AnyEvent::XMPP::Component->new (
                 domain => 'chat.jabber.org'
-                server => 'jabber.org',
+                host   => 'jabber.org',
                 port   => 5347,
                 secret => 'insecurepasswordforthehackers'
              );
@@ -78,9 +78,8 @@ sub new {
    unless (exists $args{initial_presence}) {
       $args{stream_namespace} = 'component';
    }
-   $args{override_host} = delete $args{server};
-   $args{override_host}
-      or die "Required 'server' argument missing to new for this component!";
+   $args{host}
+      or die "Required 'host' argument missing to new for this component!";
 
    unless (defined $args{port}) {
       $args{port} = 5347;
