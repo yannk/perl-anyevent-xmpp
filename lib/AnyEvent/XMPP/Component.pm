@@ -78,6 +78,8 @@ sub new {
    unless (exists $args{initial_presence}) {
       $args{stream_namespace} = 'component';
    }
+   
+   $args{host} ||= delete $args{server};
    $args{host}
       or die "Required 'host' argument missing to new for this component!";
 
