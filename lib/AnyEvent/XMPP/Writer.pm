@@ -19,55 +19,55 @@ AnyEvent::XMPP::Writer - "XML" writer for XMPP
 
 =head1 DESCRIPTION
 
-This module contains some helper functions for writing XMPP "XML",
-which is not real XML at all ;-( I use L<XML::Writer> and tune it
-until it creates "XML" that is accepted by most servers propably
-(all of the XMPP servers I tested should work (jabberd14, jabberd2,
-ejabberd, googletalk).
+This module contains some helper functions for writing XMPP "XML", which is not
+real XML at all ;-( I use L<XML::Writer> and tune it until it creates "XML"
+that is accepted by most servers propably (all of the XMPP servers I tested
+should work (jabberd14, jabberd2, ejabberd, googletalk).
 
-I hope the semantics of L<XML::Writer> don't change much over the future,
-but if they do and you run into problems, please report them!
+I hope the semantics of L<XML::Writer> don't change much in the future, but if
+they do and you run into problems, please report them!
 
 The whole "XML" concept of XMPP is fundamentally broken anyway. It's supposed
 to be an subset of XML. But a subset of XML productions is not XML. Strictly
 speaking you need a special XMPP "XML" parser and writer to be 100% conformant.
 
 On top of that XMPP B<requires> you to parse these partial "XML" documents.
-But a partial XML document is not well-formed, heck, it's not even a XML document!.
-And a parser should bail out with an error. But XMPP doesn't care, it just relies on
-implementation dependend behaviour of chunked parsing modes for SAX parsing.
-This functionality isn't even specified by the XML recommendation in any way.
-The recommendation even says that it's undefined what happens if you process
-not-well-formed XML documents.
+But a partial XML document is not well-formed, heck, it's not even a XML
+document!  And a parser should bail out with an error. But XMPP doesn't care,
+it just relies on implementation dependend behaviour of chunked parsing modes
+for SAX parsing.  This functionality isn't even specified by the XML
+recommendation in any way.  The recommendation even says that it's undefined
+what happens if you process not-well-formed XML documents.
 
-But I try to be as "XML" XMPP conformant as possible (it should be around 99-100%).
-But it's hard to say what XML is conformant, as the specifications of XMPP "XML" and XML
-are contradicting. For example XMPP also says you only have to generated and accept
-utf-8 encodings of XML, but the XML recommendation says that each parser has
-to accept utf-8 B<and> utf-16. So, what do you do? Do you use a XML conformant parser
-or do you write your own?
+But I try to be as XMPP "XML" conformant as possible (it should be around
+99-100%).  But it's hard to say what XML is conformant, as the specifications
+of XMPP "XML" and XML are contradicting. For example XMPP also says you only
+have to generated and accept UTF-8 encodings of XML, but the XML recommendation
+says that each parser has to accept UTF-8 B<and> UTF-16. So, what do you do? Do
+you use a XML conformant parser or do you write your own?
 
-I'm using XML::Parser::Expat because expat knows how to parse broken (aka 'partial')
-"XML" documents, as XMPP requires. Another argument is that if you capture a XMPP
-conversation to the end, and even if a '</stream:stream>' tag was captured, you
-wont have a valid XML document. The problem is that you have to resent a <stream> tag
-after TLS and SASL authentication each! Awww... I'm repeating myself.
+I'm using XML::Parser::Expat because expat knows how to parse broken (aka
+'partial') "XML" documents, as XMPP requires. Another argument is that if you
+capture a XMPP conversation to the end, and even if a '</stream:stream>' tag
+was captured, you wont have a valid XML document. The problem is that you have
+to resent a <stream> tag after TLS and SASL authentication each! Awww... I'm
+repeating myself.
 
-But well... AnyEvent::XMPP does it's best with expat to cope with the fundamental brokeness
-of "XML" in XMPP.
+But well... AnyEvent::XMPP does it's best with expat to cope with the
+fundamental brokeness of "XML" in XMPP.
 
-Back to the issue with "XML" generation: I've discoverd that many XMPP servers (eg.
-jabberd14 and ejabberd) have problems with XML namespaces. Thats the reason why
-I'm assigning the namespace prefixes manually: The servers just don't accept validly
-namespaced XML. The draft 3921bis does even state that a client SHOULD generate a 'stream'
-prefix for the <stream> tag.
+Back to the issue with "XML" generation: I've discoverd that many XMPP servers
+(eg.  jabberd14 and ejabberd) have problems with XML namespaces. Thats the
+reason why I'm assigning the namespace prefixes manually: The servers just
+don't accept validly namespaced XML. The draft 3921bis does even state that a
+client SHOULD generate a 'stream' prefix for the <stream> tag.
 
-I advice you to explictly set the namespaces too if you generate "XML" for XMPP yourself,
-at least until all or most of the XMPP servers have been fixed. Which might take some
-years :-) And maybe will happen never.
+I advice you to explicitly set the namespaces too if you generate "XML" for
+XMPP yourself, at least until all or most of the XMPP servers have been fixed.
+Which might take some years :-) And maybe will happen never.
 
-And another note: As XMPP requires all predefined entity characters to be escaped
-in character data you need a "XML" writer that will escape everything:
+And another note: As XMPP requires all predefined entity characters to be
+escaped in character data you need a "XML" writer that will escape everything:
 
    RFC 3920 - 11.1.  Restrictions:
 
@@ -96,9 +96,9 @@ This methods takes following arguments:
 
 =item write_cb
 
-The callback that is called when a XML stanza was completly written
-and is ready for transfer. The first argument of the callback
-will be the character data to send to the socket.
+The callback that is called when a XML stanza was completely written and is
+ready for transfer. The first argument of the callback will be the character
+data to send to the socket.
 
 =back
 
@@ -151,7 +151,7 @@ sub flush {
 This method will generate a XMPP stream header. C<$domain> has to be the
 domain of the server (or endpoint) we want to connect to.
 
-C<$namespace> is the namespace uri or the tag (from L<AnyEvent::XMPP::Namespaces>)
+C<$namespace> is the namespace URI or the tag (from L<AnyEvent::XMPP::Namespaces>)
 for the stream namespace. (This is used by L<AnyEvent::XMPP::Component> to connect
 as component to a server). C<$namespace> can also be undefined, in this case
 the C<client> namespace will be used.
@@ -222,7 +222,7 @@ sub send_end_of_stream {
 =item B<send_sasl_auth ($mechanisms, $user, $hostname, $pass)>
 
 This methods sends the start of a SASL authentication. C<$mechanisms> is
-an array reference, containing the mechanism names that are to be tryed.
+an array reference, containing the mechanism names that are to be tried.
 
 =cut
 
@@ -282,7 +282,6 @@ sub send_sasl_response {
    unless ($challenge =~ /rspauth=/) { # rspauth basically means: we are done
       $ret = $self->{sasl}->client_step ($challenge);
       if (my $e = $self->{sasl}->error) {
-         #die "Error in SASL authentication in client step with challenge: '$challenge'\n";
          die "Error in SASL authentication in client step with challenge: '" . $e . "'\n";
       }
    }
@@ -325,7 +324,7 @@ build a DOM tree yourself...).
 
 If C<$create_cb> is an array reference it's elements will be interpreted as
 single C<$create_cb> argument (which can either be a hash reference or code
-reference themself) and executed sequencially.
+reference themself) and executed sequentially.
 
 If C<$create_cb> is undefined an empty tag will be generated.
 
@@ -392,7 +391,7 @@ C<$type> is the type of the presence, which may be one of:
    unavailable, subscribe, subscribed, unsubscribe, unsubscribed, probe, error
 
 Or undef, in case you want to send a 'normal' presence.
-Or something completly different if you don't like the RFC 3921 :-)
+Or something completely different if you don't like the RFC 3921 :-)
 
 C<%attrs> contains further attributes for the presence tag or may contain one of the
 following exceptional keys:
