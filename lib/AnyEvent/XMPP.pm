@@ -120,6 +120,11 @@ Minor fixes and feature enhancements: Added old_style_ssl option for direct
 port 5223 SSL connections. Providing 'get_own_contact' for keeping
 track of own resources.
 
+The L<AnyEvent::XMPP::Ext::MUC> extension was rewritten and provides a more
+sane API now.
+
+For details consult the Changes file in the distribution.
+
 =item * 0.3
 
 Fixed some small bugs and improved documentation a bit, especially w.r.t.
