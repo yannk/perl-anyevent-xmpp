@@ -112,6 +112,32 @@ sub init {
    $self->{nodestack} = [];
 }
 
+=item B<cleanup>
+
+This methods removes all handlers. Use it to avoid circular references.
+
+=cut
+
+sub cleanup {
+  my ($self) = @_;
+  
+  $self->{parser}->setHandlers(
+     Start      => sub { },
+     End        => sub { },
+     Char       => sub { },
+     CdataStart => sub { },
+     CdataEnd   => sub { },
+     Default    => sub { },
+  );
+
+  foreach my $cb (qw( stanza_cb error_cb stream_cb parser )) {
+    delete $self->{$cb};
+  }
+  
+  return;
+}
+
+
 =item B<nseq ($namespace, $tagname, $cmptag)>
 
 This method checks whether the C<$cmptag> matches the C<$tagname>

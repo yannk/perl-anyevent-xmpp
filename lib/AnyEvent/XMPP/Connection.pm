@@ -263,6 +263,10 @@ sub new {
       delete $self->{authenticated};
       delete $self->{ssl_enabled};
       $self->event (disconnect => $host, $port, $message);
+      delete $self->{disconnect_cb};
+      delete $self->{writer};
+      $self->{parser}->cleanup;
+      delete $self->{parser};
    };
 
    if ($self->{jid}) {

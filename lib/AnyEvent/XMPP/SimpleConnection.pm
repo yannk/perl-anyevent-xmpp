@@ -128,6 +128,7 @@ sub disconnect {
    my ($self, $msg) = @_;
    $self->end_sockets;
    $self->{disconnect_cb}->($self->{peer_host}, $self->{peer_port}, $msg);
+   $self->remove_all_callbacks;
 }
 
 1;
