@@ -121,15 +121,6 @@ This methods removes all handlers. Use it to avoid circular references.
 sub cleanup {
    my ($self) = @_;
 
-   $self->{parser}->setHandlers (
-      Start      => sub { },
-      End        => sub { },
-      Char       => sub { },
-      CdataStart => sub { },
-      CdataEnd   => sub { },
-      Default    => sub { },
-   );
-
    $self->{parser}->release;
 
    for (qw(stanza_cb error_cb stream_cb parser)) {
