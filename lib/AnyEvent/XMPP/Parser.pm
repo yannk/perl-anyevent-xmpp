@@ -130,6 +130,8 @@ sub cleanup {
       Default    => sub { },
    );
 
+   $self->{parser}->release;
+
    for (qw(stanza_cb error_cb stream_cb parser)) {
       delete $self->{$_};
    }
