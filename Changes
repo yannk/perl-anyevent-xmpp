@@ -1,5 +1,7 @@
 Revision history for Net-XMPP2
 
+         - melo fixed some memleaks.
+
 0.4 Sun Feb 15 22:59:38 CET 2009
          - added a $dont_retrieve_vcard to ::Ext::VCard, to
            prevent retrieval when session_ready event comes.
