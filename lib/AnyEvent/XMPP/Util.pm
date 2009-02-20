@@ -6,7 +6,7 @@ use Net::LibIDN qw/idn_prep_name idn_prep_resource idn_prep_node/;
 use AnyEvent::XMPP::Namespaces qw/xmpp_ns_maybe/;
 require Exporter;
 our @EXPORT_OK = qw/resourceprep nodeprep prep_join_jid join_jid
-                    split_jid stringprep_jid prep_bare_jid bare_jid
+                    split_jid split_uri stringprep_jid prep_bare_jid bare_jid
                     is_bare_jid simxml dump_twig_xml install_default_debug_dump
                     cmp_jid cmp_bare_jid
                     node_jid domain_jid res_jid
@@ -102,6 +102,24 @@ sub join_jid {
    $jid .= $domain;
    $jid .= "/$resource" if $resource ne '';
    $jid
+}
+
+=item B<split_uri ($uri)>
+
+This function splits up the C<$uri> into service and node
+part and will return them as list.
+
+   my ($service, $node) = split_uri ($uri);
+
+=cut
+
+sub split_uri {
+    my ($uri) = @_;
+    if ($uri =~ /^xmpp:(\S+)\?\w+;node=(\S+)$/) {
+        return ($1, $2);
+    } else {
+        return (undef, $uri);
+    }
 }
 
 =item B<split_jid ($jid)>
