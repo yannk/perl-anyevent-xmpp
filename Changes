@@ -1,5 +1,11 @@
 Revision history for Net-XMPP2
 
+0.5
+         NOTE: The next version will have an incompatible API! Also won't
+         newer versions of Object::Event work with this module anymore!
+         You need exactly version 0.7 for AnyEvent::XMPP version 0.5 to work!
+
+         - added patch for Ext::Pubsub.
          - melo fixed some memleaks.
 
 0.4 Sun Feb 15 22:59:38 CET 2009

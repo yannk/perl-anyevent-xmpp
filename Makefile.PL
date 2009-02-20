@@ -20,7 +20,7 @@ WriteMakefile(
         'Net::LibIDN'        => 0,
         'Authen::SASL'       => 0,
         'Digest::SHA1'       => 0,
-        'Object::Event'      => 0,
+        'Object::Event'      => 0.7,
     },
     dist                => {
        COMPRESS => 'gzip -9f',
