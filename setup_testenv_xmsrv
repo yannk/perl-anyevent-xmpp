@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export NET_XMPP2_TEST="test1_netxm2@192.168.5.10/x:lolfe123"
+export NET_XMPP2_TEST="test1_netxm2@192.168.2.110/x:lolfe123"
 export NET_XMPP2_TEST_MUC="conference.xmpptest"
 export NET_XMPP2_TEST_DEBUG=1
-export NET_XMPP2_TEST_COMPONENT="192.168.5.10:test.xmpptest:5554:secret123"
+export NET_XMPP2_TEST_COMPONENT="192.168.2.110:test.xmpptest:5554:secret123"
