@@ -43,7 +43,8 @@ my $second = 0;
 
 $cl->state (['two_accounts_ready'], step_join => {}, undef, sub {
    $muc->join_room ($cl->{acc}->connection, $ROOM, "test1owner");
-   $muc->reg_cb (
+   my $guard;
+   $guard = $muc->reg_cb (
       enter => sub {
          my ($muc, $room, $user) = @_;
 
@@ -55,12 +56,12 @@ $cl->state (['two_accounts_ready'], step_join => {}, undef, sub {
             $cl->finish;
          }
 
-         $muc->unreg_my_set;
+         undef $guard;
       }, join_error => sub {
          my ($muc, $room, $error) = @_;
 
          $sjr_error = $error->string;
-         $muc->unreg_my_set;
+         undef $guard;
       }
    );
 });
@@ -69,12 +70,13 @@ my $room_cnt_after_leave;
 
 $cl->state (['step_join_done'], step_rejoin => {}, undef, sub {
    $cl->{room}->send_part ("rejoin");
-   $muc->reg_cb (
+   my $guard;
+   $guard = $muc->reg_cb (
       enter => sub {
          my ($muc, $room, $user) = @_;
 
          $cl->finish; # error!
-         $muc->unreg_my_set;
+         undef $guard;
       },
       after_leave => sub {
          my ($muc, $room) = @_;
@@ -125,12 +127,12 @@ $cl->state (['step_join_done'], step_rejoin => {}, undef, sub {
             }
          });
 
-         $muc->unreg_my_set;
+         undef $guard;
       },
       join_error => sub {
          my ($muc, $room, $error) = @_;
          $sr_error = $error->string;
-         $muc->unreg_my_set;
+         undef $guard;
          $cl->finish;
       }
    );
@@ -139,15 +141,16 @@ $cl->state (['step_join_done'], step_rejoin => {}, undef, sub {
 
 $cl->state (['step_rejoin_done'], 'step_join_occ', {}, undef, sub {
    $muc->join_room ($cl->{acc2}->connection, $ROOM, "test2user");
-   $muc->reg_cb (
+   my $guard;
+   $guard = $muc->reg_cb (
       enter => sub {
          my ($muc, $room, $user) = @_;
-         $muc->unreg_my_set;
+         undef $guard;
          $cl->finish
       },
       join_error => sub {
          my ($muc, $room, $error) = @_;
-         $muc->unreg_my_set;
+         undef $guard;
 
          $sjo_join_error_type = $error->type;
 
@@ -161,18 +164,19 @@ $cl->state (['step_rejoin_done'], 'step_join_occ', {}, undef, sub {
 $cl->state (['step_join_occ_done'], 'step_join_occ_pass', {}, undef, sub {
    $muc->join_room ($cl->{acc2}->connection, $ROOM, "test2user", password => 'abc123');
 
-   $muc->reg_cb (
+   my $guard;
+   $guard = $muc->reg_cb (
       enter => sub {
          my ($muc, $room, $user) = @_;
          $sjop_join++;
          $cl->{room2} = $room;
          $cl->state_done ('step_join_occ_pass_done');
-         $muc->unreg_my_set;
+         undef $guard;
       }, join_error => sub {
          my ($muc, $room, $error) = @_;
          $sjop_error = $error->string;
          $cl->finish;
-         $muc->unreg_my_set;
+         undef $guard;
       }
    );
 });
