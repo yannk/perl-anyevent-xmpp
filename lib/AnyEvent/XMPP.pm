@@ -117,11 +117,11 @@ Here are some notes to the last releases (release of this version is at top):
 =item * 0.5
 
 Maintenance release. Added a patch from Marcus Dubois for Ext::Pubsub.
+Also fixed some memleaks in L<AnyEvent::XMPP::Parser>.
 
 Also wanted to note that the next version of AnyEvent::XMPP will have an
-incompatible API. And that you will need the exact version 0.7 of L<Object::Event>
-for this version to work. The next version of L<Object::Event> will also not
-be backward compatible!
+incompatible API. If you are eager to try out the new complete rewrite of
+AnyEvent::XMPP contact me.
 
 =item * 0.4
 

@@ -104,8 +104,6 @@ sub init {
       Start => sub { $self->cb_start_tag (@_) },
       End   => sub { $self->cb_end_tag   (@_) },
       Char  => sub { $self->cb_char_data (@_) },
-#      CdataStart => sub { $self->cb_cdata_start (@_) },
-#      CdataEnd   => sub { $self->cb_cdata_end (@_) },
       Default    => sub { $self->cb_default (@_) },
    );
    $self->{nso} = {};
@@ -167,18 +165,6 @@ sub feed {
    }
 }
 
-#=item B<stream_id>
-#
-#This method retrieves the streams ID attribute.
-#
-#=cut
-#
-#sub stream_id {
-#   my ($self) = @_;
-#   return undef unless $self->{nodestack}->[0];
-#   $self->{nodestack}->[0]->attr ('id')
-#}
-
 sub cb_start_tag {
    my ($self, $p, $el, %attrs) = @_;
    my $node = AnyEvent::XMPP::Node->new ($p->namespace ($el), $el, \%attrs, $self);
@@ -195,6 +181,9 @@ sub cb_char_data {
       warn "characters outside of tag: [$str]!\n";
       return;
    }
+
+   return if @{$self->{nodestack}} < 2; # don't append anything to the stream element
+
    my $node = $self->{nodestack}->[-1];
    $node->add_text ($str);
    $node->append_raw ($p->recognized_string);
@@ -236,7 +225,7 @@ sub cb_end_tag {
 sub cb_default {
    my ($self, $p, $str) = @_;
    $self->{nodestack}->[-1]->append_raw ($str)
-      if @{$self->{nodestack}};
+      if @{$self->{nodestack}} > 1; # don't append to the stream element
 }
 
 =back
