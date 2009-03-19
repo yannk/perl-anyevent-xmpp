@@ -1,5 +1,7 @@
 Revision history for AnyEvent::XMPP:
 
+         - small uncleanliness fixed in ::Parser.
+
 0.5 Mon Mar 16 21:13:13 CET 2009
 
    !!!!!!!!!!!!!!!
