@@ -161,7 +161,11 @@ sub feed {
       $self->{parser}->parse_more ($data);
    };
    if ($@) {
-      $self->{error_cb}->($@, $data, 'xml');
+      if ($self->{error_cb}) {
+         $self->{error_cb}->($@, $data, 'xml');
+      } else {
+         warn "parser error: $@ on [$data]\n";
+      }
    }
 }
 
