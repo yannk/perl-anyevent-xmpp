@@ -241,7 +241,7 @@ sub publish_item {
     );
 }
 
-=item B<retrive_items($con, $uri, $cb)>
+=item B<retrieve_items($con, $uri, $cb)>
 C<$con> is the connection already established,
 C<$uri> is the name of the node to be created
 C<$cb> is the callback
@@ -272,7 +272,7 @@ sub retrieve_items {
     );
 }
 
-=item B<retrive_item($con, $uri, $id, $cb)>
+=item B<retrieve_item($con, $uri, $id, $cb)>
 C<$con> is the connection already established,
 C<$uri> is the name of the node to be created
 C<$id> is the id of the entry to be retrieved
