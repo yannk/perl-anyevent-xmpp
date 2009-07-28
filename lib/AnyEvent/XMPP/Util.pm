@@ -115,7 +115,7 @@ part and will return them as list.
 
 sub split_uri {
     my ($uri) = @_;
-    if ($uri =~ /^xmpp:(\S+)\?;node=(\S+)$/) {
+    if ($uri =~ /^xmpp:(\S+)\?(?:\w+)?;node=(\S+)$/) {
         return ($1, $2);
     } else {
         return (undef, $uri);
