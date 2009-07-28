@@ -1,6 +1,6 @@
 package AnyEvent::XMPP::Ext::Pubsub;
 use strict;
-use AnyEvent::XMPP::Util qw/simxml split_uri bare_jid/;
+use AnyEvent::XMPP::Util qw/simxml split_uri/;
 use AnyEvent::XMPP::Namespaces qw/xmpp_ns/;
 use AnyEvent::XMPP::Ext;
 
@@ -146,7 +146,7 @@ Try to retrieve items.
 
 sub subscribe_node {
     my ($self, $con, $uri, $cb) = @_;
-    my $jid = bare_jid $con->jid;
+    my $jid = $con->jid;
 
     my ($service, $node) = split_uri ($uri);
 
