@@ -6,6 +6,8 @@ use AnyEvent::XMPP::Client;
 use AnyEvent::XMPP::Ext::Version;
 use POSIX qw/strftime/;
 
+binmode STDOUT, ':encoding(UTF-8)';
+
 my ($jid,$pass) = qw/net_xmpp2@jabber.org test/;
 ($jid, $pass) = @ARGV if @ARGV;
 

@@ -4,7 +4,9 @@ use utf8;
 use AnyEvent;
 use AnyEvent::XMPP::Client;
 use AnyEvent::XMPP::Ext::OOB;
-use AnyEvent::XMPP::Ext::Disco;
+use AnyEvent::XMPP::Ext::Disco;  
+
+binmode STDOUT, ':encoding(UTF-8)';
 
 my $j  = AnyEvent->condvar;
 my $cl = AnyEvent::XMPP::Client->new (debug => 1);

@@ -6,6 +6,8 @@ use AnyEvent::XMPP::Client;
 use AnyEvent::XMPP::Ext::Disco;
 use AnyEvent::XMPP::Ext::DataForm;
 
+binmode STDOUT, ':encoding(UTF-8)';
+
 my $j  = AnyEvent->condvar;
 my $cl = AnyEvent::XMPP::Client->new (debug => 1);
 my $d  = AnyEvent::XMPP::Ext::Disco->new;
