@@ -8,6 +8,8 @@ use AnyEvent::XMPP::Ext::DataForm;
 use Storable;
 use XML::DOM::XPath;
 
+binmode STDOUT, ':encoding(UTF-8)';
+
 our $J = AnyEvent->condvar;
 our $datafile = "conferences.stor";
 our $data = {};

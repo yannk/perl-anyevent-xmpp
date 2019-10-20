@@ -6,6 +6,8 @@ use AnyEvent::XMPP::Client;
 use AnyEvent::XMPP::Ext::Disco;
 use AnyEvent::XMPP::Ext::MUC;
 
+binmode STDOUT, ':encoding(UTF-8)';
+
 my $j = AnyEvent->condvar;
 my $cl = AnyEvent::XMPP::Client->new (debug => 1);
 $cl->add_account ('net_xmpp2@jabber.org', 'test');

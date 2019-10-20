@@ -6,6 +6,8 @@ use AnyEvent::XMPP::Client;
 use AnyEvent::XMPP::Ext::Registration;
 use AnyEvent::XMPP::Util qw/split_jid/;
 
+binmode STDOUT, ':encoding(UTF-8)';
+
 sub result {
    my ($reg, $ok, $error, $form, $comment) = @_;
    $comment ||= 'REGISTERED!';

@@ -9,6 +9,8 @@ use Storable;
 use XML::DOM::XPath;
 use EVQ;
 
+binmode STDOUT, ':encoding(UTF-8)';
+
 our $datafile = "room_data.stor";
 our $data = {};
 

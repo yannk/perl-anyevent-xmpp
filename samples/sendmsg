@@ -4,6 +4,8 @@ use utf8;
 use AnyEvent;
 use AnyEvent::XMPP::IM::Connection;
 
+binmode STDOUT, ':encoding(UTF-8)';
+
 unless (@ARGV >= 3) { die "sendmsg <account jid> <password> <destination jid>\n" }
 
 my $msg  = do { local $/; <STDIN> };
